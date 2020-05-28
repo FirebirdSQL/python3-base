@@ -1,0 +1,12 @@
+############
+Introduction
+############
+
+Installation
+============
+
+::
+
+   pip install firebird-base
+
+.. note:: Requires Python 3.8+

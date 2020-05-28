@@ -1,0 +1,33 @@
+.. module:: firebird.base.buffer
+   :synopsis: Memory buffer manager
+
+##############################
+buffer - Memory buffer manager
+##############################
+
+Overview
+========
+
+Buffer factories
+================
+
+Buffer factory protocol
+-----------------------
+
+.. autoclass:: BufferFactory
+
+bytes factory
+-------------
+
+.. autoclass:: BytesBufferFactory
+
+ctypes factory
+--------------
+
+.. autoclass:: CTypesBufferFactory
+
+MemoryBuffer
+============
+
+.. autoclass:: MemoryBuffer
+

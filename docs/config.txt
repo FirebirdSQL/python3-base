@@ -1,0 +1,106 @@
+.. module:: firebird.base.config
+   :synopsis: Configuration definitions
+
+##################################
+config - Configuration definitions
+##################################
+
+Overview
+========
+
+Types for type hints & annotations
+==================================
+
+.. autodata:: TOnValidate
+
+.. autodata:: TMIMESpec
+
+Config
+======
+
+Config
+------
+.. autoclass:: Config
+
+Options
+=======
+
+Option
+------
+.. autoclass:: Option
+
+StrOption
+---------
+.. autoclass:: StrOption
+
+IntOption
+---------
+.. autoclass:: IntOption
+
+FloatOption
+-----------
+.. autoclass:: FloatOption
+
+DecimalOption
+-------------
+.. autoclass:: DecimalOption
+
+BoolOption
+----------
+.. autoclass:: BoolOption
+
+ListOption
+----------
+.. autoclass:: ListOption
+
+ZMQAddressOption
+----------------
+.. autoclass:: ZMQAddressOption
+
+ZMQAddressListOption
+--------------------
+.. autoclass:: ZMQAddressListOption
+
+EnumOption
+----------
+.. autoclass:: EnumOption
+
+UUIDOption
+----------
+.. autoclass:: UUIDOption
+
+MIMEOption
+----------
+.. autoclass:: MIMEOption
+
+PyExprOption
+------------
+.. autoclass:: PyExprOption
+
+PyCodeOption
+------------
+.. autoclass:: PyCodeOption
+
+PyCallableOption
+----------------
+.. autoclass:: PyCallableOption
+
+Functions
+=========
+
+parse_mime
+----------
+.. autofunction:: parse_mime
+
+format_mime
+-----------
+.. autofunction:: format_mime
+
+create_config
+-------------
+.. autofunction:: create_config
+
+get_config_lines
+----------------
+.. autofunction:: get_config_lines
+

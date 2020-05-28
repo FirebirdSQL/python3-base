@@ -1,0 +1,47 @@
+.. module:: firebird.base.collections
+   :synopsis: Various collection types
+
+######################################
+collections - Various collection types
+######################################
+
+Overview
+========
+
+
+Types for type hints & annotations
+==================================
+
+.. autodata:: Item
+.. autodata:: TypeSpec
+.. autodata:: ItemExpr
+.. autodata:: FilterExpr
+
+CheckExpr
+---------
+.. autodata:: CheckExpr
+
+Collections
+===========
+
+BaseObjectCollection
+--------------------
+.. autoclass:: BaseObjectCollection
+
+DataList
+--------
+.. autoclass:: DataList
+
+Registry
+--------
+.. autoclass:: Registry
+
+Functions
+=========
+
+make_lambda
+-----------
+.. autofunction:: make_lambda
+
+
+

@@ -1,0 +1,159 @@
+.. module:: firebird.base.types
+   :synopsis: Common data types
+
+#########################
+types - Common data types
+#########################
+
+Overview
+========
+
+
+Exceptions
+==========
+
+Error
+-----
+.. autoexception:: Error
+   :show-inheritance:
+   :no-inherited-members:
+
+Singletons
+==========
+
+Singleton is a pattern that restricts the instantiation of a class to one "single" instance.
+This is useful when exactly one object is needed to coordinate actions across the system.
+
+Common uses:
+
+- The abstract factory, factory method, builder, and prototype patterns can use singletons
+  in their implementation.
+- Facade objects are often singletons because only one facade object is required.
+- State objects are often singletons.
+- Singletons are often preferred to global variables because:
+
+  - They do not pollute the global namespace with unnecessary variables.
+  - They permit lazy allocation and initialization.
+
+To create your own singletons, use `Singleton` as the base class.
+
+.. admonition:: example
+
+      >>> class MySingleton(Singleton):
+      ...     "Description"
+      ...     ...
+      ...
+      >>> obj1 = MySingleton()
+      >>> obj1 = MySingleton()
+      >>> obj1 is obj2
+      True
+
+Singleton
+---------
+.. autoclass:: Singleton
+
+SingletonMeta
+-------------
+.. autoclass:: SingletonMeta
+
+Sentinels
+=========
+
+The Sentinel Object pattern is a standard Pythonic approach that’s used both in the
+Standard Library and beyond. The pattern most often uses Python’s built-in `None` object,
+but in situations where None might be a useful value, a unique sentinel `object()` can be
+used instead to indicate missing or unspecified data, or other specific condition.
+
+However, the plain `object()` sentinel has not very useful `str` and `repr` values.
+The `Sentinel` class provides named sentinels, with meaningful `str` and `repr`.
+
+Sentinel
+--------
+.. autoclass:: Sentinel
+
+SentinelMeta
+------------
+.. autoclass:: SentinelMeta
+
+Predefined sentinels
+--------------------
+
+.. autodata:: DEFAULT
+
+.. autodata:: INFINITY
+
+.. autodata:: UNLIMITED
+
+.. autodata:: UNKNOWN
+
+.. autodata:: NOT_FOUND
+
+.. autodata:: UNDEFINED
+
+.. autodata:: ANY
+
+.. autodata:: ALL
+
+.. autodata:: SUSPEND
+
+.. autodata:: RESUME
+
+.. autodata:: STOP
+
+
+Distinct objects
+================
+
+Some complex data structures or data processing algorithms require unique object
+identification (ie object identity). In Python, an object identity is defined internally
+as a unique instance identity that is not suitable for complex objects whose identity is
+derived from content.
+
+The `Distinct` abstract base class is intended as a unified solution to these needs.
+
+.. seealso:: module `firebird.base.collections`
+
+
+Distinct
+--------
+.. autoclass:: Distinct
+
+CachedDistinct
+--------------
+.. autoclass:: CachedDistinct
+
+Enums
+=====
+
+ByteOrder
+---------
+.. autoclass:: ByteOrder
+
+ZMQTransport
+------------
+.. autoclass:: ZMQTransport
+
+ZMQDomain
+---------
+.. autoclass:: ZMQDomain
+
+ZeroMQ address
+==============
+
+.. autoclass:: ZMQAddress
+
+Types for type hints & annotations
+==================================
+
+.. autodata:: ZMQAddressList
+
+Bool string conversions
+=======================
+
+.. autodata:: true_str
+
+.. autodata:: false_str
+
+str2bool
+--------
+.. autofunction:: str2bool

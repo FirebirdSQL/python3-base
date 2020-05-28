@@ -1,0 +1,57 @@
+.. module:: firebird.base.protobuf
+   :synopsis: Registry for Google Protocol Buffer messages and enums
+
+#################################################################
+protobuf - Registry for Google Protocol Buffer messages and enums
+#################################################################
+
+Overview
+========
+
+Data classes
+============
+
+ProtoMessageType
+----------------
+.. autoclass:: ProtoMessageType
+
+ProtoEnumType
+-------------
+.. autoclass:: ProtoEnumType
+
+Functions
+=========
+
+register_decriptor
+------------------
+.. autofunction:: register_decriptor
+
+load_registered
+---------------
+.. autofunction:: load_registered
+
+is_msg_registered
+-----------------
+.. autofunction:: is_msg_registered
+
+is_enum_registered
+------------------
+.. autofunction:: is_enum_registered
+
+get_enum_type
+-------------
+.. autofunction:: get_enum_type
+
+get_enum_value_name
+-------------------
+.. autofunction:: get_enum_value_name
+
+create_message
+--------------
+.. autofunction:: create_message
+
+get_enum_field_type
+-------------------
+.. autofunction:: get_enum_field_type
+
+

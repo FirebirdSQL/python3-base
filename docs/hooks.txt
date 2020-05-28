@@ -1,0 +1,17 @@
+.. module:: firebird.base.hooks
+   :synopsis: Hook manager
+
+####################
+hooks - Hook manager
+####################
+
+Overview
+========
+
+HookManager
+===========
+.. autoclass:: HookManager
+
+
+
+

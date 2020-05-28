@@ -1,0 +1,79 @@
+.. module:: firebird.base.logging
+   :synopsis: Context-based logging and trace/audit
+
+###############################################
+logging - Context-based logging and trace/audit
+###############################################
+
+Overview
+========
+
+Enums & Flags
+=============
+
+LogLevel
+--------
+.. autoclass:: LogLevel
+
+TraceFlag
+---------
+.. autoclass:: TraceFlag
+
+BindFlag
+--------
+.. autoclass:: BindFlag
+
+Functions
+=========
+
+get_manager
+-----------
+.. autofunction:: get_manager
+
+bind_logger
+-----------
+.. autofunction:: bind_logger
+
+get_logger
+----------
+.. autofunction:: get_logger
+
+get_logging_id
+--------------
+.. autofunction:: get_logging_id
+
+add_traced
+----------
+.. autofunction:: add_traced
+
+install_null_logger
+-------------------
+.. autofunction:: install_null_logger
+
+Logger adapter
+==============
+
+FBLoggerAdapter
+---------------
+.. autoclass:: FBLoggerAdapter
+
+Logging manager
+===============
+
+LoggingManager
+--------------
+.. autoclass:: LoggingManager
+
+Trace/audit decorator
+=====================
+
+traced
+------
+.. autoclass:: traced
+
+Mixins
+======
+
+LoggingIdMixin
+--------------
+.. autoclass:: LoggingIdMixin
