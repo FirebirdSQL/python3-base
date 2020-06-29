@@ -2,6 +2,26 @@
 Changelog
 #########
 
+Version 0.6.0
+=============
+
+* New module: `~firebird.base.strconv` - Data conversion from/to string
+* New module: `~firebird.base.trace` - Trace/audit for class instances
+* Reworked module: `~firebird.base.config` - Classes for configuration definitions
+
+  - New class: `.ConfigOption` - Configuration option with `Config` value
+  - New class: `.ConfigListOption` - Configuration option with list of `Config` values
+  - New class: `.DataclassOption` - Configuration option with a dataclass value
+* Changed module: `~firebird.base.types`
+
+  - New class: `.MIME` - MIME type specification
+  - New class: `.PyExpr` - Source code for Python expression
+  - New class: `.PyCode` - Python source code
+  - New class: `.PyCallable` - Source code for Python callable
+  - Removed function: str2bool
+* Changed module: `~firebird.base.logging`
+
+  - Trace/audit functionality removed (into new module `~firebird.base.trace`)
 
 Version 0.5.0
 =============

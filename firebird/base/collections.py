@@ -32,6 +32,27 @@
 #                 ______________________________________.
 
 """Firebird Base - Various collection types
+
+This module provides data structures that behave much like builtin `list` and `dict` types,
+but with direct support of operations that can use structured data stored in container, and
+which would normally require utilization of `operator`, `functools` or other means.
+
+All containers provide next operations:
+
+* `filter` and `filterfalse` that return generator that yields items for which `expr` is
+  evaluated as True (or False).
+* `find` that returns first item for which `expr` is evaluated as True, or default.
+* `contains` that returns True if there is any item for which `expr` is evaluated as True.
+* `occurrence` that returns number of items for which `expr` is evaluated as True.
+* `all` and `any` that return True if `expr` is evaluated as True for all or any list element(s).
+* `report` that returns generator that yields data produced by expression(s) evaluated on
+  list items.
+
+Individual collection types provide additional operations like splitting and extracting
+based on expression etc.
+
+Expressions used by these methods could be strings that contain Python expression
+referencing the collection item(s), or lambda functions.
 """
 
 from __future__ import annotations
@@ -205,10 +226,7 @@ Example:
 
 class DataList(list, BaseObjectCollection):
     """List of data (objects) with additional functionality.
-"""
-    def __init__(self, items: Iterable=None, type_spec: TypeSpec=UNDEFINED,
-                 key_expr: str=None, frozen: bool=False):
-        """
+
 Arguments:
     items:     Sequence to initialize the collection.
     type_spec: Reject instances that are not instances of specified types.
@@ -221,6 +239,8 @@ Arguments:
 Raises:
     ValueError: When initialization sequence contains invalid instance.
 """
+    def __init__(self, items: Iterable=None, type_spec: TypeSpec=UNDEFINED,
+                 key_expr: str=None, frozen: bool=False):
         assert key_expr is None or isinstance(key_expr, str)
         assert key_expr is None or make_lambda(key_expr) is not None
         if items is not None:
@@ -436,6 +456,9 @@ Example:
 class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
     """Mapping container for `.Distinct` objects.
 
+Arguments:
+    data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct` instances.
+
 Any method that expects a `key` also acepts `.Distinct` instance.
 
 To store items into registry with existence check, use:
@@ -463,11 +486,6 @@ Whenever a `key` is required, you can use either a `Distinct` instance, or any v
 represens a key value for instances of stored type.
 """
     def __init__(self, data: Union[Mapping, Sequence, Registry]=None):
-        """Registry initialization.
-
-Arguments:
-    data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct` instances.
-"""
         self._reg: Dict = {}
         if data:
             self.update(data)

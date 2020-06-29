@@ -110,7 +110,7 @@ class TestTypes(unittest.TestCase):
             def get_key(self) -> t.Hashable:
                 return (self.key_1, self.key_2)
         #
-        self.assertFalse(hasattr(MyCachedDistinct, '_instances_'))
+        self.assertTrue(hasattr(MyCachedDistinct, '_instances_'))
         cd_1 = MyCachedDistinct(1, ANY, 'type 1A')
         self.assertIs(cd_1, MyCachedDistinct(1, ANY, 'type 1A'))
         self.assertIsNot(cd_1, MyCachedDistinct(2, ANY, 'type 2A'))
@@ -163,28 +163,6 @@ class TestTypes(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             addr = ZMQAddress('unknown://192.168.0.1:8001')
         self.assertEqual(cm.exception.args, ("Invalid protocol",))
-    def test_str2bool(self):
-        "Test str2bool()"
-        for i in true_str:
-            self.assertTrue(str2bool(i.upper()))
-        for i in false_str:
-            self.assertFalse(str2bool(i.upper()))
-        # New options
-        true_str.append('aye')
-        self.assertTrue(str2bool('AyE'))
-        false_str.append('nope')
-        self.assertFalse(str2bool('NoPe'))
-        # Bad value
-        with self.assertRaises(ValueError) as cm:
-            str2bool('wrong value')
-        self.assertEqual(cm.exception.args, ("Value is not a valid bool string constant",))
-        # No type_check
-        for i in true_str:
-            self.assertTrue(str2bool(i.upper(), type_check=False))
-        for i in false_str:
-            self.assertFalse(str2bool(i.upper(), type_check=False))
-        # Bad value without type_check
-        self.assertFalse(str2bool('wrong value', type_check=False))
 
 
 if __name__ == '__main__':

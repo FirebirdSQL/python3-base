@@ -1,0 +1,71 @@
+.. module:: firebird.base.trace
+    :synopsis: Trace/audit for class instances
+
+#######################################
+trace - Trace/audit for class instances
+#######################################
+
+Overview
+========
+
+This module provides trace/audit logging for functions or object methods through context-based
+logging provided by `.logging` module.
+
+The trace logging is performed by `traced` decorator. You can use this decorator directly,
+or use `TracedMixin` class to automatically decorate methods of class instances on creation.
+Each decorated callable could log messages before execution, after successful execution or
+on failed execution (when unhandled execption is raised by callable). The trace decorator
+can automatically add `agent` and `context` information, and include parameters passed to
+callable, execution time, return value, information about raised exception etc. to log messages.
+
+The trace logging is managed by `TraceManager`, that allows dynamic configuration of traced
+callables at runtime.
+
+Enums & Flags
+=============
+
+TraceFlag
+---------
+.. autoclass:: TraceFlag
+
+Functions
+=========
+
+add_trace
+---------
+.. autofunction:: add_trace
+
+remove_trace
+------------
+.. autofunction:: remove_trace
+
+trace_object
+------------
+.. autofunction:: trace_object
+
+Trace manager
+=============
+
+TraceManager
+------------
+.. autoclass:: TraceManager
+
+Trace/audit decorator
+=====================
+
+traced
+------
+.. autoclass:: traced
+
+Mixins
+======
+
+TracedMixin
+-----------
+.. autoclass:: TracedMixin
+
+Globals
+=======
+
+.. autodata:: trace_manager
+   :annotation:

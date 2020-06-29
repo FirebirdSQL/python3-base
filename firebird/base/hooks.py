@@ -32,6 +32,8 @@
 #                 ______________________________________
 
 """Firebird Base - Hook manager
+
+This module provides a general framework for callbacks and "hookable" events.
 """
 
 from __future__ import annotations
@@ -68,8 +70,6 @@ class HookManager(Singleton):
         self.hookables: Dict[Type, Set[Any]] = {}
         self.hooks: Registry = Registry()
         self.flags: HookFlag = HookFlag.NONE
-        #self.any_event: bool = False
-        #self.for_name: bool = False
     def _update_flags(self, event: Any, cls: Any, obj: Any) -> None:
         if event is ANY:
             self.flags |= HookFlag.ANY_EVENT
@@ -103,12 +103,12 @@ Arguments:
         if not isinstance(instance, tuple(self.hookables.keys())):
             raise TypeError("The instance is not of hookable type")
         self.obj_map[instance] = name
-    def add_hook(self, event: Any, subject: Any, callback: Callable) -> None:
+    def add_hook(self, event: Any, source: Any, callback: Callable) -> None:
         """Add new hook.
 
 Arguments:
     event:    Event identificator.
-    subject:  Hookable class or instance, or instance name.
+    source:   Hookable class or instance, or instance name.
     callback: Callback function.
 
 Important:
@@ -119,9 +119,9 @@ Raises:
     ValueError: When `event` is not supported by specified `subject`.
 """
         cls = obj = ANY
-        if isinstance(subject, type):
-            if subject in self.hookables:
-                cls = subject
+        if isinstance(source, type):
+            if source in self.hookables:
+                cls = source
                 if event is not ANY:
                     found = False
                     for cls_ in (c for c in self.hookables if issubclass(cls, c)):
@@ -132,8 +132,8 @@ Raises:
                         raise ValueError(f"Event '{event}' is not supported by '{cls.__name__}'")
             else:
                 raise TypeError("The type is not registered as hookable")
-        elif isinstance(subject, tuple(self.hookables)):
-            obj = subject
+        elif isinstance(source, tuple(self.hookables)):
+            obj = source
             if event is not ANY:
                 found = False
                 for cls_ in (c for c in self.hookables if isinstance(obj, c)):
@@ -142,20 +142,20 @@ Raises:
                         break
                 if not found:
                     raise ValueError(f"Event '{event}' is not supported by '{obj.__class__.__name__}'")
-        elif isinstance(subject, str):
-            obj = subject
+        elif isinstance(source, str):
+            obj = source
         else:
             raise TypeError("Subject must be hookable class or instance, or name")
         self._update_flags(event, cls, obj)
         key = (event, cls, obj)
         hook: Hook = self.hooks[key] if key in self.hooks else self.hooks.store(Hook(*key))
         hook.callbacks.append(callback)
-    def remove_hook(self, event: Any, subject: Any, callback: Callable) -> None:
+    def remove_hook(self, event: Any, source: Any, callback: Callable) -> None:
         """Remove hook callback installed by `add_hook()`.
 
 Arguments:
     event:    Event identificator.
-    subject:  Hookable class or instance.
+    source:   Hookable class or instance.
     callback: Callback function.
 
 Important:
@@ -165,10 +165,10 @@ Important:
     The method does nothing if described hook is not installed.
 """
         cls = obj = ANY
-        if isinstance(subject, type):
-            cls = subject
+        if isinstance(source, type):
+            cls = source
         else:
-            obj = subject
+            obj = source
         key = (event, cls, obj)
         hook: Hook = self.hooks.get(key)
         if hook is not None:
@@ -187,39 +187,39 @@ Important:
         self.remove_all_hooks()
         self.hookables.clear()
         self.obj_map.clear()
-    def get_callbacks(self, event: Any, subject: Any) -> List:
+    def get_callbacks(self, event: Any, source: Any) -> List:
         """Returns list of all callbacks installed for specified event and hookable subject.
 
 Arguments:
-    event:   Event identificator.
-    subject: Hookable class or instance, or name.
+    event:  Event identificator.
+    source: Hookable class or instance, or name.
 """
         result = []
-        if isinstance(subject, type):
+        if isinstance(source, type):
             if HookFlag.CLASS in self.flags:
-                if (hook := self.hooks.get((event, subject, ANY))) is not None:
+                if (hook := self.hooks.get((event, source, ANY))) is not None:
                     result.extend(cast(Hook, hook).callbacks)
-                if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, subject, ANY))) is not None:
+                if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, source, ANY))) is not None:
                     result.extend(cast(Hook, hook).callbacks)
-        elif isinstance(subject, str):
+        elif isinstance(source, str):
             if HookFlag.NAME in self.flags:
-                if (hook := self.hooks.get((event, ANY, subject))) is not None:
+                if (hook := self.hooks.get((event, ANY, source))) is not None:
                     result.extend(cast(Hook, hook).callbacks)
-                if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, subject))) is not None:
+                if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, source))) is not None:
                     result.extend(cast(Hook, hook).callbacks)
         else:
             if HookFlag.INSTANCE in self.flags:
-                if (hook := self.hooks.get((event, ANY, subject))) is not None:
+                if (hook := self.hooks.get((event, ANY, source))) is not None:
                     result.extend(cast(Hook, hook).callbacks)
-                if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, subject))) is not None:
+                if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, source))) is not None:
                     result.extend(cast(Hook, hook).callbacks)
-            if HookFlag.NAME in self.flags and (name := self.obj_map.get(subject)) is not None:
+            if HookFlag.NAME in self.flags and (name := self.obj_map.get(source)) is not None:
                 if (hook := self.hooks.get((event, ANY, name))) is not None:
                     result.extend(cast(Hook, hook).callbacks)
                 if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, name))) is not None:
                     result.extend(cast(Hook, hook).callbacks)
             if HookFlag.CLASS in self.flags:
-                for cls in (c for c in self.hookables if isinstance(subject, c)):
+                for cls in (c for c in self.hookables if isinstance(source, c)):
                     if (hook := self.hooks.get((event, cls, ANY))) is not None:
                         result.extend(cast(Hook, hook).callbacks)
                     if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, cls, ANY))) is not None:
@@ -227,4 +227,9 @@ Arguments:
         return result
 
 #: Hook manager
-hooks: HookManager = HookManager()
+hook_manager: HookManager = HookManager()
+
+register_class = hook_manager.register_class
+register_name = hook_manager.register_name
+add_hook = hook_manager.add_hook
+get_callbacks = hook_manager.get_callbacks

@@ -10,9 +10,11 @@ Package modules
 
    types
    collections
+   strconv
    config
    buffer
    hooks
    logging
+   trace
    protobuf
 

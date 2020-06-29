@@ -1,12 +1,47 @@
 .. module:: firebird.base.logging
-   :synopsis: Context-based logging and trace/audit
+   :synopsis: Context-based logging
 
-###############################################
-logging - Context-based logging and trace/audit
-###############################################
+###############################
+logging - Context-based logging
+###############################
 
 Overview
 ========
+
+This module provides context-based logging system built on top of standard `logging` module.
+
+The context-based logging:
+
+1. Adds context information into `~logging.LogRecord`, that could be used in logging message.
+2. Adds support for f-string message format.
+3. Allows assignment of loggers to specific contexts.
+
+The logging context
+-------------------
+The logging context is defined as combination of `topic`, `agent` and `context` string values.
+
+The `agent` is typically an unit of code that works in specific execution contexts. For
+example a code that process client request in web application (where request is the context),
+or executes SQL command executed (the context could be a database connection, or transaction).
+The `topic` is optional. It could be any string value that can be used as secondary context.
+
+Agent and Context identification
+--------------------------------
+Agents and contexts could be identified by string value, or by any object (i.e. you can use
+the object that implement the agent or context). If object is used, the ID could be
+provided as `logging_id` attribute, `__name__` attribute or by `__str__()` return value.
+
+A `LoggingIdMixin` class could be used to add `logging_id` support to any class.
+
+The LoggingManager
+------------------
+The `LoggingManager` class maintains a set of bindings between `~logging.Logger` objects and
+combination of `agent`, `context` and `topic` specifications. It's possible to bind loggers
+to exact combination of values, or whole sets of values using `.ANY` sentinel. It means that
+is possible to assign specific `~logging.Logger` to log messages for particular agent in
+any context, or any agent operating in specific context etc.
+
+To log `agent` activities, use a logger returned by `.get_logger()` function/method.
 
 Enums & Flags
 =============
@@ -15,20 +50,12 @@ LogLevel
 --------
 .. autoclass:: LogLevel
 
-TraceFlag
----------
-.. autoclass:: TraceFlag
-
 BindFlag
 --------
 .. autoclass:: BindFlag
 
 Functions
 =========
-
-get_manager
------------
-.. autofunction:: get_manager
 
 bind_logger
 -----------
@@ -41,10 +68,6 @@ get_logger
 get_logging_id
 --------------
 .. autofunction:: get_logging_id
-
-add_traced
-----------
-.. autofunction:: add_traced
 
 install_null_logger
 -------------------
@@ -64,16 +87,13 @@ LoggingManager
 --------------
 .. autoclass:: LoggingManager
 
-Trace/audit decorator
-=====================
-
-traced
-------
-.. autoclass:: traced
-
 Mixins
 ======
 
 LoggingIdMixin
 --------------
 .. autoclass:: LoggingIdMixin
+
+Globals
+=======
+.. autodata:: logging_manager

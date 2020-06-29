@@ -10,11 +10,13 @@ the scope of development for Firebird RDBMS.
 Topic covered by `firebird-base` package:
 
 - General data types like `singletons`, `sentinels` and objects with identity.
+- Unified system for data conversion from/to string.
 - `DataList` and `Registry` collection types with advanced data-processing cappabilities.
 - Work with structured binary buffers.
 - Global registry of Google `protobuf` messages and enumerations.
 - Extended configuration system based on `ConfigParser`.
-- Context-driven logging and trace/audit.
+- Context-based logging.
+- Trace/audit for class instances.
 - General "hook" mechanism.
 
 

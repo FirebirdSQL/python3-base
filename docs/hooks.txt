@@ -8,10 +8,64 @@ hooks - Hook manager
 Overview
 ========
 
+This module provides a general framework for callbacks and "hookable" events.
+
+Architecture
+------------
+
+The callback extension mechanism is based on the following:
+
+* The `Event source` provides one or more "hookable events" that work like connection points.
+  The event source represents "origin of event" and is always identified by class, class
+  instance or name. Event sources that are identified by classes (or their instances) must
+  be registered along with events they provide.
+* `Event` is typically linked to particular event source, but it's not mandatory and it's
+  possible to define global events. Event is represented as value of any type, that must
+  be unique in used context (particular event source or global).
+
+  Each event should be properly documented along with required signature for callback
+  function.
+* `Event provider` is a class or function that implements the event for event source, and
+  asks the `.hook_manager` for list of event consumers (callbacks) registered for particular
+  event and source.
+* `Event consumer` is a function or class method that implements the callback for particular
+  event. The callback must be registered in `.hook_manager` before it could be called by
+  event providers.
+
+
+The architecture supports multiple usage strategies:
+
+* If event provider uses class instance to identify the event source, it's possible to
+  register callbacks to all instances (by registering to class), or particular instance(s).
+* It's possible to register callback to particular instance by name, if instance is associated
+  with name by `register_name()` function.
+* It's possible to register callback to `.ANY` event from particular source, or particular
+  event from `.ANY` source, or even to `.ANY` event from `.ANY` source.
+
+
+Functions
+=========
+
+register_class
+--------------
+.. autofunction:: register_class
+
+register_name
+-------------
+.. autofunction:: register_name
+
+add_hook
+--------
+.. autofunction:: add_hook
+
+get_callbacks
+-------------
+.. autofunction:: get_callbacks
+
 HookManager
 ===========
 .. autoclass:: HookManager
 
-
-
-
+Globals
+=======
+.. autodata:: hook_manager

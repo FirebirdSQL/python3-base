@@ -8,12 +8,296 @@ config - Configuration definitions
 Overview
 ========
 
-Types for type hints & annotations
-==================================
+Complex applications (and some library modules like `logging`) could be often parametrized
+via configuration. This module provides a framework for unified structured configuration
+that supports:
 
-.. autodata:: TOnValidate
+* configuration options of various data type, including lists and other complex types
+* validation
+* direct manipulation of configuration values
+* reading from (and writing into) configuration in `configparser` format
+* exchanging configuration (for example between processes) using Google protobuf messages
 
-.. autodata:: TMIMESpec
+Architecture
+------------
+
+The framework is based around two classes:
+
+* `.Config` - Collection of configuration options and sub-collections. Particular
+  configuration is then realized as descendant from this class, that defines configuration
+  options in constructor, and customize the validation when required.
+* `.Option` - Abstract base class for configuration options, where descendants implement
+  handling of particular data type. This module provides implementation for next data
+  types: `str`, `int`, `float`, `bool`, `~decimal.Decimal`, `~enum.Enum`,  `~enum.Flag`,
+  `~uuid.UUID`, `.MIME`, `.ZMQAddress`, `list`, `~dataclasses.dataclass`, `.PyExpr`,
+  `.PyCode` and `.PyCallable`. It also provides special options `ConfigOption` and
+  `ConfigListOption`.
+
+Usage
+-----
+First, you need to define your own configuration.
+
+.. code-block::
+
+   from enum import IntEnum
+   from firebird.base.config import Config, StrOption, IntOption, ListOption
+
+    class SampleEnum(IntEnum):
+        "Enum for testing"
+        UNKNOWN    = 0
+        READY      = 1
+        RUNNING    = 2
+        WAITING    = 3
+        SUSPENDED  = 4
+        FINISHED   = 5
+        ABORTED    = 6
+
+   class DbConfig(Config):
+       "Simple database config"
+       def __init__(self, name: str):
+           super().__init__(name)
+           # options
+           self.database: StrOption = StrOption('database', 'Database connection string',
+                                                required=True)
+           self.user: StrOption = StrOption('user', 'User name', required=True,
+                                            default='SYSDBA')
+           self.password: StrOption = StrOption('password', 'User password')
+
+   class SampleConfig(Config):
+       """Sample Config.
+
+   Has three options and two sub-configs.
+   """
+       def __init__(self):
+           super().__init__('sample-config')
+           # options
+           self.opt_str: StrOption = StrOption('opt_str', "Sample string option")
+           self.opt_int: IntOption = StrOption('opt_int', "Sample int option")
+           self.enum_list: ListOption = ListOption('enum_list', "List of enum values",
+                                                   item_type=SampleEnum)
+           # sub configs
+           self.master_db: DbConfig = DbConfig('master-db')
+           self.backup_db: DbConfig = DbConfig('backup-db')
+
+.. note::
+
+   Option must be assigned to Config attributes with the same name as option name.
+
+
+Typically you need only one instance of your configuration class in application.
+
+.. code-block::
+
+   app_config: SampleConfig = SampleConfig()
+
+Typically, your application is configured using file(s) in `configparser` format. You may
+create initial one using `Config.get_config()` method.
+
+.. note::
+
+   `Config.get_config()` works with current configuration values. When called on "empty"
+   instance it returns "default" configuration. Option values that match the default are
+   returned as commented out.
+
+.. code-block::
+
+   >>> print(app_config.get_config())
+
+   [sample-config]
+   ;
+   ; Sample Config.
+   ;
+   ; Has three options and two sub-configs.
+   ;
+
+   ; opt_str
+   ; -------
+   ;
+   ; data type: str
+   ;
+   ; [optional] Sample string option
+   ;
+   ;opt_str = <UNDEFINED>
+
+   ; opt_int
+   ; -------
+   ;
+   ; data type: str
+   ;
+   ; [optional] Sample int option
+   ;
+   ;opt_int = <UNDEFINED>
+
+   ; enum_list
+   ; ---------
+   ;
+   ; data type: list
+   ;
+   ; [optional] List of enum values
+   ;
+   ;enum_list = <UNDEFINED>
+
+   [master-db]
+   ;
+   ; Simple DB config
+   ;
+
+   ; database
+   ; --------
+   ;
+   ; data type: str
+   ;
+   ; [REQUIRED] Database connection string
+   ;
+   ;database = <UNDEFINED>
+
+   ; user
+   ; ----
+   ;
+   ; data type: str
+   ;
+   ; [REQUIRED] User name
+   ;
+   ;user = SYSDBA
+
+   ; password
+   ; --------
+   ;
+   ; data type: str
+   ;
+   ; [optional] User password
+   ;
+   ;password = <UNDEFINED>
+
+   [backup-db]
+   ;
+   ; Simple DB config
+   ;
+
+   ; database
+   ; --------
+   ;
+   ; data type: str
+   ;
+   ; [REQUIRED] Database connection string
+   ;
+   ;database = <UNDEFINED>
+
+   ; user
+   ; ----
+   ;
+   ; data type: str
+   ;
+   ; [REQUIRED] User name
+   ;
+   ;user = SYSDBA
+
+   ; password
+   ; --------
+   ;
+   ; data type: str
+   ;
+   ; [optional] User password
+   ;
+   ;password = <UNDEFINED>
+
+To read the configuration from file, use the `~configparser.ConfigParser` and pass it
+to `Config.load_config()` method.
+
+Example configuration file::
+
+   ; myapp.cfg
+
+   [DEFAULT]
+   password = masterkey
+
+   [sample-config]
+   opt_str = Lorem ipsum
+   enum_list = ready, finished, aborted
+
+   [master-db]
+   database = primary
+   user = tester
+   password = lockpick
+
+   [backup-db]
+   database = secondary
+
+.. code-block::
+
+   from configparser import ConfigParser
+
+   cfg = ConfigParser()
+   cfg.read('myapp.cfg')
+   app_config.load_config(cfg)
+
+Access to configuration values is through attributes on your `Config` instance, and
+their `value` attribute.
+
+.. code-block::
+
+   >>> app_config.opt_str.value
+   Lorem ipsum
+   >>> app_config.opt_int.value
+   >>> app_config.enum_list.value
+   [READY, FINISHED, ABORTED]
+   >>> app_config.master_db.database.value
+   primary
+   >>> app_config.master_db.user.value
+   tester
+   >>> app_config.master_db.password.value
+   lockpick
+   >>> app_config.backup_db.database.value
+   secondary
+   >>> app_config.backup_db.user.value
+   SYSDBA
+   >>> app_config.backup_db.password.value
+   masterkey
+
+ConfigProto
+===========
+
+You can transfer configuration (state) between instances of your `Config` classes using
+Google Protocol Buffer message `firebird.base.ConfigProto` and methods
+`~Config.save_proto()` and `~Config.load_proto()`.
+
+The protobuf message is defined in :file:`/proto/config.proto`.
+
+.. literalinclude:: ../proto/config.proto
+   :language: proto
+   :lines: 30-
+
+.. note::
+
+   You can use it directly or via `.protobuf` registry.
+
+   .. code-block::
+
+      # Direct use
+      from firebird.base.config import ConfigProto
+      cfg_msg = ConfigProto()
+
+   Because the proto file is NOT registered in `.protobuf` registry, you must register
+   it manually. The proto file is listed in `setup.cfg` under *"firebird.base.protobuf"*
+   entrypoint, so use `load_registered('firebird.base.protobuf')` for its registration.
+
+   .. code-block::
+
+      from firebird.base.protobuf import load_registered, create_message
+      load_registered('firebird.base.protobuf')
+      cfg_msg = create_message('firebird.base.ConfigProto')
+
+.. important::
+
+   Although `Option` also provides methods `~Option.save_proto()` and `~Option.load_proto()`
+   to transfer option value in/out ConfigProto message, you should always use methods
+   on `Config` instance because option's serialization may relly on `Config` instance that
+   owns them.
+
+   .. seealso:: `.ConfigOption`, `.ConfigListOption`
+
+
+.. autoclass:: ConfigProto
 
 Config
 ======
@@ -49,17 +333,9 @@ BoolOption
 ----------
 .. autoclass:: BoolOption
 
-ListOption
-----------
-.. autoclass:: ListOption
-
 ZMQAddressOption
 ----------------
 .. autoclass:: ZMQAddressOption
-
-ZMQAddressListOption
---------------------
-.. autoclass:: ZMQAddressListOption
 
 EnumOption
 ----------
@@ -73,6 +349,14 @@ MIMEOption
 ----------
 .. autoclass:: MIMEOption
 
+ListOption
+----------
+.. autoclass:: ListOption
+
+DataclassOption
+---------------
+.. autoclass:: DataclassOption
+
 PyExprOption
 ------------
 .. autoclass:: PyExprOption
@@ -85,22 +369,18 @@ PyCallableOption
 ----------------
 .. autoclass:: PyCallableOption
 
+ConfigOption
+------------
+.. autoclass:: ConfigOption
+
+ConfigListOption
+----------------
+.. autoclass:: ConfigListOption
+
 Functions
 =========
-
-parse_mime
-----------
-.. autofunction:: parse_mime
-
-format_mime
------------
-.. autofunction:: format_mime
 
 create_config
 -------------
 .. autofunction:: create_config
-
-get_config_lines
-----------------
-.. autofunction:: get_config_lines
 

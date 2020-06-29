@@ -8,6 +8,8 @@ types - Common data types
 Overview
 ========
 
+This module provides collection classes that are often used by other library modules or
+applications.
 
 Exceptions
 ==========
@@ -52,10 +54,6 @@ Singleton
 ---------
 .. autoclass:: Singleton
 
-SingletonMeta
--------------
-.. autoclass:: SingletonMeta
-
 Sentinels
 =========
 
@@ -71,35 +69,20 @@ Sentinel
 --------
 .. autoclass:: Sentinel
 
-SentinelMeta
-------------
-.. autoclass:: SentinelMeta
-
 Predefined sentinels
 --------------------
 
 .. autodata:: DEFAULT
-
 .. autodata:: INFINITY
-
 .. autodata:: UNLIMITED
-
 .. autodata:: UNKNOWN
-
 .. autodata:: NOT_FOUND
-
 .. autodata:: UNDEFINED
-
 .. autodata:: ANY
-
 .. autodata:: ALL
-
 .. autodata:: SUSPEND
-
 .. autodata:: RESUME
-
 .. autodata:: STOP
-
 
 Distinct objects
 ================
@@ -137,23 +120,61 @@ ZMQDomain
 ---------
 .. autoclass:: ZMQDomain
 
-ZeroMQ address
-==============
+Custom string types
+===================
 
+Some string values have unified structure and carry specific information (like network
+address or database connection string). Typical repeating operation with these values
+are validation and parsing. It makes sense to put these operations under one roof.
+One such approach uses custom descendants of builtin `str` type.
+
+.. caution::
+
+   Custom string types have an inherent weakness. They support all inherited string methods,
+   but any method that returns string value return a base `str` type, not the decendant class
+   type. That same apply when you assign strings to variables that should be of custom
+   string type.
+
+   .. tip::
+
+      Module `~firebird.base.strconv` could help you to safely translate strings stored
+      externally to typed strings.
+
+ZeroMQ address
+--------------
 .. autoclass:: ZMQAddress
 
-Types for type hints & annotations
-==================================
+MIME
+----
+.. autoclass:: MIME
 
-.. autodata:: ZMQAddressList
+PyExpr
+------
+.. autoclass:: PyExpr
 
-Bool string conversions
-=======================
+PyCode
+------
+.. autoclass:: PyCode
 
-.. autodata:: true_str
+PyCallable
+----------
+.. autoclass:: PyCallable
 
-.. autodata:: false_str
+Meta classes
+============
 
-str2bool
---------
-.. autofunction:: str2bool
+SingletonMeta
+-------------
+.. autoclass:: SingletonMeta
+
+SentinelMeta
+------------
+.. autoclass:: SentinelMeta
+
+CachedDistinctMeta
+------------------
+.. autoclass:: CachedDistinctMeta
+
+Conjunctive
+-----------
+.. autofunction:: Conjunctive

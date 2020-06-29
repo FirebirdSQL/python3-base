@@ -32,6 +32,9 @@
 #                 ______________________________________
 
 """Firebird Base - Memory buffer manager
+
+This module provides a raw memory buffer manager with convenient methods to read/write
+data of various data type.
 """
 
 from __future__ import annotations
@@ -43,14 +46,24 @@ from .types import Sentinel, UNLIMITED, ByteOrder
 class BufferFactory(Protocol): # pragma: no cover
     "BufferFactory Protocol definition"
     def create(self, init_or_size: Union[int, bytes], size: int = None) -> Any:
-        ...
+        """This function must create and return a mutable character buffer.
+
+Arguments:
+    init_or_size: Must be an integer which specifies the size of the array, or a bytes
+        object which will be used to initialize the array items.
+    size: Size of the array.
+"""
     def clear(self, buffer: Any) -> None:
-        ...
+        """Fills the buffer with zero.
+
+Argument:
+    buffer: A memory buffer previously created by `BufferFactory.create()` method.
+"""
 
 class BytesBufferFactory:
-    """Buffer factory for bytearray buffers."""
+    """Buffer factory for `bytearray` buffers."""
     def create(self, init_or_size: Union[int, bytes], size: int = None) -> bytearray:
-        """This function creates a mutable character buffer. The returned object is a bytearray.
+        """This function creates a mutable character buffer. The returned object is a `bytearray`.
 
     Arguments:
         init_or_size: Must be an integer which specifies the size of the array, or a bytes
@@ -117,9 +130,18 @@ def safe_ord(byte: Union[bytes, int]) -> int:
 class MemoryBuffer:
     """Generic memory buffer manager.
 
+Arguments:
+    init: Must be an integer which specifies the size of the array, or a `bytes` object
+          which will be used to initialize the array items.
+    size: Size of the array. The argument value is used only when `init` is a `bytes` object.
+    factory: Factory object used to create/resize the internal memory buffer.
+    eof_marker: Value that indicates the end of data. Could be None.
+    max_size: If specified, the buffer couldn't grow beyond specified number of bytes.
+    byteorder: The byte order used to read/write numbers.
+
 Attributes:
-    raw (bytearray): The memory buffer. The actual data type of buffer depends on `buffer factory`,
-      but it must provide direct acces to cells, slices and length like `bytearray`.
+    raw: The memory buffer. The actual data type of buffer depends on `buffer factory`, but
+         it must provide direct acces to cells, slices and length like `bytearray`.
     pos (int): Current position in buffer, i.e. the next read/writen byte would be at this position.
     factory (BufferFactory): Buffer factory instance used by manager [default: `BytesBufferFactory`].
     eof_marker (int): Value that indicates the end of data. Could be None.
@@ -229,7 +251,7 @@ Attributes:
         self.pos += 1
         return result
     def read_pascal_string(self, *, encoding='ascii') -> str:
-        "Read Pascal string (1 byte length followed by data)"
+        "Read Pascal string (1 byte length followed by string data)"
         return self.read(self.read_byte()).decode(encoding)
     def read_sized_string(self, *, encoding='ascii') -> str:
         "Read string (2 byte length followed by data)"

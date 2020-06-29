@@ -8,6 +8,14 @@ buffer - Memory buffer manager
 Overview
 ========
 
+This module provides a raw memory buffer manager with convenient methods to read/write
+data of various data type.
+
+MemoryBuffer
+============
+
+.. autoclass:: MemoryBuffer
+
 Buffer factories
 ================
 
@@ -25,9 +33,4 @@ ctypes factory
 --------------
 
 .. autoclass:: CTypesBufferFactory
-
-MemoryBuffer
-============
-
-.. autoclass:: MemoryBuffer
 
