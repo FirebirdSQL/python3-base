@@ -8,7 +8,7 @@ types - Common data types
 Overview
 ========
 
-This module provides collection classes that are often used by other library modules or
+This module provides collection of classes that are often used by other library modules or
 applications.
 
 Exceptions
