@@ -2,6 +2,14 @@
 Changelog
 #########
 
+Version 1.0.0
+=============
+
+* Documentation: new examples for :doc:`trace`, :doc:`logging` and :doc:`hooks`
+* Documentation: adjustments to css
+* DataList is now generic class
+* `.DataList.extract()` has new 'copy' argument.
+
 Version 0.6.1
 =============
 

@@ -56,7 +56,7 @@ referencing the collection item(s), or lambda functions.
 """
 
 from __future__ import annotations
-from typing import Type, Union, Any, Dict, List, Tuple, Mapping, Sequence, Generator, \
+from typing import T, Type, Union, Any, Dict, List, Tuple, Mapping, Sequence, Generator, \
      Iterable, Callable, cast
 from operator import attrgetter
 import copy
@@ -224,7 +224,7 @@ Example:
                 return True
         return False
 
-class DataList(list, BaseObjectCollection):
+class DataList(List[T], BaseObjectCollection):
     """List of data (objects) with additional functionality.
 
 Arguments:
@@ -366,13 +366,14 @@ It's not possible to `add`, `delete` or `change` items in frozen list, but `.sor
         if self.__key_expr:
             fce = make_lambda(self.__key_expr)
             self.__map = dict(((key, index) for index, key in enumerate((fce(item) for item in self))))
-    def split(self, expr: FilterExpr) -> Tuple['DataList', 'DataList']:
+    def split(self, expr: FilterExpr, frozen: bool=False) -> Tuple[DataList, DataList]:
         """Return two new `DataList` instances, first with items for which `expr` is
 evaluated as True and second for `expr` evaluated as False.
 
 Arguments:
     expr: A callable accepting one parameter or expression as string referencing list
           item as `item`.
+    frozen: Create frozen lists.
 
 Example:
     .. code-block:: python
@@ -380,17 +381,18 @@ Example:
        below, above = L.split(lambda x: x.size > 100)
        below, above = L.split('item.size > 100')
 """
-        return DataList(self.filter(expr), self._type_spec, self.__key_expr), \
-               DataList(self.filterfalse(expr), self._type_spec, self.__key_expr)
-    def extract(self, expr: FilterExpr):
-        """Move items for which `expr` is evaluated as True into new `DataList`.
+        return DataList(self.filter(expr), self._type_spec, self.__key_expr, frozen=frozen), \
+               DataList(self.filterfalse(expr), self._type_spec, self.__key_expr, frozen=frozen)
+    def extract(self, expr: FilterExpr, copy: bool=False) -> DataList:
+        """Move/copy items for which `expr` is evaluated as True into new `DataList`.
 
 Arguments:
     expr: A callable accepting one parameter or expression as string referencing list item
           as `item`.
+    copy: When True, items are not removed from source DataList.
 
 Raises:
-    TypeError: When list is frozen
+    TypeError: When list is frozen and `copy` is False.
 
 Example:
     .. code-block:: python
@@ -398,7 +400,8 @@ Example:
        L.extract(lambda x: x.name.startswith("ABC"))
        L.extract('item.name.startswith("ABC")')
 """
-        self.__updchk()
+        if not copy:
+            self.__updchk()
         fce = expr if callable(expr) else make_lambda(expr)
         l = DataList(type_spec=self._type_spec, key_expr=self.__key_expr)
         i = 0
@@ -406,7 +409,10 @@ Example:
             item = self[i]
             if fce(item):
                 l.append(item)
-                del self[i]
+                if not copy:
+                    del self[i]
+                else:
+                    i += 1
             else:
                 i += 1
         return l

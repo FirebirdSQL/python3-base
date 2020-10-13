@@ -85,7 +85,7 @@ supports multiple usage strategies.
 Context-based logging
 =====================
 
-Module '.logging' provides context-based logging system built on top of standard `logging`
+Module `.logging` provides context-based logging system built on top of standard `logging`
 module.
 
 The context-based logging:
@@ -120,6 +120,6 @@ Registry for Google Protocol Buffer messages and enums
 ======================================================
 
 Module `.protobuf` provides central registry for Google Protocol Buffer messages and enums.
-The generated *_pb2.py protobuf files could be registered using `.register_decriptor` or
+The generated `*_pb2.py protobuf` files could be registered using `.register_decriptor` or
 `.load_registered` function. The registry could be then used to obtain information about
 protobuf messages or enum types, or to create message instances or enum values.

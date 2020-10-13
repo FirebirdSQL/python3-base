@@ -42,6 +42,103 @@ The architecture supports multiple usage strategies:
 * It's possible to register callback to `.ANY` event from particular source, or particular
   event from `.ANY` source, or even to `.ANY` event from `.ANY` source.
 
+Example
+=======
+
+.. code-block:: python
+
+   from __future__ import annotations
+   from enum import Enum, auto
+   from firebird.base.types import *
+   from firebird.base.hooks import hook_manager
+
+   class MyEvents(Enum):
+       "Sample definition of events"
+       CREATE = auto()
+       ACTION = auto()
+
+   class MyHookable:
+       "Example of hookable class, i.e. a class that calls hooks registered for events."
+       def __init__(self, name: str):
+           self.name: str = name
+           for hook in hook_manager.get_callbacks(MyEvents.CREATE, self):
+               try:
+                   hook(self, MyEvents.CREATE)
+               except Exception as e:
+                   print(f"{self.name}.CREATE hook call outcome: ERROR ({e.args[0]})")
+               else:
+                   print(f"{self.name}.CREATE hook call outcome: OK")
+       def action(self):
+           print(f"{self.name}.ACTION!")
+           for hook in hook_manager.get_callbacks(MyEvents.ACTION, self):
+               try:
+                   hook(self, MyEvents.ACTION)
+               except Exception as e:
+                   print(f"{self.name}.ACTION hook call outcome: ERROR ({e.args[0]})")
+               else:
+                   print(f"{self.name}.ACTION hook call outcome: OK")
+
+   class MyHook:
+       "Example of hook implementation"
+       def __init__(self, name: str):
+           self.name: str = name
+       def callback(self, subject: MyHookable, event: MyEvents):
+           print(f"Hook {self.name} event {event.name} called by {subject.name}")
+       def err_callback(self, subject: MyHookable, event: MyEvents):
+           self.callback(subject, event)
+           raise Exception("Error in hook")
+
+
+   # Example code that installs and uses hooks
+
+   hook_manager.register_class(MyHookable, MyEvents)
+   hook_A: MyHook = MyHook('Hook-A')
+   hook_B: MyHook = MyHook('Hook-B')
+   hook_C: MyHook = MyHook('Hook-C')
+   
+   print("Install hooks")
+   hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
+   hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
+   hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
+   
+   print("Create event sources, emits CREATE")
+   src_A: MyHookable = MyHookable('Source-A')
+   src_B: MyHookable = MyHookable('Source-B')
+   
+   print("Install instance hooks")
+   hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
+   hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
+   
+   print("And action!")
+   src_A.action()
+   src_B.action()
+
+
+Output from sample code::
+
+   Install hooks
+   Create event sources, emits CREATE
+   Hook Hook-A event CREATE called by Source-A
+   Source-A.CREATE hook call outcome: OK
+   Hook Hook-B event CREATE called by Source-A
+   Source-A.CREATE hook call outcome: ERROR (Error in hook)
+   Hook Hook-A event CREATE called by Source-B
+   Source-B.CREATE hook call outcome: OK
+   Hook Hook-B event CREATE called by Source-B
+   Source-B.CREATE hook call outcome: ERROR (Error in hook)
+   Install instance hooks
+   And action!
+   Source-A.ACTION!
+   Hook Hook-A event ACTION called by Source-A
+   Source-A.ACTION hook call outcome: OK
+   Hook Hook-C event ACTION called by Source-A
+   Source-A.ACTION hook call outcome: OK
+   Source-B.ACTION!
+   Hook Hook-B event ACTION called by Source-B
+   Source-B.ACTION hook call outcome: OK
+   Hook Hook-C event ACTION called by Source-B
+   Source-B.ACTION hook call outcome: OK
+
 
 Functions
 =========
