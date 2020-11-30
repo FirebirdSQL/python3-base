@@ -182,25 +182,25 @@ The following program is an example of small but complex enough code that you ca
 
    def meeting(name: str, persons: List[Person]):
        "Simulation of virtual agents meeting"
-     
+
        for person in persons:
            person.log_context = name
-    
+
        start = monotonic()
        print("Meeting started...")
        print(f"Attendees: {', '.join(f'{x.name} [{x.mood.name}]' for x in persons)}")
-    
+
        for person in persons:
            for other in persons:
                if other is not person:
                    person.meet(other)
-    
+
        for person in persons:
            person.chat()
-    
+
        for person in persons:
            person.bye()
-    
+
        e = str(Decimal(monotonic() - start))
        print(f"Meeting closed in {e[:e.find('.')+6]} sec.")
        print(f"Outcome: {', '.join(f'{x.name} [{x.mood.name}]' for x in persons)}")
@@ -222,7 +222,7 @@ The following program is an example of small but complex enough code that you ca
        meeting(name, [Person('Alex', first), Person('David', second)])
 
    if __name__ == '__main__':
-       # >>> LOGGING  
+       # >>> LOGGING
        logger = logging.getLogger()
        logger.setLevel(LogLevel.NOTSET)
        sh = logging.StreamHandler()
@@ -239,7 +239,7 @@ The following program is an example of small but complex enough code that you ca
 
 **Output from sample code**::
 
-   > python test-trace.py 
+   > python test-trace.py
    - without trace ----------
    Meeting started...
    Attendees: Alex [SAD], David [PLEASED]
@@ -321,6 +321,57 @@ The following program is an example of small but complex enough code that you ca
    Meeting closed in 0.00466 sec.
    Outcome: Alex [HAPPY], David [HAPPY]
 
+Trace configuration
+===================
+
+.. versionadded:: 1.1.0
+
+Trace supports configuration based on `~firebird.base.config`.
+
+**Sample configuration file**::
+
+    [trace]
+    flags = ACTIVE | FAIL
+    ;flags = ACTIVE | BEFORE | AFTER | FAIL
+    classes = trace_ChannelManager, trace_Channel, trace_TextIOServiceImpl, trace_PipeServerHandler
+
+    [trace_PipeServerHandler]
+    source = saturnin.core.protocol.fbdp.PipeServerHandler
+    methods = close, send_ready, send_close
+
+    [trace_ChannelManager]
+    source = saturnin.core.base.ChannelManager
+    special = trace_defer
+
+    [trace_Channel]
+    source = saturnin.core.base.Channel
+    methods = send, receive, close, bind, unbind, connect, disconnect
+
+    [trace_DealerChannel]
+    source = saturnin.core.base.DealerChannel
+    methods = send, receive, close, bind, unbind, connect, disconnect
+
+    [trace_SimpleService]
+    source = saturnin.core.classic.SimpleService
+    methods = validate, run, initialize, start
+    with_args = no
+
+    [trace_TextIOServiceImpl]
+    source = saturnin.sdk.micro.textio.service.TextIOServiceImpl
+    methods = initialize, configure, validate, finalize
+    with_args = no
+
+    [trace_defer]
+    method = defer
+    max_param_length = 50
+
+
+.. seealso::
+
+   `~TraceManager.load_config()`, `~firebird.base.trace.BaseTraceConfig`,
+   `~firebird.base.trace.TracedMethodConfig`, `~firebird.base.trace.TracedClassConfig` and
+   `~firebird.base.trace.TraceConfig`.
+
 Enums & Flags
 =============
 
@@ -369,3 +420,23 @@ Globals
 
 .. autodata:: trace_manager
    :annotation:
+
+Trace Configuration
+===================
+
+BaseTraceConfig
+---------------
+.. autoclass:: BaseTraceConfig
+
+TracedMethodConfig
+------------------
+.. autoclass:: TracedMethodConfig
+
+TracedClassConfig
+-----------------
+.. autoclass:: TracedClassConfig
+
+TraceConfig
+-----------
+.. autoclass:: TraceConfig
+

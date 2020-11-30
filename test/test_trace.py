@@ -60,13 +60,13 @@ class BaseLoggingTest(unittest.TestCase):
         self.fmt: Formatter = Formatter("%(levelname)10s: [%(name)s] topic='%(topic)s' agent=%(agent)s context=%(context)s %(message)s")
         lastResort.setLevel(LogLevel.NOTSET)
     def setUp(self) -> None:
-        self._saved_trace = trace_manager.trace
+        self._saved_flags = trace_manager.flags
         trace_manager.clear()
         self.logger.handlers.clear()
         #lastResort.setFormatter(self.fmt)
         #self.logger.addHandler(lastResort)
     def tearDown(self):
-        trace_manager.trace = self._saved_trace
+        trace_manager.flags = self._saved_flags
         if 'FBASE_TRACE' in os.environ:
             del os.environ['FBASE_TRACE']
     def show(self, records, attrs=None):
@@ -132,7 +132,7 @@ class TestTraced(BaseLoggingTest):
         super().setUp()
         if not __debug__:
             os.environ['FBASE_TRACE'] = 'on'
-        trace_manager.trace |= TraceFlag.ACTIVE
+        trace_manager.flags |= TraceFlag.ACTIVE
     def verify_func(self, records, func_name: str, only: bool=False) -> None:
         if only:
             self.assertEqual(len(records), 1)
@@ -159,7 +159,7 @@ class TestTraced(BaseLoggingTest):
             self.assertTrue(rec.message.startswith(f'{outcome[1]} {func_name}'))
             self.assertTrue(rec.message.endswith(f'{result}'))
 
-        self.assertEqual(trace_manager.trace, TraceFlag.ACTIVE | TraceFlag.FAIL)
+        self.assertEqual(trace_manager.flags, TraceFlag.ACTIVE | TraceFlag.FAIL)
         ctx = Traced(self)
         # traced_noparam_noresult
         with self.assertLogs(level='DEBUG') as log:
@@ -215,7 +215,7 @@ class TestTraced(BaseLoggingTest):
             self.assertTrue(rec.message.endswith(f'{result}'))
 
         ctx = Traced(self)
-        trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
 
         # traced_noparam_noresult
         with self.assertLogs(level='DEBUG') as log:
@@ -249,7 +249,7 @@ class TestTraced(BaseLoggingTest):
             self.assertTrue(rec.message.endswith(msg_after_end))
 
         ctx = Traced(self)
-        trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         #
         with self.assertLogs(level='DEBUG') as log:
             d = traced(msg_before='ENTER {_fname_} ({pos_only}, {pos}, {kw}, {kw_only})')
@@ -285,7 +285,7 @@ class TestTraced(BaseLoggingTest):
             self.assertEqual(records.pop(0).message, msg_after)
 
         ctx = Traced(self)
-        trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         #
         with self.assertLogs(level='DEBUG') as log:
             d = traced(msg_before='>>> {_fname_} ({foo()}, {foo(kw)}, {foo(kw_only)})',
@@ -301,7 +301,7 @@ class TestTraced(BaseLoggingTest):
             self.assertEqual(records.pop(0).topic, topic)
 
         ctx = Traced(self)
-        trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         #
         with self.assertLogs(level='DEBUG') as log:
             traced(topic='fun')(ctx.traced_noparam_noresult)()
@@ -314,7 +314,7 @@ class TestTraced(BaseLoggingTest):
             self.assertTrue(records.pop(0).message.endswith(result))
 
         ctx = Traced(self)
-        trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         #
         with self.assertLogs(level='DEBUG') as log:
             traced(max_param_length=10)(ctx.traced_param_result)('123456789', '0123456789' * 10)
@@ -335,7 +335,7 @@ class TestTraced(BaseLoggingTest):
             self.assertEqual(rec.context, ctx)
 
         ctx = Traced(self)
-        trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         #
         with self.assertLogs(level='DEBUG') as log:
             traced(agent=UNDEFINED, context=UNDEFINED)(ctx.traced_noparam_noresult)()
@@ -353,7 +353,7 @@ class TestTraced(BaseLoggingTest):
             self.assertEqual(records.pop(0).levelno, level)
 
         ctx = Traced(self)
-        trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         #
         with self.assertLogs(level='DEBUG') as log:
             traced(level=LogLevel.INFO)(ctx.traced_noparam_noresult)()
@@ -369,7 +369,7 @@ class TestTraced(BaseLoggingTest):
             self.assertTrue(rec.message.endswith(msg_after_end))
 
         ctx = Traced(self)
-        trace_manager.trace = (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags = (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         with self.assertLogs(level='DEBUG') as log:
             traced()(ctx.traced_noparam_noresult)()
         self.verify_func(log.records, 'traced_noparam_noresult', True)
@@ -379,7 +379,7 @@ class TestTraced(BaseLoggingTest):
         verify(log.records, '>>> traced_noparam_noresult()', '<<< traced_noparam_noresult')
     def test_env(self):
         ctx = Traced(self)
-        trace_manager.trace = (TraceFlag.ACTIVE | TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags = (TraceFlag.ACTIVE | TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         with self.assertLogs(level='DEBUG') as log:
             traced()(ctx.traced_noparam_noresult)()
         self.assertEqual(len(log.records), 3)
@@ -394,7 +394,7 @@ class TestTraced(BaseLoggingTest):
         if 'FBASE_TRACE' in os.environ:
             del os.environ['FBASE_TRACE']
         ctx = Traced(self)
-        trace_manager.trace = (TraceFlag.ACTIVE | TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+        trace_manager.flags = (TraceFlag.ACTIVE | TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
         with self.assertLogs(level='DEBUG') as log:
             traced()(ctx.traced_noparam_noresult)()
         self.verify_func(log.records, 'traced_noparam_noresult', True)
@@ -419,7 +419,7 @@ class TestTraced(BaseLoggingTest):
                 self.assertTrue(rec.message.startswith(f'{outcome[1]} {func_name}'))
                 self.assertTrue(rec.message.endswith(f'{result}'))
 
-        self.assertEqual(trace_manager.trace, TraceFlag.ACTIVE | TraceFlag.FAIL)
+        self.assertEqual(trace_manager.flags, TraceFlag.ACTIVE | TraceFlag.FAIL)
         ctx = DecoratedTraced(self)
         # traced_noparam_noresult
         with self.assertLogs(level='DEBUG') as log:
@@ -462,7 +462,7 @@ class TestTraced(BaseLoggingTest):
             self.assertTrue(rec.message.startswith(f'{outcome[1]} {func_name}'))
             self.assertTrue(rec.message.endswith(f'{result}'))
 
-        self.assertEqual(trace_manager.trace, TraceFlag.ACTIVE | TraceFlag.FAIL)
+        self.assertEqual(trace_manager.flags, TraceFlag.ACTIVE | TraceFlag.FAIL)
         add_trace(Traced, 'traced_noparam_noresult')
         add_trace(Traced, 'traced_noparam_result')
         add_trace(Traced, 'traced_param_noresult')

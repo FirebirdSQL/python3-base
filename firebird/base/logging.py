@@ -64,25 +64,23 @@ class BindFlag(Flag):
 
 class FBLoggerAdapter(LoggerAdapter, CachedDistinct):
     """`~logging.LoggerAdapter` that injects information about context, agent and topic
-into `extra` and with **f-string** log message support.
-
-Attributes:
-    logger (Logger): Adapted Logger instance.
-    agent (str): Agent for logger
-    context (str): Context for logger
-    topic (str): Topic for logger.
-"""
+    into `extra` and with **f-string** log message support.
+    """
     def __init__(self, logger: Logger, agent: Any=UNDEFINED, context: Any=UNDEFINED, topic: str=''):
         """
-Arguments:
-    logger: Adapted Logger instance.
-    agent: Agent for logger
-    context: Context for logger
-    topic: Topic of recorded information.
-"""
+        Arguments:
+            logger: Adapted Logger instance.
+            agent: Agent for logger
+            context: Context for logger
+            topic: Topic of recorded information.
+        """
+        #: Adapted Logger instance.
         self.logger: Logger = logger
+        #: Agent for logger.
         self.agent: Any = agent
+        #: Context for logger.
         self.context: Any = context
+        #: Topic for logger.
         self.topic: str = topic
     @classmethod
     def extract_key(cls, *args, **kwargs) -> Hashable:
@@ -129,7 +127,7 @@ Arguments:
 
 @dataclass(order=True, frozen=True)
 class BindInfo(Distinct):
-    """Information about Logger binding"""
+    "Information about Logger binding."
     topic: str
     agent: str
     context: str
@@ -140,32 +138,32 @@ class BindInfo(Distinct):
 def get_logging_id(obj: Any) -> Any:
     """Returns logging ID for object.
 
-Arguments:
-    obj: Any object
+    Arguments:
+        obj: Any object
 
-Returns:
-    1. `logging_id` attribute if `obj` does have it, or..
-    2. `__name__` attribute if `obj` does have it, or..
-    3. `str(obj)`
-"""
-    return getattr(obj, 'logging_id', getattr(obj, '__name__', str(obj)))
+    Returns:
+        1. `logging_id` attribute if `obj` does have it, or..
+        2. `__qualname__` attribute if `obj` does have it, or..
+        3. `str(obj)`
+    """
+    return getattr(obj, 'logging_id', getattr(obj, '__qualname__', str(obj)))
 
 class LoggingIdMixin:
-    "Mixin class that adds `logging_id` property and `__str__`."
+    """Mixin class that adds `logging_id` property and `__str__` that returns `logging_id`.
+    """
     def __str__(self):
-        "Returns `logging_id`"
         return self.logging_id
     @property
     def logging_id(self) -> str:
-        "Returns `_logging_id_` attribute if defined, else returns qualified class name"
+        "Returns `_logging_id_` attribute if defined, else returns qualified class name."
         return getattr(self, '_logging_id_', self.__class__.__qualname__)
 
 class LoggingManager:
     """Logger manager.
-"""
+    """
     def __init__(self):
         self.loggers: Registry = Registry()
-        self.topics: Dict = {}
+        self.topics: Dict[str, int] = {}
         self.bindings: BindFlag = BindFlag(0)
     def _update_bindings(self, agent: Any, context: Any) -> None:
         if agent is ANY:
@@ -184,25 +182,26 @@ class LoggingManager:
     def bind_logger(self, agent: Any, context: Any, logger: Union[str, Logger], topic: str='') -> None:
         """Bind agent and context to specific logger.
 
-Arguments:
-    agent: Agent identification
-    context: Context identification
-    logger: Loger (instance or name)
-    topic: Topic of recorded information
+        Arguments:
+            agent: Agent identification
+            context: Context identification
+            logger: Loger (instance or name)
+            topic: Topic of recorded information
 
-The identification of agent and context could be:
+        The identification of agent and context could be:
 
-    1. String
-    2. Object instance. Uses `get_logging_id()` to retrieve its logging ID.
-    3. Sentinel. The ANY sentinel matches any particular agent or context. You can use
-       sentinel `.UNDEFINED` to register a logger for cases when agent or context are not
-       specified in logger lookup.
+            1. String
+            2. Object instance. Uses `get_logging_id()` to retrieve its logging ID.
+            3. Sentinel. The ANY sentinel matches any particular agent or context. You can
+               use sentinel `.UNDEFINED` to register a logger for cases when agent or
+               context are not specified in logger lookup.
 
-Important:
-   You SHOULD NOT use sentinel `.ALL` for `agent` or `context` identification! This
-   sentinel is used by `.unbind`, so bindings that use ALL could not be removed by `.unbind`.
+        Important:
+           You SHOULD NOT use sentinel `.ALL` for `agent` or `context` identification! This
+           sentinel is used by `.unbind()`, so bindings that use ALL could not be removed
+           by `.unbind()`.
 
-"""
+        """
         if isinstance(logger, str):
             logger = getLogger(logger)
         if not isinstance(agent, (str, Sentinel)):
@@ -216,7 +215,7 @@ Important:
         self.loggers.update(BindInfo(topic, agent, context, logger))
     def unbind(self, agent: Any, context: Any, topic: str='') -> int:
         """Drops logger bindings.
-"""
+        """
         if not isinstance(agent, (str, Sentinel)):
             agent = get_logging_id(agent)
         if not isinstance(context, (str, Sentinel)):
@@ -236,34 +235,35 @@ Important:
             return len(rm)
         return 0
     def clear(self) -> None:
-        """Remove all logger bindings"""
+        """Remove all logger bindings.
+        """
         self.loggers.clear()
         self.topics.clear()
         self.bindings = BindFlag(0)
     def get_logger(self, agent: Any=UNDEFINED, context: Any=DEFAULT, topic: str='') -> FBLoggerAdapter:
         """Return a logger for the specified agent and context combination.
 
-Arguments:
-    agent: Agent identification.
-    context: Context identification.
-    topic: Topic of recorded information.
+        Arguments:
+            agent: Agent identification.
+            context: Context identification.
+            topic: Topic of recorded information.
 
-The identification of agent and context could be:
+        The identification of agent and context could be:
 
-    1. String
-    2. Object instance. Uses `get_logging_id()` to retrieve its logging ID.
-    3. Sentinel `.UNDEFINED`
-    4. When `context` is sentinel `.DEFAULT`, uses `agent` attribute `log_context` (if defined)
-       or sentinel `.UNDEFINED` otherwise.
+            1. String
+            2. Object instance. Uses `get_logging_id()` to retrieve its logging ID.
+            3. Sentinel `.UNDEFINED`
+            4. When `context` is sentinel `.DEFAULT`, uses `agent` attribute `log_context`
+               (if defined) or sentinel `.UNDEFINED` otherwise.
 
-The search for a suitable topic logger proceeds as follows:
+        The search for a suitable topic logger proceeds as follows:
 
-    1. Return logger registered for specified agent and context, or...
-    2. Return logger registered for ANY agent and specified context, or...
-    3. Return logger registered for specified agent and ANY context, or...
-    4. Return logger registered for ANY agent and ANY context, or...
-    5. Return the root logger.
-"""
+            1. Return logger registered for specified agent and context, or...
+            2. Return logger registered for ANY agent and specified context, or...
+            3. Return logger registered for specified agent and ANY context, or...
+            4. Return logger registered for ANY agent and ANY context, or...
+            5. Return the root logger.
+        """
         if context is DEFAULT:
             context = getattr(agent, 'log_context', UNDEFINED)
         if agent is not UNDEFINED and not isinstance(agent, str):
@@ -294,7 +294,9 @@ The search for a suitable topic logger proceeds as follows:
 #: Logging Manager
 logging_manager: LoggingManager = LoggingManager()
 
+#: shortcut for `logging_manager.bind_logger()`
 bind_logger = logging_manager.bind_logger
+#: shortcut for `logging_manager.get_logger()`
 get_logger = logging_manager.get_logger
 
 # Install simple formatter for lastResort handler
@@ -302,7 +304,8 @@ if lastResort is not None and lastResort.formatter is None:
     lastResort.setFormatter(Formatter('%(levelname)s: %(message)s'))
 
 def install_null_logger():
-    "Installs 'null' logger."
+    """Installs 'null' logger.
+    """
     log = getLogger('null')
     log.propagate = False
     log.disabled = True

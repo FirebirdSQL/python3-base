@@ -33,6 +33,15 @@ The framework is based around two classes:
   `.PyCode` and `.PyCallable`. It also provides special options `ConfigOption` and
   `ConfigListOption`.
 
+Additionally, the `.ApplicationDirectoryScheme` abstract base class defines set of mostly
+used application directories. The function `.get_directory_scheme()` could be then used
+to obtain instance that implements platform-specific standards for file-system location
+for these directories. Currently, only "Windows" and "Linux" directory schemes are supported.
+
+.. note::
+    You may use `platform.system` call to determine the scheme name suitable for platform
+    where your application is running.
+
 Usage
 -----
 First, you need to define your own configuration.
@@ -296,8 +305,23 @@ The protobuf message is defined in :file:`/proto/config.proto`.
 
    .. seealso:: `.ConfigOption`, `.ConfigListOption`
 
+.. tip::
 
-.. autoclass:: ConfigProto
+   To address `ConfigProto`_ in functions like `~firebird.base.protobuf.create_message()`,
+   use `PROTO_CONFIG` constant.
+
+.. data:: PROTO_CONFIG
+   :annotation: Fully qualified name for `ConfigProto`_ protobuf.
+
+
+Application Directory Scheme
+============================
+
+.. versionadded:: 1.1.0
+
+.. autoclass:: ApplicationDirectoryScheme
+
+.. autofunction:: get_directory_scheme
 
 Config
 ======

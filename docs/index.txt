@@ -18,6 +18,7 @@ Topic covered by `firebird-base` package:
 - Context-based logging.
 - Trace/audit for class instances.
 - General "hook" mechanism.
+- Callback system based on Signals and Slots, and "Delphi events"
 
 
 .. note:: Requires Python 3.8+

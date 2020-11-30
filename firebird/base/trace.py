@@ -43,14 +43,17 @@ from enum import IntFlag, auto
 from functools import wraps
 from time import monotonic
 from decimal import Decimal
-from .types import Distinct, DEFAULT, UNLIMITED
+from configparser import ConfigParser
+from .types import Error, Distinct, DEFAULT, UNLIMITED, load
 from .collections import Registry
 from .strconv import convert_from_str
+from .config import StrOption, IntOption, BoolOption, ListOption, FlagOption, EnumOption, \
+     ConfigListOption, Config
 from .logging import LogLevel, FBLoggerAdapter, get_logger
 
 class TraceFlag(IntFlag):
     "`LoggingManager` trace/audit flags"
-    DISABLED = 0
+    NONE = 0
     ACTIVE = auto()
     BEFORE = auto()
     AFTER = auto()
@@ -83,23 +86,22 @@ class TracedMeta(type):
 
 class TracedMixin(metaclass=TracedMeta):
     """Mixin class that automatically registers descendants for trace and instruments
-instances on creation.
-"""
+    instances on creation.
+    """
     def __init_subclass__(cls: Type, /, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         trace_manager.register(cls)
 
-
 class traced:
     """Base decorator for logging of callables, suitable for trace/audit.
 
-It's not applied on decorated function/method if `FBASE_TRACE` environment variable is
-set to False, or if `FBASE_TRACE` is not defined and `__debug__` is False (optimized
-Python code).
+    It's not applied on decorated function/method if `FBASE_TRACE` environment variable is
+    set to False, or if `FBASE_TRACE` is not defined and `__debug__` is False (optimized
+    Python code).
 
-Both positional and keyword arguments of decorated callable are available by name for
-f-string type message interpolation as `dict` passed to logger as positional argument.
-"""
+    Both positional and keyword arguments of decorated callable are available by name for
+    f-string type message interpolation as `dict` passed to logger as positional argument.
+    """
     def __init__(self, *, agent: Any=DEFAULT, context: Any=DEFAULT, topic: str='trace',
                  msg_before: str=DEFAULT, msg_after: str=DEFAULT, msg_failed: str=DEFAULT,
                  flags: TraceFlag=TraceFlag(0), level: LogLevel=LogLevel.DEBUG,
@@ -118,22 +120,45 @@ f-string type message interpolation as `dict` passed to logger as positional arg
             level: Logging level for trace/audit messages
             max_param_length: Max. length of parameters (longer will be trimmed)
             extra: Extra data for `LogRecord`
+            callback: Callback function that gets the agent identification as argument,
+               and must return True/False indicating whether trace is allowed.
+            has_result: Indicator whether function has result value. If True, `_result_`
+               is available for interpolation in `msg_after`. The `DEFAULT` value means,
+               that value for this argument should be decided from function return value
+               annotation.
+            with_args: If True, function arguments are available for interpolation in
+               `msg_before`.
         """
+        #: Trace/audit message logged before decorated function
         self.msg_before: str = msg_before
+        #: Trace/audit message logged after decorated function
         self.msg_after: str = msg_after
+        #: Trace/audit message logged when decorated function raises an exception
         self.msg_failed: str = msg_failed
+        #: Agent identification
         self.agent: Any = agent
+        #: Context identification
         self.context: Any = context
+        #: Trace/audit logging topic
         self.topic: str = topic
+        #: Trace flags override
         self.flags: TraceFlag = flags
+        #: Logging level for trace/audit messages
         self.level: LogLevel = level
+        #: Max. length of parameters (longer will be trimmed)
         self.max_len: int = max_param_length
+        #: Extra data for `LogRecord`
         self.extra: Dict = extra
+        #: Callback function that gets the agent identification as argument,
+        #: and must return True/False indicating whether trace is allowed.
         self.callback: Callable[[Any], bool] = self.__callback if callback is None else callback
+        #: Indicator whether function has result value. If True, `_result_` is available
+        #: for interpolation in `msg_after`.
         self.has_result: bool = has_result
+        #: If True, function arguments are available for interpolation in `msg_before`
         self.with_args: bool = with_args
     def __callback(self, agent: Any) -> bool:
-        "Default callback, does nothing"
+        "Default callback, does nothing."
         return True
     def set_before_msg(self, fn: Callable, sig: Signature) -> None:
         "Sets the DEFAULT before message f-string template."
@@ -149,18 +174,18 @@ f-string type message interpolation as `dict` passed to logger as positional arg
         "Sets the DEFAULT fail message f-string template."
         self.msg_failed = f"<-- {fn.__name__}[{{_etime_}}] {{_exc_}}"
     def log_before(self, logger: FBLoggerAdapter, params: Dict) -> None:
-        "Executed before decorated callable"
+        "Executed before decorated callable."
         logger.log(self.level, self.msg_before, params, stacklevel=2)
     def log_after(self, logger: FBLoggerAdapter, params: Dict) -> None:
-        "Executed after decorated callable"
+        "Executed after decorated callable."
         logger.log(self.level, self.msg_after, params, stacklevel=2)
     def log_failed(self, logger: FBLoggerAdapter, params: Dict) -> None:
-        "Executed when decorated callable raises an exception"
+        "Executed when decorated callable raises an exception."
         logger.log(self.level, self.msg_failed, params, stacklevel=2)
     def __call__(self, fn: Callable):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            flags = trace_manager.trace | self.flags
+            flags = trace_manager.flags | self.flags
             if enabled := ((TraceFlag.ACTIVE in flags) and int(flags) > 1):
                 params = {}
                 bound = sig.bind_partial(*args, **kwargs)
@@ -225,49 +250,154 @@ f-string type message interpolation as `dict` passed to logger as positional arg
             self.set_fail_msg(fn, sig)
         return wrapper
 
+
+class BaseTraceConfig(Config):
+    """Base configuration for trace.
+    """
+    def __init__(self, name: str):
+        super().__init__(name)
+        #: Agent identification
+        self.agent: StrOption = \
+            StrOption('agent', "Agent identification")
+        #: Context identification
+        self.context: StrOption = \
+            StrOption('context', "Context identification")
+        #: Trace/audit logging topic
+        self.topic: StrOption = \
+            StrOption('topic', "Trace/audit logging topic")
+        #: Trace/audit message logged before decorated function
+        self.msg_before: StrOption = \
+            StrOption('msg_before', "Trace/audit message logged before decorated function")
+        #: Trace/audit message logged after decorated function
+        self.msg_after: StrOption = \
+            StrOption('msg_after', "Trace/audit message logged after decorated function")
+        #: Trace/audit message logged when decorated function raises an exception
+        self.msg_failed: StrOption = \
+            StrOption('msg_failed', "Trace/audit message logged when decorated function raises an exception")
+        #: Trace flags override
+        self.flags: FlagOption = \
+            FlagOption('flags', TraceFlag, "Trace flags override")
+        #: Logging level for trace/audit messages
+        self.level: EnumOption = \
+            EnumOption('level', LogLevel, "Logging level for trace/audit messages")
+        #: Max. length of parameters (longer will be trimmed)
+        self.max_param_length: IntOption = \
+            IntOption('max_param_length', "Max. length of parameters (longer will be trimmed)")
+        #: Indicator whether function has result value
+        self.has_result: BoolOption = \
+            BoolOption('has_result', "Indicator whether function has result value")
+        #: If True, function arguments are available for interpolation in `msg_before`
+        self.with_args: BoolOption = \
+            BoolOption('with_args', "If True, function arguments are available for interpolation in `msg_before`")
+
+class TracedMethodConfig(BaseTraceConfig):
+    """Configuration of traced Python method.
+    """
+    def __init__(self, name: str):
+        super().__init__(name)
+        #: Class method name [required]
+        self.method: StrOption = \
+            StrOption('method', "Class method name", required=True)
+
+class TracedClassConfig(BaseTraceConfig):
+    """Configuration of traced Python class.
+    """
+    def __init__(self, name: str):
+        super().__init__(name)
+        #: Fully qualified class name [required]
+        self.source: StrOption = \
+            StrOption('source', "Fully qualified class name", required=True)
+        #: Names of traced class methods
+        self.methods: ListOption = \
+            ListOption('methods', str, "Names of traced class methods")
+        #: Configuration sections with extended config of traced class methods
+        self.special: ConfigListOption = \
+            ConfigListOption('special',
+                             "Configuration sections with extended config of traced class methods",
+                             TracedMethodConfig)
+
+class TraceConfig(BaseTraceConfig):
+    """Trace manager configuration.
+    """
+    def __init__(self, name: str):
+        super().__init__(name)
+        #: Trace flags [required]
+        self.flags: FlagOption = \
+            FlagOption('flags', TraceFlag, "Trace flags", required=True)
+        #: When True, unregistered classes are registered automatically
+        self.autoregister: BoolOption = \
+            BoolOption('autoregister', "When True, unregistered classes are registered automatically",
+                       default=True)
+        #: Configuration sections with traced Python classes
+        self.classes: ConfigListOption = \
+            ConfigListOption('classes', "Configuration sections with traced Python classes",
+                             TracedClassConfig, required=True)
+
 class TraceManager:
-    """Trace manager."""
+    """Trace manager.
+    """
     def __init__(self):
         self._traced: Registry = Registry()
-        self._flags: TraceFlag = TraceFlag.DISABLED
-        if convert_from_str(bool, os.getenv('FBASE_TRACE', str(__debug__))):
-            self.trace |= TraceFlag.ACTIVE
+        self.__active: bool = False
+        self._flags: TraceFlag = TraceFlag.NONE
+        self.trace_active = convert_from_str(bool, os.getenv('FBASE_TRACE', str(__debug__)))
         if convert_from_str(bool, os.getenv('FBASE_TRACE_BEFORE', 'no')): # pragma: no cover
-            self.trace |= TraceFlag.BEFORE
+            self.set_flag(TraceFlag.BEFORE)
         if convert_from_str(bool, os.getenv('FBASE_TRACE_AFTER', 'no')): # pragma: no cover
-            self.trace |= TraceFlag.AFTER
+            self.set_flag(TraceFlag.AFTER)
         if convert_from_str(bool, os.getenv('FBASE_TRACE_FAIL', 'yes')):
-            self.trace |= TraceFlag.FAIL
+            self.set_flag(TraceFlag.FAIL)
     def is_registered(self, cls: Type) -> bool:
-        "Return True if class is registered"
+        "Return True if class is registered."
         return cls in self._traced
     def clear(self) -> None:
         "Removes all trace specifications."
         for cls in self._traced:
             cls.traced.clear()
     def register(self, cls: Type) -> None:
-        "Register class for trace. Does nothing if class is already registered."
+        """Register class for trace.
+
+        Arguments:
+            cls: Class to be registered.
+
+        Does nothing if class is already registered.
+        """
         if cls not in self._traced:
             self._traced.store(TracedClass(cls))
     def add_trace(self, cls: Type, method: str, decorator: Callable=traced, / , *args, **kwargs) -> None:
-        "Add/update trace specification for class method."
+        """Add/update trace specification for class method.
+
+        Arguments:
+            cls: Registered traced class
+            method: Name of class method that should be instrumented for trace
+            decorator: Decorator that should be used for trace instrumentation of this method
+            args: Positional arguments for decorator
+            kwargs: Keyword arguments for decorator
+        """
         self._traced[cls].traced.update(TracedItem(method, decorator, args, kwargs))
     def remove_trace(self, cls: Type, method: str) -> None:
-        "Remove trace specification for class method."
+        """Remove trace specification for class method.
+
+        Arguments:
+            cls: Registered traced class
+            method: Name of class method
+        """
         del self._traced[cls].traced[method]
     def trace_object(self, obj: Any, *, strict: bool=False) -> Any:
         """Instruments object's methods with decorator according to trace configuration.
 
-Arguments:
-    strict: Determines the response if the object class is not registered for trace.
-            Raises exception when True, or return the instance as is when False [default].
+        Arguments:
+            strict: Determines the response if the object class is not registered for trace.
+                    Raises exception when True, or return the instance as is when False [default].
 
-Returns:
-    Decorated instance.
+        Only methods registered with `.add_trace()` are instrumented.
 
-Raises:
-    TypeError: When object class is not registered and `strict` is True.
-"""
+        Returns:
+            Decorated instance.
+
+        Raises:
+            TypeError: When object class is not registered and `strict` is True.
+        """
         if (trace := os.getenv('FBASE_TRACE')) is not None:
             if not convert_from_str(bool, trace):
                 return obj
@@ -282,18 +412,87 @@ Raises:
         for item in entry.traced:
             setattr(obj, item.method, item.decorator(*item.args, **item.kwargs)(getattr(obj, item.method)))
         return obj
+    def load_config(self, config: ConfigParser, section: str='trace') -> None:
+        """Update trace from configuration.
+
+        Arguments:
+            config:  ConfigParser instance with trace configuration.
+            section: Name of ConfigParser section that should be used to get trace
+                     configuration.
+
+        Uses `.TraceConfig`, `.TracedClassConfig` and `.TracedMethodConfig` to process
+        the configuration.
+
+        Note:
+            Does not `.clear()` existing trace specifications.
+        """
+        def build_kwargs(from_cfg: BaseTraceConfig) -> Dict[str, Any]:
+            result = {}
+            for item in ['agent', 'context', 'topic', 'msg_before', 'msg_after',
+                         'msg_failed', 'flags', 'level', 'max_param_length',
+                         'has_result', 'with_args']:
+                if (value := getattr(from_cfg, item).value) is not None:
+                    result[item] = value
+            return result
+
+        cfg = TraceConfig('trace')
+        cfg.load_config(config, section)
+        self.trace = cfg.flags.value
+        global_kwargs = build_kwargs(cfg)
+        for cls_cfg in cfg.classes.value:
+            cls_name = cls_cfg.source.value
+            cls_kwargs = {}
+            cls_kwargs.update(global_kwargs)
+            cls_kwargs.update(build_kwargs(cls_cfg))
+            if (cls := self._traced.find(lambda i: f'{i.cls.__module__}.{i.cls.__name__}' == cls_name)) is None:
+                if cfg.autoregister.value:
+                    cls = load(':'.join(cls_name.rsplit('.',1)))
+                    self.register(cls)
+                else:
+                    raise Error(f"Class '{cls_name}' is not registered for trace.")
+            if (items := cls_cfg.methods.value) is not None:
+                for item in items:
+                    self.add_trace(cls, item, traced, *[], **cls_kwargs)
+            if (items := cls_cfg.special.value) is not None:
+                for mcfg in items:
+                    method = mcfg.method.value
+                    kwargs = {}
+                    kwargs.update(cls_kwargs)
+                    kwargs.update(build_kwargs(mcfg))
+                    self.add_trace(cls, method, traced, *[], **kwargs)
+    def set_flag(self, flag: TraceFlag) -> None:
+        """Set flag specified by `flag` mask.
+        """
+        self._flags |= flag
+    def clear_flag(self, flag: TraceFlag) -> None:
+        """Clear flag specified by `flag` mask.
+        """
+        self._flags &= ~flag
     @property
-    def trace(self) -> TraceFlag:
-        "Trace flags"
+    def flags(self) -> TraceFlag:
+        "Trace flags."
         return self._flags
-    @trace.setter
-    def trace(self, value: TraceFlag) -> None:
+    @flags.setter
+    def flags(self, value: TraceFlag) -> None:
         self._flags = value if isinstance(value, TraceFlag) else TraceFlag(value)
+    @property
+    def trace_active(self) -> bool:
+        "True if trace is active."
+        return TraceFlag.ACTIVE in self._flags
+    @trace_active.setter
+    def trace_active(self, value: bool) -> None:
+        if value:
+            self._flags |= TraceFlag.ACTIVE
+        else:
+            self._flags &= ~TraceFlag.ACTIVE
 
 #: Trace manager
 trace_manager: TraceManager = TraceManager()
 
+#: shortcut for `trace_manager.add_trace()`
 add_trace = trace_manager.add_trace
+#: shortcut for `trace_manager.remove_trace()`
 remove_trace = trace_manager.remove_trace
+#: shortcut for `trace_manager.trace_object()`
 trace_object = trace_manager.trace_object
 

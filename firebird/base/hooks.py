@@ -46,17 +46,21 @@ from .collections import Registry
 
 @dataclass(order=True, frozen=True)
 class Hook(Distinct):
-    "Hook registration info"
+    "Hook registration info."
+    #: Event identification
     event: Any
+    #: Hookable class
     cls: type = ANY
+    #: Instance of registered hookable class
     instance: Any = ANY
-    callbacks: List = field(default_factory=list)
+    #: List of callbacks
+    callbacks: List[Callable] = field(default_factory=list)
     def get_key(self) -> Any:
         "Returns hook key"
         return (self.event, self.cls, self.instance)
 
 class HookFlag(Flag):
-    "Internally used flags"
+    "Internally used flags."
     NONE = 0
     INSTANCE = auto()
     CLASS = auto()
@@ -64,7 +68,8 @@ class HookFlag(Flag):
     ANY_EVENT = auto()
 
 class HookManager(Singleton):
-    """Hook manager."""
+    """Hook manager.
+    """
     def __init__(self):
         self.obj_map: WeakKeyDictionary = WeakKeyDictionary()
         self.hookables: Dict[Type, Set[Any]] = {}
@@ -83,41 +88,41 @@ class HookManager(Singleton):
     def register_class(self, cls: Type, events: Union[Type[Enum], Set]=None) -> None:
         """Register hookable class.
 
-Arguments:
-    cls: Class that supports hooks.
-    events: Supported events.
+        Arguments:
+            cls: Class that supports hooks.
+            events: Supported events.
 
-Events could be specified using an `~enum.Enum` type or set of event identificators.
-When Enum is used (recommended), all enum values are registered as hookable events.
-"""
+        Events could be specified using an `~enum.Enum` type or set of event identificators.
+        When Enum is used (recommended), all enum values are registered as hookable events.
+        """
         if isinstance(events, type) and issubclass(events, Enum):
             events = set(events.__members__.values())
         self.hookables[cls] = events
     def register_name(self, instance: Any, name: str) -> None:
         """Associate name with hookable instance.
 
-Arguments:
-    instance: Instance of registered hookable class.
-    name:     Unique name assigned to instance.
-"""
+        Arguments:
+            instance: Instance of registered hookable class.
+            name:     Unique name assigned to instance.
+        """
         if not isinstance(instance, tuple(self.hookables.keys())):
             raise TypeError("The instance is not of hookable type")
         self.obj_map[instance] = name
     def add_hook(self, event: Any, source: Any, callback: Callable) -> None:
         """Add new hook.
 
-Arguments:
-    event:    Event identificator.
-    source:   Hookable class or instance, or instance name.
-    callback: Callback function.
+        Arguments:
+            event:    Event identificator.
+            source:   Hookable class or instance, or instance name.
+            callback: Callback function.
 
-Important:
-    The signature of `callback` must conform to requirements for particular hookable event.
+        Important:
+            The signature of `callback` must conform to requirements for particular hookable event.
 
-Raises:
-    TypeError: When `subject` is not registered as hookable.
-    ValueError: When `event` is not supported by specified `subject`.
-"""
+        Raises:
+            TypeError: When `subject` is not registered as hookable.
+            ValueError: When `event` is not supported by specified `subject`.
+        """
         cls = obj = ANY
         if isinstance(source, type):
             if source in self.hookables:
@@ -153,17 +158,17 @@ Raises:
     def remove_hook(self, event: Any, source: Any, callback: Callable) -> None:
         """Remove hook callback installed by `add_hook()`.
 
-Arguments:
-    event:    Event identificator.
-    source:   Hookable class or instance.
-    callback: Callback function.
+        Arguments:
+            event:    Event identificator.
+            source:   Hookable class or instance.
+            callback: Callback function.
 
-Important:
-    For successful removal, the argument values must be exactly the same as used in
-    `add_hook()` call.
+        Important:
+            For successful removal, the argument values must be exactly the same as used in
+            `add_hook()` call.
 
-    The method does nothing if described hook is not installed.
-"""
+            The method does nothing if described hook is not installed.
+        """
         cls = obj = ANY
         if isinstance(source, type):
             cls = source
@@ -183,17 +188,18 @@ Important:
         self.hooks.clear()
         self.flags = HookFlag.NONE
     def reset(self) -> None:
-        """Removes all installed hooks and unregisters all hookable classes and instances."""
+        """Removes all installed hooks and unregisters all hookable classes and instances.
+        """
         self.remove_all_hooks()
         self.hookables.clear()
         self.obj_map.clear()
     def get_callbacks(self, event: Any, source: Any) -> List:
         """Returns list of all callbacks installed for specified event and hookable subject.
 
-Arguments:
-    event:  Event identificator.
-    source: Hookable class or instance, or name.
-"""
+        Arguments:
+            event:  Event identificator.
+            source: Hookable class or instance, or name.
+        """
         result = []
         if isinstance(source, type):
             if HookFlag.CLASS in self.flags:
@@ -229,7 +235,11 @@ Arguments:
 #: Hook manager
 hook_manager: HookManager = HookManager()
 
+#: shortcut for `hook_manager.register_class()`
 register_class = hook_manager.register_class
+#: shortcut for `hook_manager.register_name()`
 register_name = hook_manager.register_name
+#: shortcut for `hook_manager.add_hook()`
 add_hook = hook_manager.add_hook
+#: shortcut for `hook_manager.get_callbacks()`
 get_callbacks = hook_manager.get_callbacks

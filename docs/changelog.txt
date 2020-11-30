@@ -2,6 +2,47 @@
 Changelog
 #########
 
+Version 1.1.0
+=============
+
+* New module: `signal` - Callback system based on Signals and Slots, and "Delphi events"
+* `~firebird.base.config` module:
+
+  - New class `.ApplicationDirectoryScheme`
+  - `~firebird.base.config.Config.load_config()`: raises error when section is missing,
+    better error handling when exception is raised while loading options
+  - `~firebird.base.config.PyCallableOption` `signature` argument could be
+    `inspect.Signature` or Callable
+  - Introduced `.PROTO_CONFIG` constant with fully qualified name for `ConfigProto` protobuf
+  - Optional argument `to_default` in `~firebird.base.config.Option.clear()` is now keyword-only.
+* `~firebird.base.logging` module:
+
+  - `.get_logging_id()` uses `__qualname__` instead `__name__`
+* `~firebird.base.protobuf` module:
+
+  - Added direct support for key well-known data types `Empty`, `Any`, `Duration`,
+    `Timestamp`, `Struct`, `Value`, `ListValue` and `FieldMask`. They are automatically
+    registered. New constants 'PROTO_<type>' with fully qualified names.
+  - `~firebird.base.protobuf.create_message()` has new optional `serialized` argument with
+    `bytes` that should be parsed into newly created message instance.
+  - New functions `~firebird.base.protobuf.struct2dict()` and `~firebird.base.protobuf.dict2struct()`
+* `~firebird.base.trace` module:
+
+  - `~firebird.base.trace.TraceFlag` value `DISABLED` was renamed to `NONE`.
+  - Added support for trace configuration based on `~firebird.base.config`, using new
+    classes `~firebird.base.trace.BaseTraceConfig`, `~firebird.base.trace.TracedMethodConfig`,
+    `~firebird.base.trace.TracedClassConfig` and `~firebird.base.trace.TraceConfig`.
+  - New methods in `~firebird.base.trace.TraceManager`:
+
+    - `~firebird.base.trace.TraceManager.load_config()` to update trace from configuration.
+    - `~firebird.base.trace.TraceManager.set_flag()` and
+      `~firebird.base.trace.TraceManager.clear_flag()`.
+* `~firebird.base.types` module:
+
+  - `~firebird.base.types.MIME` now handles access to properties more efficiently and faster.
+  - New function `~firebird.base.types.load()`.
+* Changes in documentation.
+
 Version 1.0.0
 =============
 

@@ -89,21 +89,21 @@ def register_convertor(cls: Type, *,
                        from_str: TConvertFromStr=str2any):
     """Registers convertor function(s).
 
-Arguments:
-    cls:      Class or class name
-    to_str:   Function that converts `cls` value to `str`
-    from_str: Function that converts `str` to value of `cls` data type
-"""
+    Arguments:
+        cls:      Class or class name
+        to_str:   Function that converts `cls` value to `str`
+        from_str: Function that converts `str` to value of `cls` data type
+    """
     _convertors.store(Convertor(cls, to_str, from_str))
 
 def register_class(cls: Type) -> None:
     """Registers class for name lookup.
 
-.. seealso:: `has_convertor()`, `get_convertor()`
+    .. seealso:: `has_convertor()`, `get_convertor()`
 
-Raises:
-    TypeError: When class name is already registered.
-"""
+    Raises:
+        TypeError: When class name is already registered.
+    """
     if cls.__name__ in _classes:
         raise TypeError(f"Class '{cls.__name__}' already registered as '{_classes[cls.__name__]!r}'")
     _classes[cls.__name__] = cls
@@ -126,19 +126,19 @@ def _get_convertor(cls: Union[Type, str]) -> Convertor:
 def has_convertor(cls: Union[Type, str]) -> bool:
     """Returns True if class has a convertor.
 
-Arguments:
-    cls: Type or type name. The name could be simple class name, or full name that includes
-         the module name.
+    Arguments:
+        cls: Type or type name. The name could be simple class name, or full name that includes
+             the module name.
 
-Note:
-    When `cls` is a name:
+    Note:
+        When `cls` is a name:
 
-    1. If class name is NOT registered via `register_class()`, it's not possible to perform
-       lookup for bases classes.
-    2. If simple class name is provided and multiple classes of the same name but from
-       different modules have registered convertors, the first one found is used. If you
-       want to avoid this situation, use full names.
-"""
+        1. If class name is NOT registered via `register_class()`, it's not possible to perform
+           lookup for bases classes.
+        2. If simple class name is provided and multiple classes of the same name but from
+           different modules have registered convertors, the first one found is used. If you
+           want to avoid this situation, use full names.
+    """
     return _get_convertor(cls) is not None
 
 def update_convertor(cls: Union[Type, str], *,
@@ -146,14 +146,14 @@ def update_convertor(cls: Union[Type, str], *,
                      from_str: TConvertFromStr=None):
     """Update convertor function(s).
 
-Arguments:
-    cls:      Class or class name
-    to_str:   Function that converts `cls` value to `str`
-    from_str: Function that converts `str` to value of `cls` data type
+    Arguments:
+        cls:      Class or class name
+        to_str:   Function that converts `cls` value to `str`
+        from_str: Function that converts `str` to value of `cls` data type
 
-Raises:
-    KeyError: If data type has not registered convertor.
-"""
+    Raises:
+        KeyError: If data type has not registered convertor.
+    """
     conv = get_convertor(cls)
     if to_str:
         conv.to_str = to_str
@@ -163,58 +163,58 @@ Raises:
 def convert_to_str(value: Any) -> str:
     """Converts value to string using registered convertor.
 
-Arguments:
-    value:  Value to be converted.
+    Arguments:
+        value:  Value to be converted.
 
-If there is no convertor for value's class, uses MRO to locate alternative convertor.
+    If there is no convertor for value's class, uses MRO to locate alternative convertor.
 
-Raises:
-    TypeError: If there is no convertor for value's class or any from its bases classes.
-"""
+    Raises:
+        TypeError: If there is no convertor for value's class or any from its bases classes.
+    """
     return get_convertor(value.__class__).to_str(value)
 
 
 def convert_from_str(cls: Union[Type, str], value: str) -> Any:
     """Converts value from string to data type using registered convertor.
 
-Arguments:
-    cls:   Type or type name. The name could be simple class name, or full name that includes
-           the module name.
-    value: String value to be converted
+    Arguments:
+        cls:   Type or type name. The name could be simple class name, or full name that includes
+               the module name.
+        value: String value to be converted
 
-Note:
-    When `cls` is a type name:
+    Note:
+        When `cls` is a type name:
 
-    1. If class name is NOT registered via `register_class()`, it's not possible to perform
-       lookup for bases classes.
-    2. If simple class name is provided and multiple classes of the same name but from
-       different modules have registered convertors, the first one found is used. If you
-       want to avoid this situation, use full names.
+        1. If class name is NOT registered via `register_class()`, it's not possible to perform
+           lookup for bases classes.
+        2. If simple class name is provided and multiple classes of the same name but from
+           different modules have registered convertors, the first one found is used. If you
+           want to avoid this situation, use full names.
 
-Raises:
-    TypeError: If there is no convertor for `cls` or any from its bases classes.
-"""
+    Raises:
+        TypeError: If there is no convertor for `cls` or any from its bases classes.
+    """
     return get_convertor(cls).from_str(cls, value)
 
 def get_convertor(cls: Union[Type, str]) -> Convertor:
     """Returns Convertor for data type.
 
-Arguments:
-    cls: Type or type name. The name could be simple class name, or full name that includes
-         the module name.
+    Arguments:
+        cls: Type or type name. The name could be simple class name, or full name that includes
+             the module name.
 
-Note:
-    When `cls` is a type name:
+    Note:
+        When `cls` is a type name:
 
-    1. If class name is NOT registered via `register_class()`, it's not possible to perform
-       lookup for bases classes.
-    2. If simple class name is provided and multiple classes of the same name but from
-       different modules have registered convertors, the first one found is used. If you
-       want to avoid this situation, use full names.
+        1. If class name is NOT registered via `register_class()`, it's not possible to perform
+           lookup for bases classes.
+        2. If simple class name is provided and multiple classes of the same name but from
+           different modules have registered convertors, the first one found is used. If you
+           want to avoid this situation, use full names.
 
-Raises:
-    TypeError: If there is no convertor for `cls` or any from its bases classes.
-"""
+    Raises:
+        TypeError: If there is no convertor for `cls` or any from its bases classes.
+    """
     if (conv := _get_convertor(cls)) is None:
         raise TypeError(f"Type '{cls.__name__ if isinstance(cls, type) else cls}' has no Convertor")
     return conv

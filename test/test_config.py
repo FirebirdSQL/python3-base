@@ -35,10 +35,13 @@
 "Firebird Base - Unit tests for firebird.base.config."
 
 from __future__ import annotations
-import unittest
+from unittest import TestCase, mock, main as unittest_main
 from uuid import UUID
 from decimal import Decimal
 import io
+import os
+import platform
+from pathlib import Path
 from enum import IntEnum, IntFlag, Flag, auto
 from dataclasses import dataclass
 from inspect import signature
@@ -99,7 +102,7 @@ def foo_func(value: int) -> int:
 def store_opt(d, o):
     d[o.name] = o
 
-class BaseConfigTest(unittest.TestCase):
+class BaseConfigTest(TestCase):
     "Base class for firebird.base.config unit tests"
     def setUp(self):
         self.proto: config.ConfigProto = config.ConfigProto()
@@ -223,7 +226,7 @@ option_name =
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -233,7 +236,7 @@ option_name =
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: uint64',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -553,7 +556,7 @@ option_name = bad_value
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -567,7 +570,7 @@ option_name = bad_value
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: bytes',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -722,7 +725,7 @@ option_name = bad_value
         opt.load_proto(self.proto)
         self.assertEqual(opt.value, Decimal('10'))
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -736,7 +739,7 @@ option_name = bad_value
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: float',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -892,7 +895,7 @@ option_name = bad_value
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -902,7 +905,7 @@ option_name = bad_value
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Value is not a valid bool string constant',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -1088,7 +1091,7 @@ option_name = 1000
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -1098,7 +1101,7 @@ option_name = 1000
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: uint32',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -1307,7 +1310,7 @@ option_name = 1000
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -1322,7 +1325,7 @@ option_name = 1000
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ("Illegal value 'SimpleIntFlag.512|256|128|64|32|FOUR' for flag option 'option_name'",))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -1499,7 +1502,7 @@ option_name = BAD_UID
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -1509,7 +1512,7 @@ option_name = BAD_UID
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: uint32',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -1708,7 +1711,7 @@ option_name = text/plain;charset/utf-8
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -1718,7 +1721,7 @@ option_name = text/plain;charset/utf-8
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: uint32',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -1869,7 +1872,7 @@ option_name = bad_value
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -1883,7 +1886,7 @@ option_name = bad_value
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: uint64',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -2056,7 +2059,7 @@ option_name =
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -2066,7 +2069,7 @@ option_name =
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: uint32',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -2481,7 +2484,7 @@ option_name = This is not a valid Python expression
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -2491,7 +2494,7 @@ option_name = This is not a valid Python expression
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: uint32',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -2830,7 +2833,7 @@ option_name =
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -2839,7 +2842,7 @@ option_name =
         with self.assertRaises(TypeError):
             opt.load_proto(self.proto)
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -3012,7 +3015,7 @@ option_name = 1000
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -3022,7 +3025,7 @@ option_name = 1000
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: uint32',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
@@ -3383,8 +3386,50 @@ database = secondary
 password = masterkey"""
         self.assertEqual('\n'.join(x.strip() for x in cfg.get_config().splitlines()), lines)
 
+class TestApplicationDirScheme(BaseConfigTest):
+    "Unit tests for firebird.base.config.ApplicationDirectoryScheme"
+    _pd = 'c:\\ProgramData'
+    _ap = 'C:\\Users\\username\\AppData'
+    _lap = 'C:\\Users\\username\\AppData\\Local'
+    app_name = 'test_app'
+    def setUp(self):
+        super().setUp()
+    @mock.patch.dict(os.environ, {'%PROGRAMDATA%': _pd,
+                                  '%LOCALAPPDATA%': _lap,
+                                  '%APPDATA%': _ap})
+    def test_01_widnows(self):
+        if platform.system() != 'Windows':
+            self.skipTest("Only for Windows")
+        scheme = config.get_directory_scheme('Windows', self.app_name)
+        self.assertEqual(scheme.config, Path('c:\\ProgramData\\test_app\\config'))
+        self.assertEqual(scheme.run_data, Path('c:\\ProgramData\\test_app\\run'))
+        self.assertEqual(scheme.logs, Path('c:\\ProgramData\\test_app\\log'))
+        self.assertEqual(scheme.data, Path('c:\\ProgramData\\test_app\\data'))
+        self.assertEqual(scheme.tmp, Path('c:\\ProgramData\\test_app\\tmp'))
+        self.assertEqual(scheme.cache, Path('c:\\ProgramData\\test_app\\cache'))
+        self.assertEqual(scheme.srv, Path('c:\\ProgramData\\test_app\\srv'))
+        self.assertEqual(scheme.user_config, Path('C:\\Users\\username\\AppData\\Local\\test_app\\config'))
+        self.assertEqual(scheme.user_data, Path('C:\\Users\\username\\AppData\\Local\\test_app\\data'))
+        self.assertEqual(scheme.user_sync, Path('C:\\Users\\username\\AppData\\test_app'))
+        self.assertEqual(scheme.user_cache, Path('C:\\Users\\username\\AppData\\Local\\test_app\\cache'))
+    def test_02_linux(self):
+        if platform.system() != 'Linux':
+            self.skipTest("Only for Linux")
+        scheme = config.get_directory_scheme('Linux', self.app_name)
+        self.assertEqual(scheme.config, Path('/etc/test_app'))
+        self.assertEqual(scheme.run_data, Path('/run/test_app'))
+        self.assertEqual(scheme.logs, Path('/var/log/test_app'))
+        self.assertEqual(scheme.data, Path('/var/lib/test_app'))
+        self.assertEqual(scheme.tmp, Path('/var/tmp/test_app'))
+        self.assertEqual(scheme.cache, Path('/var/cache/test_app'))
+        self.assertEqual(scheme.srv, Path('/srv/test_app'))
+        self.assertEqual(scheme.user_config, Path('~/.config/test_app'))
+        self.assertEqual(scheme.user_data, Path('~/.local/share/test_app'))
+        self.assertEqual(scheme.user_sync, Path('~/.local/sync/test_app'))
+        self.assertEqual(scheme.user_cache, Path('~/.cache/test_app'))
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest_main()
 
 #class TestFloatOption(BaseConfigTest):
     #"Unit tests for firebird.base.config.FloatOption"

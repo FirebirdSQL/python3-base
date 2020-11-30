@@ -178,3 +178,7 @@ CachedDistinctMeta
 Conjunctive
 -----------
 .. autofunction:: Conjunctive
+
+load
+----
+.. autofunction:: load

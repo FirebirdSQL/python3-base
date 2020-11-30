@@ -37,6 +37,8 @@
 from __future__ import annotations
 from typing import Any, Dict, Hashable, Callable, AnyStr, cast
 from abc import ABC, ABCMeta, abstractmethod
+import sys
+from importlib import import_module
 from enum import Enum, IntEnum
 from weakref import WeakValueDictionary
 
@@ -44,15 +46,14 @@ from weakref import WeakValueDictionary
 
 class Error(Exception):
     """Exception that is intended to be used as a base class of all **application-related**
-errors. The important difference from `Exception` class is that `Error` accepts keyword
-arguments, that are stored into instance attributes with the same name.
+    errors. The important difference from `Exception` class is that `Error` accepts keyword
+    arguments, that are stored into instance attributes with the same name.
 
-Important:
-    Attribute lookup on this class never fails, as all attributes that are not actually set,
-    have `None` value.
+    Important:
+        Attribute lookup on this class never fails, as all attributes that are not actually
+        set, have `None` value.
 
-Example:
-    .. code-block:: python
+    Example::
 
         try:
             if condition:
@@ -65,9 +66,9 @@ Example:
             elif e.err_code == 1:
                 ...
 
-Note:
-    Warnings are not considered errors and thus should not use this class as base.
-"""
+    Note:
+        Warnings are not considered errors and thus should not use this class as base.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
         for name, value in kwargs.items():
@@ -82,10 +83,10 @@ _singletons_ = {}
 class SingletonMeta(type):
     """Metaclass for `Singleton` classes.
 
-Manages internal cache of class instances. If instance for a class is in cache, it's returned
-without calling the constructor, otherwise the instance is created normally and stored in
-cache for later use.
-"""
+    Manages internal cache of class instances. If instance for a class is in cache, it's
+    returned without calling the constructor, otherwise the instance is created normally
+    and stored in cache for later use.
+    """
     def __call__(cls: Singleton, *args, **kwargs):
         name = f"{cls.__module__}.{cls.__qualname__}"
         obj = _singletons_.get(name)
@@ -97,11 +98,11 @@ cache for later use.
 class Singleton(metaclass=SingletonMeta):
     """Base class for singletons.
 
-Important:
-    If you create a descendant class that uses constructor arguments, these arguments are
-    meaningful ONLY on first call, because all subsequent calls simply return an instance
-    stored in cache without calling the constructor.
-"""
+    Important:
+        If you create a descendant class that uses constructor arguments, these arguments
+        are meaningful ONLY on first call, because all subsequent calls simply return
+        an instance stored in cache without calling the constructor.
+    """
 
 # Sentinels
 
@@ -118,16 +119,18 @@ class SentinelMeta(type):
 class Sentinel(metaclass=SentinelMeta):
     """Simple sentinel object.
 
-Important:
-  All sentinels have name, that is **always in capital letters**. Sentinels with the same
-  name are singletons.
-
-Attributes:
-    name (str): Sentinel name.
-"""
+    Important:
+      All sentinels have name, that is **always in capital letters**. Sentinels with
+      the same name are singletons.
+    """
     #: Class attribute with defined sentinels. There is no need to access or manipulate it.
     instances = {}
     def __init__(self, name: str):
+        """
+        Arguments:
+            name: Sentinel name.
+        """
+        #: Sentinel name.
         self.name = name.upper()
     def __str__(self):
         "Returns name"
@@ -162,23 +165,23 @@ RESUME: Sentinel = Sentinel('RESUME')
 STOP: Sentinel = Sentinel('STOP')
 
 # Distinct objects
-
 class Distinct(ABC):
     """Abstract base class for classes (incl. dataclasses) with distinct instances.
-"""
+    """
     @abstractmethod
     def get_key(self) -> Hashable:
         """Returns instance key.
 
-Important:
-    The key is used for instance hash computation that by default uses the `hash`
-    function. If the key is not suitable argument for `hash`, you must provide your
-    own `__hash__` implementation as well!
-"""
+        Important:
+            The key is used for instance hash computation that by default uses the `hash`
+            function. If the key is not suitable argument for `hash`, you must provide your
+            own `__hash__` implementation as well!
+        """
     __hash__ = lambda self: hash(self.get_key())
 
 class CachedDistinctMeta(ABCMeta):
-    "Metaclass for CachedDistinct."
+    """Metaclass for CachedDistinct.
+    """
     def __call__(cls: CachedDistinct, *args, **kwargs):
         key = cls.extract_key(*args, **kwargs)
         obj = cls._instances_.get(key)
@@ -190,8 +193,8 @@ class CachedDistinctMeta(ABCMeta):
 class CachedDistinct(Distinct, metaclass=CachedDistinctMeta):
     """Abstract `Distinct` descendant that caches instances.
 
-All created instances are cached in `~weakref.WeakValueDictionary`.
-"""
+    All created instances are cached in `~weakref.WeakValueDictionary`.
+    """
     def __init_subclass__(cls: Type, /, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         setattr(cls, '_instances_', WeakValueDictionary())
@@ -200,21 +203,20 @@ All created instances are cached in `~weakref.WeakValueDictionary`.
     def extract_key(cls, *args, **kwargs) -> Hashable:
         """Returns key from arguments passed to `__init__()`.
 
-Important:
-    The key is used to store instance in cache. It should be the same as key returned by
-    instance `Distinct.get_key()`!
-"""
+        Important:
+            The key is used to store instance in cache. It should be the same as key
+            returned by instance `Distinct.get_key()`!
+        """
 
 # Enums
-
 class ByteOrder(Enum):
-    "Byte order for storing numbers in binary `.MemoryBuffer`."
+    """Byte order for storing numbers in binary `.MemoryBuffer`."""
     LITTLE = 'little'
     BIG = 'big'
     NETWORK = BIG
 
 class ZMQTransport(IntEnum):
-    """ZeroMQ transport protocol"""
+    """ZeroMQ transport protocol."""
     UNKNOWN = 0 # Not a valid option, defined only to handle undefined values
     INPROC = 1
     IPC = 2
@@ -224,23 +226,22 @@ class ZMQTransport(IntEnum):
     VMCI = 6
 
 class ZMQDomain(IntEnum):
-    """ZeroMQ address domain"""
+    """ZeroMQ address domain."""
     UNKNOWN = 0  # Not a valid option, defined only to handle undefined values
     LOCAL = 1    # Within process (inproc)
     NODE = 2     # On single node (ipc or tcp loopback)
     NETWORK = 3  # Network-wide (ip address or domain name)
 
 # Enhanced string types
-
 class ZMQAddress(str):
     """ZeroMQ endpoint address.
 
-It behaves like `str`, but checks that value is valid ZMQ endpoint address, has
-additional R/O properties and meaningful `repr()`.
+    It behaves like `str`, but checks that value is valid ZMQ endpoint address, has
+    additional R/O properties and meaningful `repr()`.
 
-Raises:
-    ValueError: When string value passed to constructor is not a valid ZMQ endpoint address.
-"""
+    Raises:
+        ValueError: When string value passed to constructor is not a valid ZMQ endpoint address.
+    """
     def __new__(cls, value: AnyStr):
         if isinstance(value, bytes):
             value = cast(bytes, value).decode('utf8')
@@ -257,17 +258,17 @@ Raises:
         return f"ZMQAddress('{self}')"
     @property
     def protocol(self) -> ZMQTransport:
-        "Transport protocol"
+        "Transport protocol."
         protocol, _ = self.split('://', 1)
         return ZMQTransport._member_map_[protocol.upper()]
     @property
     def address(self) -> str:
-        "Address"
+        "Endpoint address."
         _, address = self.split('://', 1)
         return address
     @property
     def domain(self) -> ZMQDomain:
-        "Address domain"
+        "Endpoint address domain."
         if self.protocol == ZMQTransport.INPROC:
             return ZMQDomain.LOCAL
         if self.protocol == ZMQTransport.IPC:
@@ -282,10 +283,10 @@ Raises:
 class MIME(str):
     """MIME type specification.
 
-It behaves like `str`, but checks that value is valid MIME type specification, has
-additional R/O properties and meaningful `repr()`.
+    It behaves like `str`, but checks that value is valid MIME type specification, has
+    additional R/O properties and meaningful `repr()`.
 
-"""
+    """
     #: Supported MIME types
     MIME_TYPES = ['text', 'image', 'audio', 'video', 'application', 'multipart', 'message']
     def __new__(cls, value: AnyStr):
@@ -297,41 +298,45 @@ additional R/O properties and meaningful `repr()`.
             raise ValueError(f"MIME type '{mime_type[:i]}' not supported")
         if [i for i in dfm if '=' not in i]:
             raise ValueError("Wrong specification of MIME type parameters")
-        return str.__new__(cls, value)
+        obj = str.__new__(cls, value)
+        obj._bs_: int = obj.find('/')
+        obj._fp_: int = obj.find(';')
+        return obj
     def __repr__(self):
         return f"MIME('{self}')"
     @property
     def mime_type(self) -> str:
-        "MIME type specification: <type>/<subtype>"
-        if ';' in self:
-            return self[:self.find(';')]
+        "MIME type specification: <type>/<subtype>."
+        if self._fp_ != -1:
+            return self[:self._fp_]
         return self
     @property
     def type(self) -> str:
-        "MIME type"
-        return self[:self.find('/')]
+        "MIME type."
+        return self[:self._bs_]
     @property
     def subtype(self) -> str:
-        "MIME subtype"
-        if ';' in self:
-            return self[self.find('/')+1:self.find(';')]
-        return self[self.find('/')+1]
+        "MIME subtype."
+        if self._fp_ != -1:
+            return self[self._bs_ + 1:self._fp_]
+        return self[self._bs_ + 1:]
     @property
     def params(self) -> Dict[str, str]:
-        "MIME parameters"
-        if ';' in self:
-            return {k.strip(): v.strip() for k, v in (x.split('=') for x in self[self.find(';')+1:].split(';'))}
+        "MIME parameters."
+        if self._fp_ != -1:
+            return {k.strip(): v.strip() for k, v
+                    in (x.split('=') for x in self[self._fp_+1:].split(';'))}
         return {}
 
 class PyExpr(str):
     """Source code for Python expression.
 
-It behaves like `str`, but checks that value is a valid Python expression, and provides
-direct access to compiled code.
+    It behaves like `str`, but checks that value is a valid Python expression, and provides
+    direct access to compiled code.
 
-Raises:
-    SyntaxError: When string value is not a valid Python expression.
-"""
+    Raises:
+        SyntaxError: When string value is not a valid Python expression.
+    """
     _expr_ = None
     def __new__(cls, value: str):
         expr = compile(value, "PyExpr", 'eval')
@@ -343,9 +348,10 @@ Raises:
     def get_callable(self, arguments: str='', namespace: Dict[str, Any]=None) -> Callable:
         """Returns expression as callable function ready for execution.
 
-Arguments:
-    arguments: String with arguments (names separated by coma) for returned function.
-"""
+        Arguments:
+            arguments: String with arguments (names separated by coma) for returned function.
+            namespace: Dictionary with namespace elements available for expression.
+        """
         ns = {}
         if namespace:
             ns.update(namespace)
@@ -361,12 +367,12 @@ Arguments:
 class PyCode(str):
     """Python source code.
 
-It behaves like `str`, but checks that value is a valid Python code block, and provides
-direct access to compiled code.
+    It behaves like `str`, but checks that value is a valid Python code block, and provides
+    direct access to compiled code.
 
-Raises:
-    SyntaxError: When string value is not a valid Python code block.
-"""
+    Raises:
+        SyntaxError: When string value is not a valid Python code block.
+    """
     _code_ = None
     def __new__(cls, value: str):
         code = compile(value, "PyCode", 'exec')
@@ -381,14 +387,16 @@ Raises:
 class PyCallable(str):
     """Source code for Python callable.
 
-It behaves like `str`, but checks that value is a valid Python callable (function of class
-definition), and acts like a callable (i.e. you can directly call the PyCallable value).
+    It behaves like `str`, but checks that value is a valid Python callable (function of class
+    definition), and acts like a callable (i.e. you can directly call the PyCallable value).
 
-Raises:
-    ValueError: When string value does not contains the function or class definition.
-    SyntaxError: When string value is not a valid Python callable.
-"""
+    Raises:
+        ValueError: When string value does not contains the function or class definition.
+        SyntaxError: When string value is not a valid Python callable.
+    """
     _callable_ = None
+    #: Name of the callable (function).
+    name: str = None
     def __new__(cls, value: str):
         callable_name = None
         for line in value.split('\n'):
@@ -412,23 +420,22 @@ Raises:
         return self._callable_(*args, **kwargs)
 
 # Metaclasses
-
 def Conjunctive(name, bases, attrs):
     """Returns a metaclass that is conjunctive descendant of all metaclasses used by parent
-classes.
+    classes.
 
-Example:
+    Example:
 
-    class A(type): pass
+        class A(type): pass
 
-    class B(type): pass
+        class B(type): pass
 
-    class AA(metaclass=A):pass
+        class AA(metaclass=A):pass
 
-    class BB(metaclass=B):pass
+        class BB(metaclass=B):pass
 
-    class CC(AA, BB, metaclass=Conjunctive): pass
-"""
+        class CC(AA, BB, metaclass=Conjunctive): pass
+    """
     basemetaclasses = []
     for base in bases:
         metacls = type(base)
@@ -436,3 +443,18 @@ Example:
             basemetaclasses.append(metacls)
     dynamic = type(''.join(b.__name__ for b in basemetaclasses), tuple(basemetaclasses), {})
     return dynamic(name, bases, attrs)
+
+# Functions
+def load(spec: str) -> Any:
+    """Return object from module. Module is imported if necessary.
+
+    Arguments:
+        spec: Object specification in format `module[.submodule.[submodule...]]:object_name`
+
+    """
+    module_spec, name = spec.split(':')
+    if module_spec in sys.modules:
+        module = sys.modules[module_spec]
+    else:
+        module = import_module(module_spec)
+    return getattr(module, name)

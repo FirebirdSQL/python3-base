@@ -45,18 +45,21 @@ that supports:
 """
 
 from __future__ import annotations
-from typing import Generic, Type, Any, List, Dict, Union, Sequence, Optional, TypeVar, cast, get_type_hints
+from typing import Generic, Type, Any, List, Dict, Union, Sequence, Callable, Optional, \
+     TypeVar, cast, get_type_hints
 from abc import ABC, abstractmethod
 from uuid import UUID
 from decimal import Decimal, DecimalException
-from configparser import ConfigParser
+from configparser import ConfigParser, DEFAULTSECT
 from inspect import signature, Signature, Parameter
 from enum import Enum, Flag, _decompose
+from pathlib import Path
+import os
 from .config_pb2 import ConfigProto
 from .types import Error, MIME, ZMQAddress, PyExpr, PyCode, PyCallable
 from .strconv import get_convertor, convert_to_str, Convertor
 
-# Functions
+PROTO_CONFIG = 'firebird.base.ConfigProto'
 
 def unindent_verticals(value: str) -> str:
     lines = []
@@ -73,44 +76,283 @@ def unindent_verticals(value: str) -> str:
 def _eq(a: Any, b: Any) -> bool:
     return str(a) == str(b)
 
-def create_config(_cls: Type[Config], name: str, description: str) -> Config: # pragma: no cover
+def create_config(_cls: Type[Config], name: str) -> Config: # pragma: no cover
     """Return newly created `Config` instance. Intended to be used with `functools.partial`.
-"""
-    return _cls(name, description)
+    """
+    return _cls(name)
 
 
+class ApplicationDirectoryScheme(ABC):
+    """Abstract base classes to provide paths to typically used directories that conform
+    to chosen directory scheme.
 
-# Base classes
+    Note:
+        You may use `platform.system` call to determine the scheme name suitable
+        for platform where your application is running.
+    """
+    @abstractmethod
+    def __init__(self, app_name: str):
+        """
+        Arguments:
+            app_name: Appplication name to be used as HOME directory.
+        """
+    @property
+    @abstractmethod
+    def config(self) -> Path:
+        """Directory for host-specific system-wide configuration files.
+        """
+    @property
+    @abstractmethod
+    def run_data(self) -> Path:
+        """Directory for run-time variable data that may not persist over boot.
+        """
+    @property
+    @abstractmethod
+    def logs(self) -> Path:
+        """Directory for log files.
+        """
+    @property
+    @abstractmethod
+    def data(self) -> Path:
+        """Directory for state information / persistent data modified by application as
+        it runs.
+        """
+    @property
+    @abstractmethod
+    def tmp(self) -> Path:
+        """Directory for temporary files to be preserved between reboots.
+        """
+    @property
+    @abstractmethod
+    def cache(self) -> Path:
+        """Directory for application cache data.
+
+        Such data are locally generated as a result of time-consuming I/O or calculation.
+        The application must be able to regenerate or restore the data. The cached files
+        can be deleted without loss of data.
+        """
+    @property
+    @abstractmethod
+    def srv(self) -> Path:
+        """Directory for site-specific data served by this system, such as data and
+        scripts for web servers, data offered by FTP servers, and repositories for
+        version control systems etc.
+        """
+    @property
+    @abstractmethod
+    def user_config(self) -> Path:
+        """Directory for user-specific configuration.
+        """
+    @property
+    @abstractmethod
+    def user_data(self) -> Path:
+        """Directory for User local data.
+        """
+    @property
+    @abstractmethod
+    def user_sync(self) -> Path:
+        """Directory for user data synced accross systems (roaming).
+        """
+    @property
+    @abstractmethod
+    def user_cache(self) -> Path:
+        """Directory for user-specific application cache data.
+        """
+
+class _WindowsDirectoryScheme(ApplicationDirectoryScheme):
+    """Provides paths to typically used directories that conform to Windows standards.
+    """
+    def __init__(self, app_name: str):
+        """
+        Arguments:
+            name: Appplication name to be used as HOME directory.
+            scheme: Name of directory scheme.
+        """
+        self.name: str = app_name
+        self.__pd: Path = Path(os.path.expandvars('%PROGRAMDATA%'))
+        self.__lad: Path = Path(os.path.expandvars('%LOCALAPPDATA%'))
+        self.__ad: Path = Path(os.path.expandvars('%APPDATA%'))
+    @property
+    def config(self) -> Path:
+        """Directory for host-specific system-wide configuration files.
+        """
+        return self.__pd / self.name / 'config'
+    @property
+    def run_data(self) -> Path:
+        """Directory for run-time variable data that may not persist over boot.
+        """
+        return self.__pd / self.name / 'run'
+    @property
+    def logs(self) -> Path:
+        """Directory for log files.
+        """
+        return self.__pd / self.name / 'log'
+    @property
+    def data(self) -> Path:
+        """Directory for state information / persistent data modified by application as
+        it runs.
+        """
+        return self.__pd / self.name / 'data'
+    @property
+    def tmp(self) -> Path:
+        """Directory for temporary files to be preserved between reboots.
+        """
+        return self.__pd / self.name / 'tmp'
+    @property
+    def cache(self) -> Path:
+        """Directory for application cache data.
+
+        Such data are locally generated as a result of time-consuming I/O or calculation.
+        The application must be able to regenerate or restore the data. The cached files
+        can be deleted without loss of data.
+        """
+        return self.__pd / self.name / 'cache'
+    @property
+    def srv(self) -> Path:
+        """Directory for site-specific data served by this system, such as data and
+        scripts for web servers, data offered by FTP servers, and repositories for
+        version control systems etc.
+        """
+        return self.__pd / self.name / 'srv'
+    @property
+    def user_config(self) -> Path:
+        """Directory for user-specific configuration.
+        """
+        return self.__lad / self.name / 'config'
+    @property
+    def user_data(self) -> Path:
+        """Directory for User local data.
+        """
+        return self.__lad / self.name / 'data'
+    @property
+    def user_sync(self) -> Path:
+        """Directory for user data synced accross systems (roaming).
+        """
+        return self.__ad / self.name
+    @property
+    def user_cache(self) -> Path:
+        """Directory for user-specific application cache data.
+        """
+        return self.__lad / self.name / 'cache'
+
+class _LinuxDirectoryScheme(ApplicationDirectoryScheme):
+    """Provides paths to typically used directories that conform to Linux standards.
+    """
+    def __init__(self, app_name: str):
+        """
+        Arguments:
+            name: Appplication name to be used as HOME directory.
+            scheme: Name of directory scheme.
+        """
+        self.name: str = app_name
+    @property
+    def config(self) -> Path:
+        """Directory for host-specific system-wide configuration files.
+        """
+        return Path('/etc') / self.name
+    @property
+    def run_data(self) -> Path:
+        """Directory for run-time variable data that may not persist over boot.
+        """
+        return Path('/run') / self.name
+    @property
+    def logs(self) -> Path:
+        """Directory for log files.
+        """
+        return Path('/var/log') / self.name
+    @property
+    def data(self) -> Path:
+        """Directory for state information / persistent data modified by application as
+        it runs.
+        """
+        return Path('/var/lib') / self.name
+    @property
+    def tmp(self) -> Path:
+        """Directory for temporary files to be preserved between reboots.
+        """
+        return Path('/var/tmp') / self.name
+    @property
+    def cache(self) -> Path:
+        """Directory for application cache data.
+
+        Such data are locally generated as a result of time-consuming I/O or calculation.
+        The application must be able to regenerate or restore the data. The cached files
+        can be deleted without loss of data.
+        """
+        return Path('/var/cache') / self.name
+    @property
+    def srv(self) -> Path:
+        """Directory for site-specific data served by this system, such as data and
+        scripts for web servers, data offered by FTP servers, and repositories for
+        version control systems etc.
+        """
+        return Path('/srv') / self.name
+    @property
+    def user_config(self) -> Path:
+        """Directory for user-specific configuration.
+        """
+        return Path('~/.config') / self.name
+    @property
+    def user_data(self) -> Path:
+        """Directory for User local data.
+        """
+        return Path('~/.local/share') / self.name
+    @property
+    def user_sync(self) -> Path:
+        """Directory for user data synced accross systems (roaming).
+        """
+        return Path('~/.local/sync') / self.name
+    @property
+    def user_cache(self) -> Path:
+        """Directory for user-specific application cache data.
+        """
+        return Path('~/.cache') / self.name
+
+def get_directory_scheme(name: str, app_name: str) -> ApplicationDirectoryScheme:
+    """Returns new `ApplicationDirectoryScheme` instance suitable for specified platform.
+
+    Arguments:
+        name: Name of Application Directory Scheme.
+        app_name: Appplication name to be used as HOME directory.
+
+    Raises:
+        ValueError: For unknown directory scheme.
+    """
+    if name == 'Windows':
+        return _WindowsDirectoryScheme(app_name)
+    elif name == 'Linux':
+        return _LinuxDirectoryScheme(app_name)
+    else:
+        raise ValueError(f"Unknown directory scheme '{name}'")
 
 T = TypeVar('T')
 
 class Option(Generic[T], ABC):
     """Generic abstract base class for configuration options.
-
-Arguments:
-    name: Option name.
-    datatype: Option datatype.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-
-Attributes:
-    name (str): Option name.
-    datatype (type): Option datatype.
-    description (str): Option description. Can span multiple lines.
-    required (bool): True if option must have a value.
-    default (instance of [T]): Default option value.
-"""
+    """
     def __init__(self, name: str, datatype: T, description: str, required: bool=False,
                  default: T=None):
+        """
+        Arguments:
+            name: Option name.
+            datatype: Option datatype.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         assert name and isinstance(name, str), "name required"
         assert datatype and isinstance(datatype, type), "datatype required"
         assert description and isinstance(description, str), "description required"
         assert default is None or isinstance(default, datatype), "default has wrong data type"
+        #: Option name.
         self.name: str = name
+        #: Option datatype.
         self.datatype: T = datatype
+        #: Option description. Can span multiple lines.
         self.description: str = description
+        #: True if option must have a value.
         self.required: bool = required
+        #: Default option value.
         self.default: T = default
         if default is not None:
             self.set_value(default)
@@ -123,14 +365,14 @@ Attributes:
                             f" not '{type(value).__name__}'")
     def _get_config_lines(self) -> List[str]:
         """Returns list of strings containing text lines suitable for use in configuration
-file processed with `~configparser.ConfigParser`.
+        file processed with `~configparser.ConfigParser`.
 
-Text lines with configuration start with comment marker `;` and end with newline.
+        Text lines with configuration start with comment marker `;` and end with newline.
 
-Note:
-   This function is intended for internal use. To get string describing current
-   configuration that is suitable for configuration files, use `get_config` method.
-"""
+        Note:
+           This function is intended for internal use. To get string describing current
+           configuration that is suitable for configuration files, use `get_config` method.
+        """
         lines = [f"; {self.name}\n",
                  f"; {'-' * len(self.name)}\n",
                  ";\n",
@@ -156,131 +398,136 @@ Note:
     def load_config(self, config: ConfigParser, section: str) -> None:
         """Update option value from `~configparser.ConfigParser` instance.
 
-Arguments:
-    config:  ConfigParser instance.
-    section: Name of ConfigParser section that should be used to get new option value.
+        Arguments:
+            config:  ConfigParser instance.
+            section: Name of ConfigParser section that should be used to get new option
+               value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
-        if self.name in config[section]:
+        Raises:
+            ValueError: When option value cannot be loadded.
+            KeyError: If section does not exists, and it's not `configparser.DEFAULTSECT`.
+        """
+        if not config.has_section(section) and section != DEFAULTSECT:
+            raise KeyError(f"Configuration error: section '{section}' not found!")
+        if config.has_option(section, self.name):
             self.set_as_str(config[section][self.name])
     def validate(self) -> None:
         """Validates option state.
 
-Raises:
-    Error: When required option does not have a value.
-"""
+        Raises:
+            Error: When required option does not have a value.
+        """
         if self.required and self.get_value() is None:
             raise Error(f"Missing value for required option '{self.name}'")
     def get_config(self) -> str:
         """Returns string containing text lines suitable for use in configuration file
-processed with `~configparser.ConfigParser`.
+        processed with `~configparser.ConfigParser`.
 
-Text lines with configuration start with comment marker ; and end with newline.
-"""
+        Text lines with configuration start with comment marker ; and end with newline.
+        """
         return ''.join(self._get_config_lines())
     @abstractmethod
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
     @abstractmethod
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
     @abstractmethod
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
     @abstractmethod
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
     @abstractmethod
     def get_value(self) -> T:
-        "Return current option value"
+        "Return current option value."
     @abstractmethod
     def set_value(self, value: T) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
     @abstractmethod
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
     @abstractmethod
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
 
 class Config:
     """Collection of configuration options.
 
-Arguments:
-    name: Name associated with Config (default section name).
-
-Important:
-    Descendants must define individual options and sub configs as instance attributes.
-"""
+    Important:
+        Descendants must define individual options and sub configs as instance attributes.
+    """
     def __init__(self, name: str):
+        """
+        Arguments:
+            name: Name associated with Config (default section name).
+        """
         self._name: str = name
     def validate(self) -> None:
         """Checks whether:
-    - all required options have value other than None.
-    - all options are defined as config attribute with the same name as option name
+            - all required options have value other than None.
+            - all options are defined as config attribute with the same name as option name
 
-Raises exception when any constraint required by configuration is violated.
-"""
+        Raises exception when any constraint required by configuration is violated.
+        """
         for option in self.options:
             option.validate()
             if not hasattr(self, option.name):
                 raise Error(f"Option '{option.name}' is not defined as "
                             f"attribute with the same name")
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears all owned options and options in owned sub-configs.
 
-Arguments:
-    to_default: If True, sets the option values to defaults, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option values to defaults, else to None.
+        """
         for option in self.options:
-            option.clear(to_default)
+            option.clear(to_default=to_default)
         for config in self.configs:
-            config.clear(to_default)
+            config.clear(to_default=to_default)
     def get_description(self) -> str:
         """Configuration description. Can span multiple lines.
 
-Note:  Default implementation returns class doc string.
-"""
+        Note:  Default implementation returns class doc string.
+        """
         return self.__doc__
     def get_config(self) -> str:
         """Returns string containing text lines suitable for use in configuration file
-processed with `~configparser.ConfigParser`.
+        processed with `~configparser.ConfigParser`.
 
-Text lines with configuration start with comment marker ; and end with newline.
-"""
+        Text lines with configuration start with comment marker ; and end with newline.
+        """
         lines = [f'[{self.name}]\n', ';\n']
         for line in self.get_description().splitlines():
             lines.append(f"; {line}\n")
@@ -295,26 +542,34 @@ Text lines with configuration start with comment marker ; and end with newline.
     def load_config(self, config: ConfigParser, section: str=None) -> None:
         """Update configuration.
 
-Arguments:
-    config:  ConfigParser instance with configuration values.
-    section: Name of ConfigParser section that should be used to get new configuration
-             values. If not provided, uses `name`.
-"""
+        Arguments:
+            config:  ConfigParser instance with configuration values.
+            section: Name of ConfigParser section that should be used to get new
+                     configuration values. If not provided, uses `name`.
+
+        Raises:
+            ValueError: When any option value cannot be loadded.
+            KeyError: If section does not exists, and it's not `configparser.DEFAULTSECT`.
+        """
         if section is None:
             section = self.name
+        if not config.has_section(section) and section != DEFAULTSECT:
+            raise Error(f"Configuration error: section '{section}' not found!")
         try:
             for option in self.options:
                 option.load_config(config, section)
             for subcfg in self.configs:
                 subcfg.load_config(config)
+        except Error:
+            raise
         except Exception as exc: # pragma: no cover
             raise Error(f"Configuration error: {exc}") from exc
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains option values and sub-configs.
-"""
+        Arguments:
+            proto: Protobuf message that may contains option values and sub-configs.
+        """
         for option in self.options:
             option.load_proto(proto)
         for subcfg in self.configs:
@@ -323,9 +578,9 @@ Arguments:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option values and sub-configs should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option values and sub-configs should be stored.
+        """
         for option in self.options:
             option.save_proto(proto)
         for subcfg in self.configs:
@@ -341,9 +596,9 @@ Arguments:
     @property
     def configs(self) -> List[Config]:
         """List of sub-Configs defined for this Config instance. It includes all instance
-attributes of `Config` type, and `Config` values of owned `ConfigOption` and `ConfigListOption`
-instances.
-"""
+        attributes of `Config` type, and `Config` values of owned `ConfigOption` and
+        `ConfigListOption` instances.
+        """
         result = [v if isinstance(v, Config) else v.value
                   for v in vars(self).values() if isinstance(v, (Config, ConfigOption))]
         for opt in (v for v in vars(self).values() if isinstance(v, ConfigListOption)):
@@ -351,28 +606,28 @@ instances.
         return result
 
 # Options
-
 class StrOption(Option[str]):
     """Configuration option with string value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False, default: str=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         self._value: str = None
         super().__init__(name, str, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         if self._value is None:
             return '<UNDEFINED>'
         result = self._value
@@ -388,41 +643,41 @@ Arguments:
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         self._value = value
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return self._value
     def get_value(self) -> str:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: str) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -432,67 +687,68 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: str = property(get_value, set_value)
+    value: str = property(get_value, set_value, doc="Current option value")
 
 class IntOption(Option[int]):
     """Configuration option with integer value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-    signed: When False, the option value cannot be negative.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: int=None, signed: bool=False):
+        """
+    Arguments:
+        name: Option name.
+        description: Option description. Can span multiple lines.
+        required: True if option must have a value.
+        default: Default option value.
+        signed: When False, the option value cannot be negative.
+        """
         self._value: int = None
         self.__signed: bool = signed
         super().__init__(name, int, description, required, default)
     def clear(self, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         return '<UNDEFINED>' if self._value is None else str(self._value)
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         new = int(value)
         if not self.__signed and new < 0:
             raise ValueError("Negative numbers not allowed")
         self._value = new
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return str(self._value)
     def get_value(self) -> int:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: int) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         if value is not None and (not self.__signed and value < 0):
             raise ValueError("Negative numbers not allowed")
@@ -500,14 +756,13 @@ Raises:
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
-
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             oneof = opt.WhichOneof('kind')
@@ -520,78 +775,78 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             opt = proto.options[self.name]
             if self.__signed:
                 opt.as_sint64 = self._value
             else:
                 opt.as_uint64 = self._value
-    value: int = property(get_value, set_value)
+    value: int = property(get_value, set_value, doc="Current option value")
 
 class FloatOption(Option[float]):
     """Configuration option with float value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False, default: float=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         self._value: float = None
         super().__init__(name, float, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         return '<UNDEFINED>' if self._value is None else str(self._value)
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         self._value = float(value)
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return str(self._value)
     def get_value(self) -> float:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: float) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
-
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             oneof = opt.WhichOneof('kind')
@@ -604,77 +859,77 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_double = self._value
-    value: float = property(get_value, set_value)
+    value: float = property(get_value, set_value, doc="Current option value")
 
 class DecimalOption(Option[Decimal]):
     """Configuration option with decimal.Decimal value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False, default: Decimal=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         self._value: Decimal = None
         super().__init__(name, Decimal, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         return '<UNDEFINED>' if self._value is None else str(self._value)
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         try:
             self._value = Decimal(value)
         except DecimalException as exc:
             raise ValueError(str(exc))
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return str(self._value)
     def get_value(self) -> Decimal:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: Decimal) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto):
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
-
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             oneof = opt.WhichOneof('kind')
@@ -687,76 +942,77 @@ Raises:
     def save_proto(self, proto: ConfigProto):
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = str(self._value)
-    value: Decimal = property(get_value, set_value)
+    value: Decimal = property(get_value, set_value, doc="Current option value")
 
 class BoolOption(Option[bool]):
     """Configuration option with boolean value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False, default: bool=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         self._value: bool = None
         self.from_str = get_convertor(bool).from_str
         super().__init__(name, bool, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         if self._value is None:
             return '<UNDEFINED>'
         return 'yes' if self._value else 'no'
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         self._value = self.from_str(bool, value)
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return str(self._value)
     def get_value(self) -> bool:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: bool) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             oneof = opt.WhichOneof('kind')
@@ -769,74 +1025,75 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_bool = self._value
-    value: bool = property(get_value, set_value)
+    value: bool = property(get_value, set_value, doc="Current option value")
 
 class ZMQAddressOption(Option[ZMQAddress]):
     """Configuration option with `.ZMQAddress` value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: ZMQAddress=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         self._value: ZMQAddress = None
         super().__init__(name, ZMQAddress, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         return '<UNDEFINED>' if self._value is None else self._value
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         self._value = ZMQAddress(value)
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return self._value
     def get_value(self) -> ZMQAddress:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: ZMQAddress) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -846,61 +1103,60 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: ZMQAddress = property(get_value, set_value)
+    value: ZMQAddress = property(get_value, set_value, doc="Current option value")
 
 class EnumOption(Option[Enum]):
     """Configuration option with enum value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-    allowed: List of allowed Enum members. When not defined, all members of enum type are
-             allowed.
-
-Attributes:
-    allowed: List of allowed enum values.
-"""
+    """
     def __init__(self, name: str, enum_class: Enum, description: str, *, required: bool=False,
                  default: Enum=None, allowed: List=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+            allowed: List of allowed Enum members. When not defined, all members of enum type are
+                     allowed.
+        """
         self._value: Enum = None
+        #: List of allowed enum values.
         self.allowed: Sequence = enum_class if allowed is None else allowed
         self._members: Dict = {i.name.lower(): i for i in self.allowed}
         super().__init__(name, enum_class, description, required, default)
     def get_config(self) -> str:
         """Returns string containing text lines suitable for use in configuration file
-processed with `~configparser.ConfigParser`.
+        processed with `~configparser.ConfigParser`.
 
-Text lines with configuration start with comment marker ; and end with newline.
-"""
+        Text lines with configuration start with comment marker ; and end with newline.
+        """
         lines: List = super()._get_config_lines()
         lines.insert(4, f"; values: {', '.join(x.name.lower() for x in self.allowed)}\n")
         return ''.join(lines)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         return '<UNDEFINED>' if self._value is None else self._value.name.lower()
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         name = value.lower()
         if name in self._members:
             self.set_value(self._members[name])
@@ -908,21 +1164,21 @@ Raises:
             raise ValueError(f"Illegal value '{value}' for enum type "
                              f"'{self.datatype.__name__}'")
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return self._value.name
     def get_value(self) -> Enum:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: Enum) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         if value is not None and value not in self.allowed:
             raise ValueError(f"Value '{value}' not allowed")
@@ -930,13 +1186,13 @@ Raises:
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains option value.
+        Arguments:
+            proto: Protobuf message that may contains option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -946,61 +1202,60 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = self._value.name
-    value: Enum = property(get_value, set_value)
+    value: Enum = property(get_value, set_value, doc="Current option value")
 
 class FlagOption(Option[Flag]):
     """Configuration option with flag value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-    allowed: List of allowed Flag members. When not defined, all members of flag type are
-             allowed.
-
-Attributes:
-    allowed: List of allowed flag values.
-"""
+    """
     def __init__(self, name: str, flag_class: Flag, description: str, *, required: bool=False,
                  default: Flag=None, allowed: List=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+            allowed: List of allowed Flag members. When not defined, all members of flag type are
+                     allowed.
+        """
         self._value: Flag = None
+        #: List of allowed flag values.
         self.allowed: Sequence = flag_class if allowed is None else allowed
         self._members: Dict = {i.name.lower(): i for i in self.allowed}
         super().__init__(name, flag_class, description, required, default)
     def get_config(self) -> str:
         """Returns string containing text lines suitable for use in configuration file
-processed with `~configparser.ConfigParser`.
+        processed with `~configparser.ConfigParser`.
 
-Text lines with configuration start with comment marker ; and end with newline.
-"""
+        Text lines with configuration start with comment marker ; and end with newline.
+        """
         lines: List = super()._get_config_lines()
         lines.insert(4, f"; values: {', '.join(x.name.lower() for x in self.allowed)}\n")
         return ''.join(lines)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         return '<UNDEFINED>' if self._value is None else self.get_as_str().lower()
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         result = self.datatype(0)
         for name in (x.strip().lower() for x in value.split('|' if '|' in value else ',')):
             if name in self._members:
@@ -1009,7 +1264,7 @@ Raises:
                 raise ValueError(f"Illegal value '{name}' for flag option '{self.name}'")
         self.set_value(result)
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         if self._value._name_ is not None:
             return self._value.name
         members, uncovered = _decompose(self.datatype, self._value)
@@ -1017,18 +1272,18 @@ Raises:
             return f'{members[0]._value_}'
         return ' | '.join([str(m._name_ or m._value_) for m in members])
     def get_value(self) -> Flag:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: Flag) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         if value is not None:
             members, uncovered = _decompose(self.datatype, value.value)
@@ -1038,13 +1293,13 @@ Raises:
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains option value.
+        Arguments:
+            proto: Protobuf message that may contains option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             oneof = opt.WhichOneof('kind')
@@ -1057,69 +1312,70 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_uint64 = self._value.value
-    value: Flag = property(get_value, set_value)
+    value: Flag = property(get_value, set_value, doc="Current option value")
 
 class UUIDOption(Option[UUID]):
     """Configuration option with UUID value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False, default: UUID=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         self._value: UUID = None
         super().__init__(name, UUID, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         return '<UNDEFINED>' if self._value is None else str(self._value)
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         self._value = UUID(value)
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return 'None' if self._value is None else self._value.hex
     def get_value(self) -> UUID:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: UUID) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
-"""
+        Arguments:
+            proto: Protobuf message that may contains options value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             oneof = opt.WhichOneof('kind')
@@ -1132,69 +1388,70 @@ Arguments:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_bytes = self._value.bytes
-    value: UUID = property(get_value, set_value)
+    value: UUID = property(get_value, set_value, doc="Current option value")
 
 class MIMEOption(Option[MIME]):
     """Configuration option with MIME type specification value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False, default: MIME=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         self._value: MIME = None
         super().__init__(name, MIME, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         return '<UNDEFINED>' if self._value is None else self._value
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         self._value = MIME(value)
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return 'None' if self._value is None else self._value
     def get_value(self) -> MIME:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: MIME) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
-"""
+        Arguments:
+            proto: Protobuf message that may contains options value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -1204,45 +1461,43 @@ Arguments:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: MIME = property(get_value, set_value)
+    value: MIME = property(get_value, set_value, doc="Current option value")
 
 class ListOption(Option[List]):
     """Configuration option with list of values.
 
-Arguments:
-    name:        Option name.
-    item_type:   Datatype of list items. It could be a type or sequence of types. If multiple
-                 types are provided, each value in config file must have format:
-                 `type_name:value_as_str`.
-    description: Option description. Can span multiple lines.
-    required:    True if option must have a value.
-    default:     Default option value.
-    separator:   String that separates list item values when options value is read from
-                 `ConfigParser`. It's possible to use a line break as separator.
-                 If separator is `None` [default] and the value contains line breaks, it uses
-                 the line break as separator, otherwise it uses comma as separator.
-
-Attributes:
-    item_types:  Datatypes of list items. If there is more than one type, each value in
-                 config file must have format: `type_name:value_as_str`.
-    separator:   String that separates list item values when options value is read from
-                 `ConfigParser`. Default separator is None. It's possible to use a line
-                 break as separator. If separator is `None` and the value contains line
-                 breaks, it uses the line break as separator, otherwise it uses comma as
-                 separator.
-
-Important:
-    When option is read from `ConfigParser`, empty values are ignored.
-"""
+    Important:
+        When option is read from `ConfigParser`, empty values are ignored.
+    """
     def __init__(self, name: str, item_type: Union[Type, Sequence[Type]], description: str,
                  *, required: bool=False, default: List=None, separator: str=None):
+        """
+        Arguments:
+            name:        Option name.
+            item_type:   Datatype of list items. It could be a type or sequence of types. If multiple
+                         types are provided, each value in config file must have format:
+                         `type_name:value_as_str`.
+            description: Option description. Can span multiple lines.
+            required:    True if option must have a value.
+            default:     Default option value.
+            separator:   String that separates list item values when options value is read from
+                         `ConfigParser`. It's possible to use a line break as separator.
+                         If separator is `None` [default] and the value contains line breaks, it uses
+                         the line break as separator, otherwise it uses comma as separator.
+        """
         self._value: List = None
+        #: Datatypes of list items. If there is more than one type, each value in
+        #: config file must have format: `type_name:value_as_str`.
         self.item_types: Sequence[Type] = (item_type, ) if isinstance(item_type, type) else item_type
+        #: String that separates list item values when options value is read from
+        #: `ConfigParser`. Default separator is None. It's possible to use a line break as
+        #: separator. If separator is `None` and the value contains line breaks, it uses
+        #: the line break as separator, otherwise it uses comma as separator.
         self.separator: Optional[str] = separator
         self._convertor: Convertor = get_convertor(item_type) if isinstance(item_type, type) else None
         super().__init__(name, list, description, required, default)
@@ -1251,15 +1506,15 @@ Important:
         if len(self.item_types) > 1:
             result = f'{value.__class__.__name__}:{result}'
         return result
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         if self._value is None:
             return '<UNDEFINED>'
         result = [convert_to_str(i) for i in self._value]
@@ -1273,12 +1528,12 @@ Arguments:
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         new = []
         if value.strip():
             separator = ('\n' if '\n' in value else ',') if self.separator is None else self.separator
@@ -1299,25 +1554,25 @@ Raises:
                 new.append(convertor.from_str(itype, item.strip()))
             self._value = new
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         result = [convert_to_str(i) for i in self._value]
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ','
         return sep.join(result)
     def get_value(self) -> List:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: List) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         if value is not None:
             i = 0
@@ -1329,13 +1584,13 @@ Raises:
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -1345,38 +1600,39 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             result = [self._get_as_typed_str(i) for i in self._value]
             sep = self.separator
             if sep is None:
                 sep = '\n' if sum(len(i) for i in result) > 80 else ','
             proto.options[self.name].as_string = sep.join(result)
-    value: List = property(get_value, set_value)
+    value: List = property(get_value, set_value, doc="Current option value")
 
 class PyExprOption(Option[PyExpr]):
     """String configuration option with Python expression value.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-"""
+    """
     def __init__(self, name: str, description: str, *, required: bool=False, default: PyExpr=None):
         self._value: PyExpr = None
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         super().__init__(name, PyExpr, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         if self._value is None:
             return '<UNDEFINED>'
         result = self._value
@@ -1392,41 +1648,41 @@ Arguments:
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         self._value = PyExpr(value)
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return self._value
     def get_value(self) -> PyExpr:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: PyExpr) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -1436,41 +1692,42 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: PyExpr = property(get_value, set_value)
+    value: PyExpr = property(get_value, set_value, doc="Current option value")
 
 class PyCodeOption(Option[PyCode]):
     """String configuration option with Python code value.
 
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    required: True if option must have a value.
-    default: Default option value.
-
-Important:
-    Python code must be properly indented, but ConfigParser multiline string values have
-    leading whitespace removed. To circumvent this, the `PyCodeOption` supports assignment
-    of text values where lines start with `|` character. This character is removed, along
-    with any number of subsequent whitespace characters that are between `|` and first
-    non-whitespace character on first line starting with `|`.
-"""
+    Important:
+        Python code must be properly indented, but ConfigParser multiline string values have
+        leading whitespace removed. To circumvent this, the `PyCodeOption` supports assignment
+        of text values where lines start with `|` character. This character is removed, along
+        with any number of subsequent whitespace characters that are between `|` and first
+        non-whitespace character on first line starting with `|`.
+    """
     def __init__(self, name: str, description: str, *, required: bool=False, default: PyCode=None):
         self._value: PyCode = None
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         super().__init__(name, PyCode, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         if self._value is None:
             return '<UNDEFINED>'
         result = self._value
@@ -1486,42 +1743,42 @@ Arguments:
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         value = unindent_verticals(value)
         self._value = PyCode(value)
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return self._value
     def get_value(self) -> PyCode:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: PyCode) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -1531,47 +1788,48 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: PyCode = property(get_value, set_value)
+    value: PyCode = property(get_value, set_value, doc="Current option value")
 
 class PyCallableOption(Option[PyCallable]):
     """String configuration option with Python callable value.
 
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    signature: Callable signature.
-    required: True if option must have a value.
-    default: Default option value.
-
-Attributes:
-    signature (inspect.Signature): Callable signature.
-
-Important:
-    Python code must be properly indented, but `ConfigParser` multiline string values have
-    leading whitespace removed. To circumvent this, the `PyCodeOption` supports assignment
-    of text values where lines start with `|` character. This character is removed, along
-    with any number of subsequent whitespace characters that are between `|` and first
-    non-whitespace character on first line starting with `|`.
-"""
-    def __init__(self, name: str, description: str, signature: Signature, * ,
+    Important:
+        Python code must be properly indented, but `ConfigParser` multiline string values have
+        leading whitespace removed. To circumvent this, the `PyCodeOption` supports assignment
+        of text values where lines start with `|` character. This character is removed, along
+        with any number of subsequent whitespace characters that are between `|` and first
+        non-whitespace character on first line starting with `|`.
+    """
+    def __init__(self, name: str, description: str, signature: Union[Signature, Callable], * ,
                  required: bool=False, default: PyCallable=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            signature: Callable signature or callable.
+            required: True if option must have a value.
+            default: Default option value.
+        """
         self._value: PyCallable = None
+        #: Callable signature.
+        if not isinstance(signature, Signature):
+            signature = Signature.from_callable(PyCallable(signature)._callable_)
         self.signature: Signature = signature
         super().__init__(name, PyCallable, description, required=required, default=default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         if self._value is None:
             return '<UNDEFINED>'
         result = self._value
@@ -1587,30 +1845,30 @@ Arguments:
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         value = unindent_verticals(value)
         self.set_value(PyCallable(value))
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         return self._value
     def get_value(self) -> PyCallable:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: PyCallable) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the callable has wrong signature.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the callable has wrong signature.
+        """
         self._check_value(value)
         if value is not None:
             val_sig = signature(value._callable_)
@@ -1630,13 +1888,13 @@ Raises:
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -1646,87 +1904,88 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: PyCallable = property(get_value, set_value)
+    value: PyCallable = property(get_value, set_value, doc="Current option value")
 
 class ConfigOption(Option[str]):
     """Configuration option with `Config` value.
 
-Important:
-    This option is intended for sub-configs that should have *configurable* name (i.e. the
-    section name that holds sub-config values). To create sub-configs with fixed section
-    names, simply assign them to instance attributes of `Config` instance that owns them
-    (preferably in constructor).
+    Important:
+        This option is intended for sub-configs that should have *configurable* name (i.e. the
+        section name that holds sub-config values). To create sub-configs with fixed section
+        names, simply assign them to instance attributes of `Config` instance that owns them
+        (preferably in constructor).
 
-    While the `value` attribute for this option is an instance of any class inherited from
-    `Config`, in other ways it behaves like `StrOption` that loads/saves only name of its
-    `Config` value (i.e. the section name). The actual I/O for sub-config's options is
-    delegated to `Config` instance that owns this option.
+        While the `value` attribute for this option is an instance of any class inherited from
+        `Config`, in other ways it behaves like `StrOption` that loads/saves only name of its
+        `Config` value (i.e. the section name). The actual I/O for sub-config's options is
+        delegated to `Config` instance that owns this option.
 
-    The "empty" value for this option is not `None` (because the `Config` instance always
-    exists), but an empty string for `Config.name` attribute.
-
-Arguments:
-    name: Option name.
-    description: Option description. Can span multiple lines.
-    config: Option's value.
-    required: True if option must have a value.
-    default: Default `Config.name` value.
-"""
+        The "empty" value for this option is not `None` (because the `Config` instance always
+        exists), but an empty string for `Config.name` attribute.
+    """
     def __init__(self, name: str, description: str, config: Config, *, required: bool=False,
                  default: str=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            config: Option's value.
+            required: True if option must have a value.
+            default: Default `Config.name` value.
+        """
         assert isinstance(config, Config)
         self._value: Config = config
         super().__init__(name, str, description, required, default)
     def validate(self) -> None:
         """Validates option state.
 
-Raises:
-    Error: When required option does not have a value.
-"""
+        Raises:
+            Error: When required option does not have a value.
+        """
         if self.required and self.get_value().name == '':
             raise Error(f"Missing value for required option '{self.name}'")
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Note:
-   This method calls `~Config.clear(to_default)`.
+        Note:
+           This method calls `~Config.clear(to_default)`.
 
-Arguments:
-    to_default: If True, sets the `Config.name` to default value, else to empty string.
-"""
-        self._value.clear(to_default)
+        Arguments:
+            to_default: If True, sets the `Config.name` to default value, else to empty string.
+        """
+        self._value.clear(to_default=to_default)
         self._value.name = self.default if to_default else ''
     def get_formatted(self) -> str:
         """Return value formatted for use in config file.
 
-The string contains section name that will be used to store the `Config` values.
-"""
+        The string contains section name that will be used to store the `Config` values.
+        """
         return self._value.name
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Important:
-    Because the actual value is a `Config` instance, the string must contain the
-    `Config.name` value (which is the section name used to store `Config` options).
-    Beware that multiple Config instances with the same (section) name may cause
-    collision when configuration is written to protobuf message or configuration file.
+        Arguments:
+            value: New `Config.name` value.
 
-Arguments:
-    value: New `Config.name` value.
-"""
+        Important:
+            Because the actual value is a `Config` instance, the string must contain the
+            `Config.name` value (which is the section name used to store `Config` options).
+            Beware that multiple Config instances with the same (section) name may cause
+            collision when configuration is written to protobuf message or configuration file.
+        """
         self._value.name = value
     def get_as_str(self) -> str:
         """Return value as string.
 
-Important:
-    Because the actual value is a `Config` instance, the returned string is the section
-    name used to store `Config` options.
-"""
+        Important:
+            Because the actual value is a `Config` instance, the returned string is the section
+            name used to store `Config` options.
+        """
         return self._value.name
     def get_value(self) -> Config:
         "Return current option value."
@@ -1734,17 +1993,17 @@ Important:
     def set_value(self, value: str) -> None:
         """Set new option value.
 
-This option type does not support direct assignment of `Config` value. Because this method
-is also used to assign default value (which is a `Config.name`), it accepts None or string
-argument that is interpreted as new Config name. `None` value is translated to empty string.
+        This option type does not support direct assignment of `Config` value. Because this method
+        is also used to assign default value (which is a `Config.name`), it accepts None or string
+        argument that is interpreted as new Config name. `None` value is translated to empty string.
 
-Arguments:
-    value: New `Config` name.
+        Arguments:
+            value: New `Config` name.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When None or empty string is passed and option value is required.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When None or empty string is passed and option value is required.
+        """
         if value is None:
             value = ''
         if value == '' and self.required:
@@ -1753,13 +2012,13 @@ Raises:
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -1769,60 +2028,59 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             proto.options[self.name].as_string = self._value.name
-    value: Config = property(get_value, set_value)
+    value: Config = property(get_value, set_value, doc="Current option value")
 
 class ConfigListOption(Option[List]):
     """Configuration option with list of `Config` values.
 
-Important:
-    This option is intended for configurable set of sub-configs of fixed type.
+    Important:
+        This option is intended for configurable set of sub-configs of fixed type.
 
-    While the `value` attribute for this option is a list of instances of single class
-    inherited from `Config`, in other ways it behaves like `ListOption` with `str` items
-    that loads/saves only names of its `Config` items (i.e. the section names). The actual
-    I/O for sub-config options is delegated to `Config` instance that owns this option.
+        While the `value` attribute for this option is a list of instances of single class
+        inherited from `Config`, in other ways it behaves like `ListOption` with `str` items
+        that loads/saves only names of its `Config` items (i.e. the section names). The actual
+        I/O for sub-config options is delegated to `Config` instance that owns this option.
 
-Arguments:
-    name:        Option name.
-    description: Option description. Can span multiple lines.
-    item_type:   Datatype of list items. Must be subclass of `Config`.
-    required:    True if option must have a value.
-    separator:   String that separates values when options value is read from `ConfigParser`.
-                 It's possible to use a line break as separator.
-                 If separator is `None` [default] and the value contains line breaks, it uses
-                 the line break as separator, otherwise it uses comma as separator.
-
-Attributes:
-    item_type:   Datatype of list items.
-    separator:   String that separates values when options value is read from `ConfigParser`.
-                 Default separator is None. It's possible to use a line break as separator.
-                 If separator is `None` and the value contains line breaks, it uses
-                 the line break as separator, otherwise it uses comma as separator.
-
-Important:
-    When option is read from `ConfigParser`, empty values are ignored.
-"""
+    Important:
+        When option is read from `ConfigParser`, empty values are ignored.
+    """
     def __init__(self, name: str, description: str, item_type: Type[Config], *,
                  required: bool=False, separator: str=None):
+        """
+        Arguments:
+            name:        Option name.
+            description: Option description. Can span multiple lines.
+            item_type:   Datatype of list items. Must be subclass of `Config`.
+            required:    True if option must have a value.
+            separator:   String that separates values when options value is read from `ConfigParser`.
+                         It's possible to use a line break as separator.
+                         If separator is `None` [default] and the value contains line breaks, it uses
+                         the line break as separator, otherwise it uses comma as separator.
+        """
         assert issubclass(item_type, Config)
         self._value: List = []
+        #: Datatype of list items.
         self.item_type: Type[Config] = item_type
+        #: String that separates values when options value is read from `ConfigParser`.
+        #: Default separator is None. It's possible to use a line break as separator.
+        #: If separator is `None` and the value contains line breaks, it uses the line
+        #: break as separator, otherwise it uses comma as separator.
         self.separator: Optional[str] = separator
         super().__init__(name, list, description, required, [])
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = []
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         if self._value is None:
             return '<UNDEFINED>'
         result = [i.name for i in self._value]
@@ -1836,12 +2094,12 @@ Arguments:
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         new = []
         if value.strip():
             separator = ('\n' if '\n' in value else ',') if self.separator is None else self.separator
@@ -1849,25 +2107,25 @@ Raises:
                 new.append(self.item_type(item.strip()))
             self._value = new
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         result = [i.name for i in self._value]
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ','
         return sep.join(result)
     def get_value(self) -> List:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: List) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         if value is not None:
             i = 0
@@ -1879,13 +2137,13 @@ Raises:
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -1895,63 +2153,61 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         result = [i.name for i in self._value]
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ','
         proto.options[self.name].as_string = sep.join(result)
-    value: List = property(get_value, set_value)
+    value: List = property(get_value, set_value, doc="Current option value")
 
 class DataclassOption(Option[Any]):
     """Configuration option with a dataclass value.
 
-The `ConfigParser` format for this option is a list of values, where each list items
-defines value for dataclass field in `field_name:value_as_str` format. The configuration
-must contain values for all fields for the dataclass that does not have default value.
+    The `ConfigParser` format for this option is a list of values, where each list items
+    defines value for dataclass field in `field_name:value_as_str` format. The configuration
+    must contain values for all fields for the dataclass that does not have default value.
 
-Important:
-    This option uses type annotation for dataclass to determine the actual data type for
-    conversion from string. It means that:
+    Important:
+        This option uses type annotation for dataclass to determine the actual data type for
+        conversion from string. It means that:
 
-    1. If type annotation contains "typing" types, it's necessary to specify "real" types
-       for all dataclass fields using the `fields` argument.
-    2. All used data types must have string convertors registered in `strconv` module.
+        1. If type annotation contains "typing" types, it's necessary to specify "real" types
+           for all dataclass fields using the `fields` argument.
+        2. All used data types must have string convertors registered in `strconv` module.
 
-Arguments:
-    name:        Option name.
-    dataclass:   Dataclass type.
-    description: Option description. Can span multiple lines.
-    required:    True if option must have a value.
-    default:     Default option value.
-    separator:   String that separates dataclass field values when options value is read
-                 from `ConfigParser`. It's possible to use a line break as separator.
-                 If separator is `None` [default] and the value contains line breaks, it
-                 uses the line break as separator, otherwise it uses comma as separator.
-    fields:      Dictionary that maps dataclass field names to data types.
-
-Attributes:
-    dataclass:   Dataclass type.
-    separator:   String that separates dataclass field values when options value is read
-                 from `ConfigParser`. Default separator is None. It's possible to use a line
-                 break as separator. If separator is `None` and the value contains line
-                 breaks, it uses the line break as separator, otherwise it uses comma as
-                 separator.
-
-Important:
-    When option is read from `ConfigParser`, empty values are ignored.
-"""
+    Important:
+        When option is read from `ConfigParser`, empty values are ignored.
+    """
     def __init__(self, name: str, dataclass: Type, description: str, *, required: bool=False,
                  default: Any=None, separator: str=None, fields: Dict[str, Type]=None):
+        """
+        Arguments:
+            name:        Option name.
+            dataclass:   Dataclass type.
+            description: Option description. Can span multiple lines.
+            required:    True if option must have a value.
+            default:     Default option value.
+            separator:   String that separates dataclass field values when options value is read
+                         from `ConfigParser`. It's possible to use a line break as separator.
+                         If separator is `None` [default] and the value contains line breaks, it
+                         uses the line break as separator, otherwise it uses comma as separator.
+            fields:      Dictionary that maps dataclass field names to data types.
+        """
         assert hasattr(dataclass, '__dataclass_fields__')
         self._fields: Dict[str, Type] = get_type_hints(dataclass) if fields is None else fields
         if __debug__:
             for ftype in self._fields.values():
                 assert get_convertor(ftype) is not None
         self._value: Any = None
+        #: Dataclass type.
         self.dataclass: Type = dataclass
+        #: String that separates dataclass field values when options value is read from
+        #: `ConfigParser`. Default separator is None. It's possible to use a line break
+        #: as separator. If separator is `None` and the value contains line breaks, it
+        #: uses the line break as separator, otherwise it uses comma as separator.
         self.separator: Optional[str] = separator
         super().__init__(name, dataclass, description, required, default)
     def _get_str_fields(self) -> List[str]:
@@ -1960,15 +2216,15 @@ Important:
             for fname in self._fields:
                 result.append(f'{fname}:{convert_to_str(getattr(self._value, fname))}')
         return result
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
-Arguments:
-    to_default: If True, sets the option value to default value, else to None.
-"""
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        """Return value formatted for use in config file."""
+        "Return value formatted for use in config file."
         if self._value is None:
             return '<UNDEFINED>'
         result = self._get_str_fields()
@@ -1982,12 +2238,12 @@ Arguments:
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
         new = {}
         if value.strip():
             separator = ('\n' if '\n' in value else ',') if self.separator is None else self.separator
@@ -2008,37 +2264,37 @@ Raises:
                     raise ValueError(f"Illegal value '{value}' for option '{self.name}'")
             self._value = new_val
     def get_as_str(self) -> str:
-        """Return value as string."""
+        "Return value as string."
         result = self._get_str_fields()
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ','
         return sep.join(result)
     def get_value(self) -> Any:
-        "Return current option value"
+        "Return current option value."
         return self._value
     def set_value(self, value: Any) -> None:
         """Set new option value.
 
-Arguments:
-    value: New option value.
+        Arguments:
+            value: New option value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message that may contains options value.
+        Arguments:
+            proto: Protobuf message that may contains options value.
 
-Raises:
-    TypeError: When the new value is of the wrong type.
-    ValueError: When the argument is not a valid option value.
-"""
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
         if self.name in proto.options:
             opt = proto.options[self.name]
             if opt.HasField('as_string'):
@@ -2048,14 +2304,14 @@ Raises:
     def save_proto(self, proto: ConfigProto) -> None:
         """Serialize value into `.ConfigProto` message.
 
-Arguments:
-    proto: Protobuf message where option value should be stored.
-"""
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
         if self._value is not None:
             result = self._get_str_fields()
             sep = self.separator
             if sep is None:
                 sep = '\n' if sum(len(i) for i in result) > 80 else ','
             proto.options[self.name].as_string = sep.join(result)
-    value: Any = property(get_value, set_value)
+    value: Any = property(get_value, set_value, doc="Current option value")
 

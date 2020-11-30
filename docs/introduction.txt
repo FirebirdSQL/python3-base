@@ -123,3 +123,13 @@ Module `.protobuf` provides central registry for Google Protocol Buffer messages
 The generated `*_pb2.py protobuf` files could be registered using `.register_decriptor` or
 `.load_registered` function. The registry could be then used to obtain information about
 protobuf messages or enum types, or to create message instances or enum values.
+
+Callback systems
+================
+
+Module `.signal` provides two callback mechanisms: one based on signals and slots similar
+to Qt signal/slot, and second based on optional method delegation similar to events in Delphi.
+
+In both cases, the callback callables could be functions, instance or class methods,
+partials and lambda functions. The `inspect` module is used to define the signature for
+callbacks, and to validate that only compatible callables are assigned.

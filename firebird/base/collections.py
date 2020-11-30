@@ -63,8 +63,14 @@ import copy
 from .types import Error, Distinct, Sentinel, UNDEFINED
 
 
-def make_lambda(expr: str, params: str='item', context: Dict=None):
-    """Makes lambda function from expression."""
+def make_lambda(expr: str, params: str='item', context: Dict[str, Any]=None):
+    """Makes lambda function from expression.
+
+    Arguments:
+        expr: Python expression as string.
+        params: Comma-separated list of names that should be used as lambda parameters
+        context: Dictionary passed as `context` to `eval`.
+    """
     return eval(f'lambda {params}:{expr}', context) if context else eval(f'lambda {params}:{expr}')
 
 
@@ -80,93 +86,93 @@ FilterExpr = Union[str, Callable[[Item], bool]]
 CheckExpr = Union[str, Callable[[Item, Any], bool]]
 
 class BaseObjectCollection:
-    """Collection of objects.
-"""
+    """Base class for collection of objects.
+    """
     def filter(self, expr: FilterExpr) -> Generator[Item, None, None]:
         """Returns generator that yields items for which `expr` is evaluated as True.
 
-Arguments:
-    expr: Bool expression, a callable accepting one parameter and returning bool or
-          bool expression as string referencing list item as `item`.
+        Arguments:
+            expr: Bool expression, a callable accepting one parameter and returning bool or
+                  bool expression as string referencing list item as `item`.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       L.filter(lambda x: x.name.startswith("ABC"))
-       L.filter('item.name.startswith("ABC")')
-"""
+               L.filter(lambda x: x.name.startswith("ABC"))
+               L.filter('item.name.startswith("ABC")')
+        """
         fce = expr if callable(expr) else make_lambda(expr)
         return (item for item in self if fce(item))
     def filterfalse(self, expr: FilterExpr) -> Generator[Item, None, None]:
         """Returns generator that yields items for which `expr` is evaluated as False.
 
-Arguments:
-    expr: Bool expression, a callable accepting one parameter and returning bool or
-          bool expression as string referencing list item as `item`.
+        Arguments:
+            expr: Bool expression, a callable accepting one parameter and returning bool or
+                  bool expression as string referencing list item as `item`.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       L.filterfalse(lambda x: x.name.startswith("ABC"))
-       L.filterfalse('item.name.startswith("ABC")')
-"""
+               L.filterfalse(lambda x: x.name.startswith("ABC"))
+               L.filterfalse('item.name.startswith("ABC")')
+        """
         fce = expr if callable(expr) else make_lambda(expr)
         return (item for item in self if not fce(item))
     def find(self, expr: FilterExpr, default: Any=None) -> Item:
         """Returns first item for which `expr` is evaluated as True, or default.
 
-Arguments:
-    expr:    Bool expression, a callable accepting one parameter and returning bool or
-             bool expression as string referencing list item as `item`.
-    default: Default value returned when Items is not found.
+        Arguments:
+            expr:    Bool expression, a callable accepting one parameter and returning bool or
+                     bool expression as string referencing list item as `item`.
+            default: Default value returned when Items is not found.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       L.find(lambda x: x.name.startswith("ABC"))
-       L.find('item.name.startswith("ABC")')
-"""
+               L.find(lambda x: x.name.startswith("ABC"))
+               L.find('item.name.startswith("ABC")')
+        """
         for item in self.filter(expr):
             return item
         return default
     def contains(self, expr: FilterExpr=None) -> bool:
         """Returns True if there is any item for which `expr` is evaluated as True.
 
-Arguments:
-    expr: Bool expression, a callable accepting one parameter and returning bool or
-          bool expression as string referencing list item as `item`.
+        Arguments:
+            expr: Bool expression, a callable accepting one parameter and returning bool or
+                  bool expression as string referencing list item as `item`.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       if L.contains(lambda x: x.name.startswith("ABC")):
-           ...
-       if L.contains('item.name.startswith("ABC")'):
-           ...
-"""
+               if L.contains(lambda x: x.name.startswith("ABC")):
+                   ...
+               if L.contains('item.name.startswith("ABC")'):
+                   ...
+        """
         return self.find(expr) is not None
     def report(self, *args) -> Generator[Any, None, None]:
         """Returns generator that yields data produced by expression(s) evaluated on list items.
 
-Arguments:
-    args: Parameter(s) could be one from:
+        Arguments:
+            args: Parameter(s) could be one from:
 
-        - A callable accepting one parameter and returning data for output
-        - One or more expressions as string referencing item as `item`.
+                - A callable accepting one parameter and returning data for output
+                - One or more expressions as string referencing item as `item`.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       # generator of tuples with item.name and item.size
+               # generator of tuples with item.name and item.size
 
-       L.report(lambda x: (x.name, x.size))
-       L.report('item.name','item.size')
+               L.report(lambda x: (x.name, x.size))
+               L.report('item.name','item.size')
 
-       # generator of item names
+               # generator of item names
 
-       L.report(lambda x: x.name)
-       L.report('item.name')
-"""
+               L.report(lambda x: x.name)
+               L.report('item.name')
+        """
         if len(args) == 1 and callable(args[0]):
             fce = args[0]
         else:
@@ -176,30 +182,30 @@ Example:
     def occurrence(self, expr: FilterExpr) -> int:
         """Return number of items for which `expr` is evaluated as True.
 
-Arguments:
-    expr: Bool expression, a callable accepting one parameter and returning bool or
-          bool expression as string referencing list item as `item`.
+        Arguments:
+            expr: Bool expression, a callable accepting one parameter and returning bool or
+                  bool expression as string referencing list item as `item`.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       L.occurrence(lambda x: x.name.startswith("ABC"))
-       L.occurrence('item.name.startswith("ABC")')
-"""
+               L.occurrence(lambda x: x.name.startswith("ABC"))
+               L.occurrence('item.name.startswith("ABC")')
+        """
         return sum(1 for item in self.filter(expr))
     def all(self, expr: FilterExpr) -> bool:
         """Return True if `expr` is evaluated as True for all list elements.
 
-Arguments:
-    expr: Bool expression, a callable accepting one parameter and returning bool or
-          bool expression as string referencing list item as `item`.
+        Arguments:
+            expr: Bool expression, a callable accepting one parameter and returning bool or
+                  bool expression as string referencing list item as `item`.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       L.all(lambda x: x.name.startswith("ABC"))
-       L.all('item.name.startswith("ABC")')
-"""
+               L.all(lambda x: x.name.startswith("ABC"))
+               L.all('item.name.startswith("ABC")')
+        """
         fce = expr if callable(expr) else make_lambda(expr)
         for item in self:
             if not fce(item):
@@ -208,16 +214,16 @@ Example:
     def any(self, expr: FilterExpr) -> bool:
         """Return True if `expr` is evaluated as True for any list element.
 
-Arguments:
-    expr: Bool expression, a callable accepting one parameter and returnin bool or
-          bool expression as string referencing list item as `item`.
+        Arguments:
+            expr: Bool expression, a callable accepting one parameter and returnin bool or
+                  bool expression as string referencing list item as `item`.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       L.any(lambda x: x.name.startswith("ABC"))
-       L.any('item.name.startswith("ABC")')
-"""
+               L.any(lambda x: x.name.startswith("ABC"))
+               L.any('item.name.startswith("ABC")')
+        """
         fce = expr if callable(expr) else make_lambda(expr)
         for item in self:
             if fce(item):
@@ -226,21 +232,22 @@ Example:
 
 class DataList(List[T], BaseObjectCollection):
     """List of data (objects) with additional functionality.
-
-Arguments:
-    items:     Sequence to initialize the collection.
-    type_spec: Reject instances that are not instances of specified types.
-    key_expr:  Key expression. Must contain item referrence as `item`, for example
-               `item.attribute_name`. If **all** classes specified in `type_spec` are
-               descendants of `.Distinct`, the default value is `item.get_key()`, otherwise
-               the default is `None`.
-    frozen:    Create frozen list.
-
-Raises:
-    ValueError: When initialization sequence contains invalid instance.
-"""
+    """
     def __init__(self, items: Iterable=None, type_spec: TypeSpec=UNDEFINED,
                  key_expr: str=None, frozen: bool=False):
+        """
+        Arguments:
+            items:     Sequence to initialize the collection.
+            type_spec: Reject instances that are not instances of specified types.
+            key_expr:  Key expression. Must contain item referrence as `item`, for example
+                       `item.attribute_name`. If **all** classes specified in `type_spec`
+                       are descendants of `.Distinct`, the default value is `item.get_key()`,
+                       otherwise the default is `None`.
+            frozen:    Create frozen list.
+
+        Raises:
+            ValueError: When initialization sequence contains invalid instance.
+        """
         assert key_expr is None or isinstance(key_expr, str)
         assert key_expr is None or make_lambda(key_expr) is not None
         if items is not None:
@@ -288,56 +295,56 @@ Raises:
     def insert(self, index: int, item: Item) -> None:
         """Insert item before index.
 
-Raises:
-    TypeError: When item is not an instance of allowed class, or list is frozen
-"""
+        Raises:
+            TypeError: When item is not an instance of allowed class, or list is frozen
+        """
         self.__updchk()
         self.__valchk(item)
         super().insert(index, item)
     def remove(self, item: Item) -> None:
         """Remove first occurrence of item.
 
-Raises:
-    ValueError: If the value is not present, or list is frozen
-"""
+        Raises:
+            ValueError: If the value is not present, or list is frozen
+        """
         self.__updchk()
         super().remove(item)
     def append(self, item: Item) -> None:
         """Add an item to the end of the list.
 
-Raises:
-    TypeError: When item is not an instance of allowed class, or list is frozen
-"""
+        Raises:
+            TypeError: When item is not an instance of allowed class, or list is frozen
+        """
         self.__updchk()
         self.__valchk(item)
         super().append(item)
     def extend(self, iterable: Iterable) -> None:
         """Extend the list by appending all the items in the given iterable.
 
-Raises:
-    TypeError: When item is not an instance of allowed class, or list is frozen
-"""
+        Raises:
+            TypeError: When item is not an instance of allowed class, or list is frozen
+        """
         for item in iterable:
             self.append(item)
     def sort(self, attrs: List=None, expr: ItemExpr=None, reverse: bool=False) -> None:
         """Sort items in-place, optionaly using attribute values as key or key expression.
 
-Arguments:
-    attrs: List of attribute names.
-    expr: Key expression, a callable accepting one parameter or expression
-           as string referencing list item as `item`.
+        Arguments:
+            attrs: List of attribute names.
+            expr: Key expression, a callable accepting one parameter or expression
+                   as string referencing list item as `item`.
 
-    Important:
-        Only one parameter (`attrs` or `expr`) could be specified.
-        If none is present then uses default list sorting rule.
+            Important:
+                Only one parameter (`attrs` or `expr`) could be specified.
+                If none is present then uses default list sorting rule.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       L.sort(attrs=['name','degree'])       # Sort by item.name, item.degree
-       L.sort(expr=lambda x: x.name.upper()) # Sort by upper item.name
-       L.sort(expr='item.name.upper()')      # Sort by upper item.name
-"""
+               L.sort(attrs=['name','degree'])       # Sort by item.name, item.degree
+               L.sort(expr=lambda x: x.name.upper()) # Sort by upper item.name
+               L.sort(expr='item.name.upper()')      # Sort by upper item.name
+        """
         assert attrs is None or isinstance(attrs, (list, tuple))
         if attrs:
             super().sort(key=attrgetter(*attrs), reverse=reverse)
@@ -350,56 +357,58 @@ Example:
     def clear(self) -> None:
         """Remove all items from the list.
 
-Raises:
-    TypeError: When list is frozen."""
+        Raises:
+            TypeError: When list is frozen.
+        """
         self.__updchk()
         super().clear()
     def freeze(self) -> None:
         """Set list to immutable (frozen) state.
 
-Freezing list makes internal map from `key_expr` to item index that significantly
-speeds up retrieval by key using the `get()` method.
+        Freezing list makes internal map from `key_expr` to item index that significantly
+        speeds up retrieval by key using the `get()` method.
 
-It's not possible to `add`, `delete` or `change` items in frozen list, but `.sort` is allowed.
-"""
+        It's not possible to `add`, `delete` or `change` items in frozen list, but `.sort`
+        is allowed.
+        """
         self.__frozen = True
         if self.__key_expr:
             fce = make_lambda(self.__key_expr)
             self.__map = dict(((key, index) for index, key in enumerate((fce(item) for item in self))))
     def split(self, expr: FilterExpr, frozen: bool=False) -> Tuple[DataList, DataList]:
         """Return two new `DataList` instances, first with items for which `expr` is
-evaluated as True and second for `expr` evaluated as False.
+        evaluated as True and second for `expr` evaluated as False.
 
-Arguments:
-    expr: A callable accepting one parameter or expression as string referencing list
-          item as `item`.
-    frozen: Create frozen lists.
+        Arguments:
+            expr: A callable accepting one parameter or expression as string referencing
+                  list item as `item`.
+            frozen: Create frozen lists.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       below, above = L.split(lambda x: x.size > 100)
-       below, above = L.split('item.size > 100')
-"""
+               below, above = L.split(lambda x: x.size > 100)
+               below, above = L.split('item.size > 100')
+        """
         return DataList(self.filter(expr), self._type_spec, self.__key_expr, frozen=frozen), \
                DataList(self.filterfalse(expr), self._type_spec, self.__key_expr, frozen=frozen)
     def extract(self, expr: FilterExpr, copy: bool=False) -> DataList:
         """Move/copy items for which `expr` is evaluated as True into new `DataList`.
 
-Arguments:
-    expr: A callable accepting one parameter or expression as string referencing list item
-          as `item`.
-    copy: When True, items are not removed from source DataList.
+        Arguments:
+            expr: A callable accepting one parameter or expression as string referencing list item
+                  as `item`.
+            copy: When True, items are not removed from source DataList.
 
-Raises:
-    TypeError: When list is frozen and `copy` is False.
+        Raises:
+            TypeError: When list is frozen and `copy` is False.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       L.extract(lambda x: x.name.startswith("ABC"))
-       L.extract('item.name.startswith("ABC")')
-"""
+               L.extract(lambda x: x.name.startswith("ABC"))
+               L.extract('item.name.startswith("ABC")')
+        """
         if not copy:
             self.__updchk()
         fce = expr if callable(expr) else make_lambda(expr)
@@ -418,24 +427,24 @@ Example:
         return l
     def get(self, key: Any, default: Any=None) -> Item:
         """Returns item with given key using default key expression. Returns `default`
-value if item is not found.
+        value if item is not found.
 
-Uses very fast method to look up value of default key expression in `frozen` list,
-otherwise it uses slower list traversal.
+        Uses very fast method to look up value of default key expression in `frozen` list,
+        otherwise it uses slower list traversal.
 
-Arguments:
-    key:     Searched value.
-    default: Default value.
+        Arguments:
+            key:     Searched value.
+            default: Default value.
 
-Raises:
-    Error: If key expression is not defined.
+        Raises:
+            Error: If key expression is not defined.
 
-Example:
-    .. code-block:: python
+        Example:
+            .. code-block:: python
 
-       # Search using default key expression (fast for frozen list)
-       L.get('ITEM_NAME')
-"""
+               # Search using default key expression (fast for frozen list)
+               L.get('ITEM_NAME')
+        """
         if not self.__key_expr:
             raise Error("Key expression required")
         if self.__map:
@@ -448,50 +457,54 @@ Example:
         return default
     @property
     def frozen(self) -> bool:
-        "True if list items couldn't be changed"
+        "True if list items couldn't be changed."
         return self.__frozen
     @property
     def key_expr(self) -> Item:
-        "Key expression"
+        "Key expression."
         return self.__key_expr
     @property
     def type_spec(self) -> Union[TypeSpec, Sentinel]:
-        "Specification of valid type(s) for list values, or `.UNDEFINED` if there is no such constraint."
+        """Specification of valid type(s) for list values, or `.UNDEFINED` if there is
+        no such constraint.
+        """
         return self._type_spec
 
 class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
     """Mapping container for `.Distinct` objects.
 
-Arguments:
-    data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct` instances.
+    Any method that expects a `key` also acepts `.Distinct` instance.
 
-Any method that expects a `key` also acepts `.Distinct` instance.
+    To store items into registry with existence check, use:
+        - R.store(item)
+        - R.extend(items) or R.extend(item)
 
-To store items into registry with existence check, use:
-    - R.store(item)
-    - R.extend(items) or R.extend(item)
+    To update items in registry (added if not present), use:
+        - R[key] = item
+        - R.update(items) or R.update(item)
 
-To update items in registry (added if not present), use:
-    - R[key] = item
-    - R.update(items) or R.update(item)
+    To check presence of item or key in registry, use:
+        - key in R
 
-To check presence of item or key in registry, use:
-    - key in R
+    To retrieve items from registry, use:
+        - R.get(key, default=None)
+        - R[key]
+        - R.pop(key, default=None)
+        - R.popitem(last=True)
 
-To retrieve items from registry, use:
-    - R.get(key, default=None)
-    - R[key]
-    - R.pop(key, default=None)
-    - R.popitem(last=True)
+    To delete items from registry, use:
+        - R.remove(item)
+        - del R[key]
 
-To delete items from registry, use:
-    - R.remove(item)
-    - del R[key]
-
-Whenever a `key` is required, you can use either a `Distinct` instance, or any value that
-represens a key value for instances of stored type.
-"""
+    Whenever a `key` is required, you can use either a `Distinct` instance, or any value
+    that represens a key value for instances of stored type.
+    """
     def __init__(self, data: Union[Mapping, Sequence, Registry]=None):
+        """
+        Arguments:
+            data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`
+                  instances.
+        """
         self._reg: Dict = {}
         if data:
             self.update(data)
@@ -514,17 +527,19 @@ represens a key value for instances of stored type.
             item = item.get_key()
         return item in self._reg
     def clear(self) -> None:
-        """Remove all items from registry."""
+        """Remove all items from registry.
+        """
         self._reg.clear()
     def get(self, key: Any, default: Any=None) -> Distinct:
-        """ D.get(key[,d]) -> D[key] if key in D else d. d defaults to None."""
+        """ D.get(key[,d]) -> D[key] if key in D else d. d defaults to None.
+        """
         return self._reg.get(key.get_key() if isinstance(key, Distinct) else key, default)
     def store(self, item: Distinct) -> Distinct:
         """Register an item.
 
-Raises:
-    ValueError: When item is already registered.
-"""
+        Raises:
+            ValueError: When item is already registered.
+        """
         assert isinstance(item, Distinct), f"Item is not of type '{Distinct.__name__}'"
         key = item.get_key()
         if key in self._reg:
@@ -532,14 +547,16 @@ Raises:
         self._reg[key] = item
         return item
     def remove(self, item: Distinct):
-        """Removes item from registry (same as: del R[item])."""
+        """Removes item from registry (same as: del R[item]).
+        """
         del self._reg[item.get_key()]
     def update(self, _from: Union[Distinct, Mapping, Sequence]) -> None:
         """Update items in the registry.
 
-Arguments:
-    _from: Either a `.Distinct` instance, or sequence or mapping of `.Distinct` instances.
-"""
+        Arguments:
+            _from: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`
+                   instances.
+        """
         if isinstance(_from, Distinct):
             self[_from] = _from
         else:
@@ -548,16 +565,18 @@ Arguments:
     def extend(self, _from: Union[Distinct, Mapping, Sequence]) -> None:
         """Store one or more items to the registry.
 
-Arguments:
-    _from: Either a `.Distinct` instance, or sequence or mapping of `.Distinct` instances.
-"""
+        Arguments:
+            _from: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`
+                   instances.
+        """
         if isinstance(_from, Distinct):
             self.store(_from)
         else:
             for item in cast(Mapping, _from).values() if hasattr(_from, 'values') else _from:
                 self.store(item)
     def copy(self) -> Registry:
-        """Shalow copy of the registry."""
+        """Shalow copy of the registry.
+        """
         if self.__class__ is Registry:
             return Registry(self)
         data = self._reg
@@ -570,11 +589,13 @@ Arguments:
         return c
     def pop(self, key: Any, default: Any=None) -> Distinct:
         """Remove specified `key` and return the corresponding `.Distinct` object. If `key`
-        is not found, the `default` is returned if given, otherwise `KeyError` is raised """
+        is not found, the `default` is returned if given, otherwise `KeyError` is raised.
+        """
         return self._reg.pop(key.get_key() if isinstance(key, Distinct) else key, default)
     def popitem(self, last: bool=True) -> Distinct:
         """Returns and removes a `.Distinct` object. The objects are returned in LIFO order
-if `last` is true or FIFO order if false."""
+        if `last` is true or FIFO order if false.
+        """
         if last:
             _, item = self._reg.popitem()
             return item

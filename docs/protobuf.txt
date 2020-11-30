@@ -48,6 +48,14 @@ get_enum_field_type
 -------------------
 .. autofunction:: get_enum_field_type
 
+struct2dict
+-----------
+.. autofunction:: struct2dict
+
+dict2struct
+-----------
+.. autofunction:: dict2struct
+
 Data classes
 ============
 

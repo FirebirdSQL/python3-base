@@ -163,6 +163,30 @@ class TestTypes(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             addr = ZMQAddress('unknown://192.168.0.1:8001')
         self.assertEqual(cm.exception.args, ("Invalid protocol",))
+    def test_MIME(self):
+        "Test MIME"
+        mime = MIME('text/plain;charset=utf-8')
+        self.assertEqual(mime.mime_type, 'text/plain')
+        self.assertEqual(mime.type, 'text')
+        self.assertEqual(mime.subtype, 'plain')
+        self.assertDictEqual(mime.params, {'charset': 'utf-8',})
+        #
+        mime = MIME('text/plain')
+        self.assertEqual(mime.mime_type, 'text/plain')
+        self.assertEqual(mime.type, 'text')
+        self.assertEqual(mime.subtype, 'plain')
+        self.assertDictEqual(mime.params, {})
+        #
+        # Bad MIME type
+        with self.assertRaises(ValueError) as cm:
+            mime = MIME('')
+        self.assertEqual(cm.exception.args, ("MIME type specification must be 'type/subtype[;param=value;...]'",))
+        with self.assertRaises(ValueError) as cm:
+            mime = MIME('model/airplane')
+        self.assertEqual(cm.exception.args, ("MIME type 'model' not supported",))
+        with self.assertRaises(ValueError) as cm:
+            mime = MIME('text/plain;charset:utf-8')
+        self.assertEqual(cm.exception.args, ("Wrong specification of MIME type parameters",))
 
 
 if __name__ == '__main__':
