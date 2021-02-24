@@ -221,14 +221,13 @@ class _EventSocket:
             else:
                 return self._slot(*args, **kwargs)
     def is_set(self) -> bool:
-        "Returns True if slot is assigned to eventsocket"
+        """Returns True if slot is assigned to eventsocket.
+        """
         if isinstance(self._weak, ref):
             return self._weak() is not None
         elif self._weak:
             return self._slot() is not None
         return self._slot is not None
-
-
 
 class eventsocket:
     """The `eventsocket` is like read/write property that handles connection and call
@@ -256,7 +255,9 @@ class eventsocket:
     """
     _empty = _EventSocket()
     def __init__(self, fget, doc=None):
-        self._sig: Signature = Signature.from_callable(fget)
+        s = Signature.from_callable(fget)
+        # Remove 'self' from list of parameters
+        self._sig: Signature = s.replace(parameters=[v for k,v in s.parameters.items() if k.lower() != 'self'])
         # Key: instance of class where this eventsocket instance is used to define a property
         # Value: _EventSocket
         self._map = WeakKeyDictionary()
@@ -264,11 +265,15 @@ class eventsocket:
             doc = fget.__doc__
         self.__doc__ = doc
     def _kw_test(self, sig: Signature) -> bool:
-        p = sig.parameters
-        for k in set(p).difference(set(self._sig.parameters)):
-            if p[k].default is Signature.empty:
+        set_p = set(sig.parameters)
+        set_t = set(self._sig.parameters)
+        for k in set_p.difference(set_t):
+            if sig.parameters[k].default is Signature.empty:
                 return False
-        return True
+        for k in set_t.difference(set_p):
+            if self._sig.parameters[k].default is Signature.empty:
+                return False
+        return sig.return_annotation == self._sig.return_annotation
     def __get__(self, obj, objtype):
         if obj is None:
             return self
@@ -285,7 +290,7 @@ class eventsocket:
         if str(sig) != str(self._sig):
             # Check if the difference is only in keyword arguments with defaults.
             if not self._kw_test(sig):
-                raise ValueError("Callable signature does not match the signal signature")
+                raise ValueError("Callable signature does not match the event signature")
         self._map[obj] = _EventSocket(value)
     def __delete__(self, obj):
         raise AttributeError("can't delete eventsocket")

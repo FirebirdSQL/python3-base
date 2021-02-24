@@ -457,11 +457,13 @@ class DataList(List[T], BaseObjectCollection):
         return default
     @property
     def frozen(self) -> bool:
-        "True if list items couldn't be changed."
+        """True if list items couldn't be changed.
+        """
         return self.__frozen
     @property
     def key_expr(self) -> Item:
-        "Key expression."
+        """Key expression.
+        """
         return self.__key_expr
     @property
     def type_spec(self) -> Union[TypeSpec, Sentinel]:

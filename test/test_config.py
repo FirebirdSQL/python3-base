@@ -3063,6 +3063,166 @@ option_name = <UNDEFINED>
         opt.set_value(None)
         self.assertEqual(opt.get_config(), lines)
 
+class TestPathOption(BaseConfigTest):
+    "Unit tests for firebird.base.config.PathOption"
+    PRESENT_VAL = Path('c:\\home\\present' if platform.system == 'Windows' else '/home/present')
+    DEFAULT_VAL = Path('c:\\home\\default' if platform.system == 'Windows' else '/home/default')
+    DEFAULT_OPT_VAL = Path('c:\\home\\default-opt' if platform.system == 'Windows' else '/home/default-opt')
+    NEW_VAL = Path('c:\\home\\new' if platform.system == 'Windows' else '/home/new')
+    def setUp(self):
+        super().setUp()
+        self.setConf(f"""[%(DEFAULT)s]
+option_name = {self.DEFAULT_VAL}
+[%(PRESENT)s]
+option_name = {self.PRESENT_VAL}
+[%(ABSENT)s]
+[%(BAD)s]
+option_name =
+""")
+    def test_simple(self):
+        opt = config.PathOption('option_name', 'description')
+        self.assertEqual(opt.name, 'option_name')
+        self.assertEqual(opt.datatype, Path)
+        self.assertEqual(opt.description, 'description')
+        self.assertFalse(opt.required)
+        self.assertIsNone(opt.default)
+        self.assertIsNone(opt.value)
+        opt.validate()
+        opt.load_config(self.conf, PRESENT_S)
+        self.assertEqual(opt.value, self.PRESENT_VAL)
+        self.assertEqual(opt.get_formatted(), str(self.PRESENT_VAL))
+        self.assertIsInstance(opt.value, opt.datatype)
+        opt.clear()
+        self.assertIsNone(opt.value)
+        opt.load_config(self.conf, DEFAULT_S)
+        self.assertEqual(opt.value, self.DEFAULT_VAL)
+        self.assertIsInstance(opt.value, opt.datatype)
+        opt.set_value(None)
+        self.assertIsNone(opt.value)
+        opt.load_config(self.conf, ABSENT_S)
+        self.assertEqual(opt.value, self.DEFAULT_VAL)
+        self.assertIsInstance(opt.value, opt.datatype)
+        opt.set_value(self.NEW_VAL)
+        self.assertEqual(opt.value, self.NEW_VAL)
+        self.assertIsInstance(opt.value, opt.datatype)
+    def test_required(self):
+        opt = config.PathOption('option_name', 'description', required=True)
+        self.assertEqual(opt.name, 'option_name')
+        self.assertEqual(opt.datatype, Path)
+        self.assertEqual(opt.description, 'description')
+        self.assertTrue(opt.required)
+        self.assertIsNone(opt.default)
+        self.assertIsNone(opt.value)
+        with self.assertRaises(Error) as cm:
+            opt.validate()
+        self.assertEqual(cm.exception.args, ("Missing value for required option 'option_name'",))
+        opt.load_config(self.conf, PRESENT_S)
+        self.assertEqual(opt.value, self.PRESENT_VAL)
+        opt.validate()
+        opt.clear()
+        self.assertIsNone(opt.value)
+        opt.load_config(self.conf, DEFAULT_S)
+        self.assertEqual(opt.value, self.DEFAULT_VAL)
+        with self.assertRaises(ValueError) as cm:
+            opt.set_value(None)
+        self.assertEqual(cm.exception.args, ("Value is required for option 'option_name'.",))
+        opt.load_config(self.conf, ABSENT_S)
+        self.assertEqual(opt.value, self.DEFAULT_VAL)
+        opt.set_value(self.NEW_VAL)
+        self.assertEqual(opt.value, self.NEW_VAL)
+    def test_bad_value(self):
+        opt = config.PathOption('option_name', 'description')
+        opt.load_config(self.conf, BAD_S)
+        self.assertEqual(opt.value, Path(''))
+        with self.assertRaises(TypeError) as cm:
+            opt.set_value(10.0)
+        self.assertEqual(cm.exception.args, ("Option 'option_name' value must be a 'Path', not 'float'",))
+    def test_default(self):
+        opt = config.PathOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
+        self.assertEqual(opt.name, 'option_name')
+        self.assertEqual(opt.datatype, Path)
+        self.assertEqual(opt.description, 'description')
+        self.assertFalse(opt.required)
+        self.assertEqual(opt.default, self.DEFAULT_OPT_VAL)
+        self.assertIsInstance(opt.default, opt.datatype)
+        self.assertEqual(opt.value, self.DEFAULT_OPT_VAL)
+        self.assertIsInstance(opt.value, opt.datatype)
+        opt.validate()
+        opt.load_config(self.conf, PRESENT_S)
+        self.assertEqual(opt.value, self.PRESENT_VAL)
+        opt.clear()
+        self.assertEqual(opt.value, opt.default)
+        opt.load_config(self.conf, DEFAULT_S)
+        self.assertEqual(opt.value, self.DEFAULT_VAL)
+        opt.set_value(None)
+        self.assertIsNone(opt.value)
+        opt.load_config(self.conf, ABSENT_S)
+        self.assertEqual(opt.value, self.DEFAULT_VAL)
+        opt.set_value(self.NEW_VAL)
+        self.assertEqual(opt.value, self.NEW_VAL)
+    def test_proto(self):
+        opt = config.PathOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
+        proto_value = Path('c:\\home\\proto' if platform.system == 'Windows' else '/home/proto')
+        opt.set_value(proto_value)
+        self.proto.options['option_name'].as_string = str(proto_value)
+        proto_dump = str(self.proto)
+        opt.load_proto(self.proto)
+        self.assertEqual(opt.value, proto_value)
+        self.assertIsInstance(opt.value, opt.datatype)
+        self.proto.Clear()
+        self.assertFalse('option_name' in self.proto.options)
+        opt.save_proto(self.proto)
+        self.assertTrue('option_name' in self.proto.options)
+        self.assertEqual(str(self.proto), proto_dump)
+        # empty proto
+        opt.clear(to_default=False)
+        self.proto.Clear()
+        opt.load_proto(self.proto)
+        self.assertIsNone(opt.value)
+        # bad proto value
+        self.proto.options['option_name'].as_uint64 = 1000
+        with self.assertRaises(TypeError) as cm:
+            opt.load_proto(self.proto)
+        self.assertEqual(cm.exception.args, ('Wrong value type: uint64',))
+        self.proto.Clear()
+        opt.clear(to_default=False)
+        opt.save_proto(self.proto)
+        self.assertFalse('option_name' in self.proto.options)
+    def test_get_config(self):
+        opt = config.PathOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
+        lines = f"""; option_name
+; -----------
+;
+; data type: Path
+;
+; [optional] description
+;
+;option_name = {self.DEFAULT_OPT_VAL}
+"""
+        self.assertEqual(opt.get_config(), lines)
+        lines = f"""; option_name
+; -----------
+;
+; data type: Path
+;
+; [optional] description
+;
+option_name = {self.NEW_VAL}
+"""
+        opt.set_value(self.NEW_VAL)
+        self.assertEqual(opt.get_config(), lines)
+        lines = """; option_name
+; -----------
+;
+; data type: Path
+;
+; [optional] description
+;
+option_name = <UNDEFINED>
+"""
+        opt.set_value(None)
+        self.assertEqual(opt.get_config(), lines)
+
 class DbConfig(config.Config):
     "Simple DB config for testing"
     def __init__(self, name: str):
@@ -3400,7 +3560,7 @@ class TestApplicationDirScheme(BaseConfigTest):
     def test_01_widnows(self):
         if platform.system() != 'Windows':
             self.skipTest("Only for Windows")
-        scheme = config.get_directory_scheme('Windows', self.app_name)
+        scheme = config.get_directory_scheme(self.app_name)
         self.assertEqual(scheme.config, Path('c:\\ProgramData\\test_app\\config'))
         self.assertEqual(scheme.run_data, Path('c:\\ProgramData\\test_app\\run'))
         self.assertEqual(scheme.logs, Path('c:\\ProgramData\\test_app\\log'))
@@ -3415,7 +3575,7 @@ class TestApplicationDirScheme(BaseConfigTest):
     def test_02_linux(self):
         if platform.system() != 'Linux':
             self.skipTest("Only for Linux")
-        scheme = config.get_directory_scheme('Linux', self.app_name)
+        scheme = config.get_directory_scheme(self.app_name)
         self.assertEqual(scheme.config, Path('/etc/test_app'))
         self.assertEqual(scheme.run_data, Path('/run/test_app'))
         self.assertEqual(scheme.logs, Path('/var/log/test_app'))
@@ -3423,10 +3583,10 @@ class TestApplicationDirScheme(BaseConfigTest):
         self.assertEqual(scheme.tmp, Path('/var/tmp/test_app'))
         self.assertEqual(scheme.cache, Path('/var/cache/test_app'))
         self.assertEqual(scheme.srv, Path('/srv/test_app'))
-        self.assertEqual(scheme.user_config, Path('~/.config/test_app'))
-        self.assertEqual(scheme.user_data, Path('~/.local/share/test_app'))
-        self.assertEqual(scheme.user_sync, Path('~/.local/sync/test_app'))
-        self.assertEqual(scheme.user_cache, Path('~/.cache/test_app'))
+        self.assertEqual(scheme.user_config, Path('~/.config/test_app').expanduser())
+        self.assertEqual(scheme.user_data, Path('~/.local/share/test_app').expanduser())
+        self.assertEqual(scheme.user_sync, Path('~/.local/sync/test_app').expanduser())
+        self.assertEqual(scheme.user_cache, Path('~/.cache/test_app').expanduser())
 
 if __name__ == '__main__':
     unittest_main()

@@ -19,14 +19,14 @@ import sphinx_bootstrap_theme
 # -- Project information -----------------------------------------------------
 
 project = 'Firebird-base'
-copyright = '2020, The Firebird Project'
+copyright = '2020-2021, The Firebird Project'
 author = 'Pavel Císař'
 
 # The short X.Y version
-version = '1.1.0'
+version = '1.2.0'
 
 # The full version, including alpha/beta/rc tags
-release = '1.1.0'
+release = '1.2.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -37,7 +37,7 @@ release = '1.1.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinxcontrib.napoleon',
+    'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',

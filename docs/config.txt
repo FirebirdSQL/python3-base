@@ -319,7 +319,15 @@ Application Directory Scheme
 
 .. versionadded:: 1.1.0
 
-.. autoclass:: ApplicationDirectoryScheme
+.. versionchanged:: 1.2.0
+
+.. autoclass:: DirectoryScheme
+
+.. autoclass:: WindowsDirectoryScheme
+
+.. autoclass:: LinuxDirectoryScheme
+
+.. autoclass:: MacOSDirectoryScheme
 
 .. autofunction:: get_directory_scheme
 
@@ -365,6 +373,10 @@ EnumOption
 ----------
 .. autoclass:: EnumOption
 
+FlagOption
+----------
+.. autoclass:: FlagOption
+
 UUIDOption
 ----------
 .. autoclass:: UUIDOption
@@ -380,6 +392,10 @@ ListOption
 DataclassOption
 ---------------
 .. autoclass:: DataclassOption
+
+PathOption
+----------
+.. autoclass:: PathOption
 
 PyExprOption
 ------------

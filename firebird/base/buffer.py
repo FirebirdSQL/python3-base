@@ -44,7 +44,8 @@ from .types import Sentinel, UNLIMITED, ByteOrder
 
 @runtime_checkable
 class BufferFactory(Protocol): # pragma: no cover
-    "BufferFactory Protocol definition"
+    """BufferFactory Protocol definition.
+    """
     def create(self, init_or_size: Union[int, bytes], size: int=None) -> Any:
         """This function must create and return a mutable character buffer.
 
@@ -91,7 +92,8 @@ class BytesBufferFactory:
         buffer[:limit] = init_or_size[:limit]
         return buffer
     def clear(self, buffer: bytearray) -> None:
-        "Fills the buffer with zero."
+        """Fills the buffer with zero.
+        """
         buffer[:] = b'\x00' * len(buffer)
 
 class CTypesBufferFactory:
@@ -125,7 +127,8 @@ class CTypesBufferFactory:
         buffer[:limit] = init_or_size[:limit]
         return buffer
     def clear(self, buffer: bytearray, init: int=0) -> None:
-        "Fills the buffer with specified value (default)."
+        """Fills the buffer with specified value (default).
+        """
         memset(buffer, init, len(buffer))
 
 def safe_ord(byte: Union[bytes, int]) -> int:
@@ -169,56 +172,69 @@ class MemoryBuffer:
         if len(self.raw) < self.pos + size:
             raise IOError("Insufficient buffer size")
     def clear(self) -> None:
-        "Fills the buffer with zeros and resets the position in buffer to zero."
+        """Fills the buffer with zeros and resets the position in buffer to zero.
+        """
         self.factory.clear(self.raw)
         self.pos = 0
     def resize(self, size: int) -> None:
-        "Resize buffer to specified length."
+        """Resize buffer to specified length.
+        """
         if self.max_size is not UNLIMITED and self.max_size < size:
             raise IOError(f"Cannot resize buffer past max. size {self.max_size} bytes")
         self.raw = self.factory.create(self.raw, size)
     def is_eof(self) -> bool:
-        "Return True when positioned past the end of buffer or on `.eof_marker` (if defined)."
+        """Return True when positioned past the end of buffer or on `.eof_marker`
+        (if defined).
+        """
         if self.pos >= len(self.raw):
             return True
         if self.eof_marker is not None and safe_ord(self.raw[self.pos]) == self.eof_marker:
             return True
         return False
     def write(self, data: bytes) -> None:
-        "Write bytes."
+        """Write bytes.
+        """
         size = len(data)
         self._ensure_space(size)
         self.raw[self.pos:self.pos + size] = data
         self.pos += size
     def write_byte(self, byte: int) -> None:
-        "Write one byte."
+        """Write one byte.
+        """
         self._ensure_space(1)
         self.raw[self.pos] = byte
         self.pos += 1
     def write_number(self, value: int, size: int, *, signed: bool=False) -> None:
-        "Write number with specified size (in bytes)."
+        """Write number with specified size (in bytes).
+        """
         self.write(value.to_bytes(size, self.byteorder.value, signed=signed))
     def write_short(self, value: int) -> None:
-        "Write 2 byte number (c_ushort)."
+        """Write 2 byte number (c_ushort).
+        """
         self.write_number(value, 2)
     def write_int(self, value: int) -> None:
-        "Write 4 byte number (c_uint)."
+        """Write 4 byte number (c_uint).
+        """
         self.write_number(value, 4)
     def write_bigint(self, value: int) -> None:
-        "Write tagged 8 byte number (c_ulonglong)."
+        """Write tagged 8 byte number (c_ulonglong).
+        """
         self.write_number(value, 8)
     def write_string(self, value: str, *, encoding='ascii') -> None:
-        "Write zero-terminated string."
+        """Write zero-terminated string.
+        """
         self.write(value.encode(encoding))
         self.write_byte(0)
     def write_pascal_string(self, value: str, *, encoding='ascii') -> None:
-        "Write tagged Pascal string (2 byte length followed by data)."
+        """Write tagged Pascal string (2 byte length followed by data).
+        """
         value = value.encode(encoding)
         size = len(value)
         self.write_byte(size)
         self.write(value)
     def read(self, size: int=-1) -> bytes:
-        "Reads specified number of bytes, or all remaining data."
+        """Reads specified number of bytes, or all remaining data.
+        """
         if size < 0:
             size = self.buffer_size - self.pos
         self._check_space(size)
@@ -226,28 +242,35 @@ class MemoryBuffer:
         self.pos += size
         return result
     def read_number(self, size: int, *, signed=False) -> int:
-        "Read number with specified size in bytes."
+        """Read number with specified size in bytes.
+        """
         self._check_space(size)
         result = (0).from_bytes(self.raw[self.pos: self.pos + size], self.byteorder.value, signed=signed)
         self.pos += size
         return result
     def read_byte(self, *, signed=False) -> int:
-        "Read 1 byte number (c_ubyte)."
+        """Read 1 byte number (c_ubyte).
+        """
         return self.read_number(1, signed=signed)
     def read_short(self, *, signed=False) -> int:
-        "Read 2 byte number (c_ushort)."
+        """Read 2 byte number (c_ushort).
+        """
         return self.read_number(2, signed=signed)
     def read_int(self, *, signed=False) -> int:
-        "Read 4 byte number (c_uint)."
+        """Read 4 byte number (c_uint).
+        """
         return self.read_number(4, signed=signed)
     def read_bigint(self, *, signed=False) -> int:
-        "Read 8 byte number (c_ulonglong)."
+        """Read 8 byte number (c_ulonglong).
+        """
         return self.read_number(8, signed=signed)
     def read_sized_int(self, *, signed=False) -> int:
-        "Read number cluster (2 byte length followed by data)."
+        """Read number cluster (2 byte length followed by data).
+        """
         return self.read_number(self.read_short(), signed=signed)
     def read_string(self, *, encoding='ascii') -> str:
-        "Read null-terminated string."
+        """Read null-terminated string.
+        """
         i = self.pos
         while i < self.buffer_size and safe_ord(self.raw[i]) != 0:
             i += 1
@@ -255,22 +278,27 @@ class MemoryBuffer:
         self.pos += 1
         return result
     def read_pascal_string(self, *, encoding='ascii') -> str:
-        "Read Pascal string (1 byte length followed by string data)."
+        """Read Pascal string (1 byte length followed by string data).
+        """
         return self.read(self.read_byte()).decode(encoding)
     def read_sized_string(self, *, encoding='ascii') -> str:
-        "Read string (2 byte length followed by data)."
+        """Read string (2 byte length followed by data).
+        """
         return self.read(self.read_short()).decode(encoding)
     def read_bytes(self) -> bytes:
-        "Read content of binary cluster (2 bytes data length followed by data)."
+        """Read content of binary cluster (2 bytes data length followed by data).
+        """
         return self.read(self.read_short())
     # Properties
     @property
     def buffer_size(self) -> int:
-        "Current buffer size in bytes."
+        """Current buffer size in bytes.
+        """
         return len(self.raw)
     @property
     def last_data(self) -> int:
-        "Index of first non-zero byte when searched from the end of buffer."
+        """Index of first non-zero byte when searched from the end of buffer.
+        """
         i = len(self.raw) - 1
         while i >= 0:
             if safe_ord(self.raw[i]) != 0:

@@ -50,20 +50,24 @@ TConvertFromStr = Callable[[Type, str], Any]
 
 @dataclass
 class Convertor(Distinct):
-    "Data convertor registry entry."
+    """Data convertor registry entry.
+    """
     cls: Type
     to_str: TConvertToStr
     from_str: TConvertFromStr
     def get_key(self) -> Hashable:
-        """Returns instance key."""
+        """Returns instance key.
+        """
         return self.cls
     @property
     def name(self) -> str:
-        "Type name"
+        """Type name.
+        """
         return self.cls.__name__
     @property
     def full_name(self) -> str:
-        "Type name incl. source module"
+        """Type name including source module.
+        """
         return f'{self.cls.__module__}.{self.cls.__name__}'
 
 _convertors: Registry = Registry()
@@ -77,11 +81,13 @@ TRUE_STR = ['yes', 'true', 'on', 'y', '1']
 FALSE_STR = ['no', 'false', 'off', 'n', '0']
 
 def any2str(value: Any) -> str:
-    "Converts value to string using `str(value)`."
+    """Converts value to string using `str(value)`.
+    """
     return str(value)
 
 def str2any(cls: Type, value: str) -> Any:
-    "Converts string to data type value using `type(value)`."
+    """Converts string to data type value using `type(value)`.
+    """
     return cls(value)
 
 def register_convertor(cls: Type, *,

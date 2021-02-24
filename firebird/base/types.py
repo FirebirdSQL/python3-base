@@ -107,7 +107,8 @@ class Singleton(metaclass=SingletonMeta):
 # Sentinels
 
 class SentinelMeta(type):
-    "Metaclass for `Sentinel`."
+    """Metaclass for `Sentinel`.
+    """
     def __call__(cls: Sentinel, *args, **kwargs):
         name = args[0].upper()
         obj = cls.instances.get(name)
@@ -133,10 +134,12 @@ class Sentinel(metaclass=SentinelMeta):
         #: Sentinel name.
         self.name = name.upper()
     def __str__(self):
-        "Returns name"
+        """Returns name.
+        """
         return self.name
     def __repr__(self):
-        "Returns Sentinel('name')"
+        """Returns Sentinel('name').
+        """
         return f"Sentinel('{self.name}')"
 
 # Useful sentinel objects
@@ -210,13 +213,15 @@ class CachedDistinct(Distinct, metaclass=CachedDistinctMeta):
 
 # Enums
 class ByteOrder(Enum):
-    """Byte order for storing numbers in binary `.MemoryBuffer`."""
+    """Byte order for storing numbers in binary `.MemoryBuffer`.
+    """
     LITTLE = 'little'
     BIG = 'big'
     NETWORK = BIG
 
 class ZMQTransport(IntEnum):
-    """ZeroMQ transport protocol."""
+    """ZeroMQ transport protocol.
+    """
     UNKNOWN = 0 # Not a valid option, defined only to handle undefined values
     INPROC = 1
     IPC = 2
@@ -226,7 +231,8 @@ class ZMQTransport(IntEnum):
     VMCI = 6
 
 class ZMQDomain(IntEnum):
-    """ZeroMQ address domain."""
+    """ZeroMQ address domain.
+    """
     UNKNOWN = 0  # Not a valid option, defined only to handle undefined values
     LOCAL = 1    # Within process (inproc)
     NODE = 2     # On single node (ipc or tcp loopback)
@@ -258,17 +264,20 @@ class ZMQAddress(str):
         return f"ZMQAddress('{self}')"
     @property
     def protocol(self) -> ZMQTransport:
-        "Transport protocol."
+        """Transport protocol.
+        """
         protocol, _ = self.split('://', 1)
         return ZMQTransport._member_map_[protocol.upper()]
     @property
     def address(self) -> str:
-        "Endpoint address."
+        """Endpoint address.
+        """
         _, address = self.split('://', 1)
         return address
     @property
     def domain(self) -> ZMQDomain:
-        "Endpoint address domain."
+        """Endpoint address domain.
+        """
         if self.protocol == ZMQTransport.INPROC:
             return ZMQDomain.LOCAL
         if self.protocol == ZMQTransport.IPC:
@@ -306,23 +315,27 @@ class MIME(str):
         return f"MIME('{self}')"
     @property
     def mime_type(self) -> str:
-        "MIME type specification: <type>/<subtype>."
+        """MIME type specification: <type>/<subtype>.
+        """
         if self._fp_ != -1:
             return self[:self._fp_]
         return self
     @property
     def type(self) -> str:
-        "MIME type."
+        """MIME type.
+        """
         return self[:self._bs_]
     @property
     def subtype(self) -> str:
-        "MIME subtype."
+        """MIME subtype.
+        """
         if self._fp_ != -1:
             return self[self._bs_ + 1:self._fp_]
         return self[self._bs_ + 1:]
     @property
     def params(self) -> Dict[str, str]:
-        "MIME parameters."
+        """MIME parameters.
+        """
         if self._fp_ != -1:
             return {k.strip(): v.strip() for k, v
                     in (x.split('=') for x in self[self._fp_+1:].split(';'))}
@@ -381,7 +394,8 @@ class PyCode(str):
         return new
     @property
     def code(self):
-        "Python code ready to be appased to `exec`."
+        """Python code ready to be appased to `exec`.
+        """
         return self._code_
 
 class PyCallable(str):
@@ -449,7 +463,7 @@ def load(spec: str) -> Any:
     """Return object from module. Module is imported if necessary.
 
     Arguments:
-        spec: Object specification in format `module[.submodule.[submodule...]]:object_name`
+        spec: Object specification in format `module[.submodule...]:object_name[.object_name...]`
 
     """
     module_spec, name = spec.split(':')
@@ -457,4 +471,7 @@ def load(spec: str) -> Any:
         module = sys.modules[module_spec]
     else:
         module = import_module(module_spec)
-    return getattr(module, name)
+    result = module
+    for item in name.split('.'):
+        result = getattr(result, item)
+    return result

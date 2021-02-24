@@ -2,10 +2,42 @@
 Changelog
 #########
 
+Version 1.2.0
+=============
+
+* Build scheme changed to `PEP 517`.
+* Various changes to documentation and type hint adjustments.
+* `~firebird.base.config` module:
+
+  - **BREAKING CHANGE**: `.ApplicationDirectoryScheme` was replaced by
+    `~firebird.base.config.DirectoryScheme` class, and
+    `~firebird.base.config.get_directory_scheme()` has changed signature.
+  - Directory scheme was reworked and now also supports concept of HOME directory.
+  - New MacOS directory scheme support. As I don't have access to MacOS, this support
+    should be considered EXPERIMENTAL. Any feedback about it's correctness is welcome.
+  - Added: New `.Config` constructor keyword-only `bool` argument `optional` and
+    associated `~Config.optional` read-only property.
+  - Added: `.Config.has_value()` function.
+  - New class: `.PathOption` for Configuration options with `pathlib.Path` value.
+* `~firebird.base.protobuf` module:
+
+  - Added: function `.get_message_factory`.
+* `~firebird.base.signal` module:
+
+  - Fix: Bug in `eventsocket` signature handling.
+* `~firebird.base.trace` module:
+
+  - Added: `apply_to_descendants` boolean configuration option to apply configuration also
+    to all registered descendant classes. The default value is `True`.
+
 Version 1.1.0
 =============
 
 * New module: `signal` - Callback system based on Signals and Slots, and "Delphi events"
+* `~firebird.base.types` module:
+
+  - `~firebird.base.types.load` function now supports `object_name[.object_name...]`
+    specifications instead single `object_name`.
 * `~firebird.base.config` module:
 
   - New class `.ApplicationDirectoryScheme`

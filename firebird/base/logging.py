@@ -45,7 +45,8 @@ from .types import UNDEFINED, DEFAULT, ANY, ALL, Distinct, CachedDistinct, Senti
 from .collections import Registry
 
 class LogLevel(IntEnum):
-    "Shadow enumeration for logging levels"
+    """Shadow enumeration for logging levels.
+    """
     NOTSET = 0
     DEBUG = 10
     INFO = 20
@@ -56,7 +57,8 @@ class LogLevel(IntEnum):
     WARN = WARNING
 
 class BindFlag(Flag):
-    "Internal flags used by `LoggingManager`."
+    """Internal flags used by `LoggingManager`.
+    """
     DIRECT = auto()
     ANY_AGENT = auto()
     ANY_CTX = auto()
@@ -84,10 +86,12 @@ class FBLoggerAdapter(LoggerAdapter, CachedDistinct):
         self.topic: str = topic
     @classmethod
     def extract_key(cls, *args, **kwargs) -> Hashable:
-        "Returns instance key extracted from constructor arguments."
+        """Returns instance key extracted from constructor arguments.
+        """
         return (args[1], args[2])
     def get_key(self) -> Hashable: # pragma: no cover
-        "Returns instance key."
+        """Returns instance key.
+        """
         return (self.topic, self.agent, self.context)
     def process(self, msg, kwargs) -> Tuple[str, Dict]:
         """Process the logging message and keyword arguments passed into
@@ -127,7 +131,8 @@ class FBLoggerAdapter(LoggerAdapter, CachedDistinct):
 
 @dataclass(order=True, frozen=True)
 class BindInfo(Distinct):
-    "Information about Logger binding."
+    """Information about Logger binding.
+    """
     topic: str
     agent: str
     context: str
@@ -155,7 +160,8 @@ class LoggingIdMixin:
         return self.logging_id
     @property
     def logging_id(self) -> str:
-        "Returns `_logging_id_` attribute if defined, else returns qualified class name."
+        """Returns `_logging_id_` attribute if defined, else returns qualified class name.
+        """
         return getattr(self, '_logging_id_', self.__class__.__qualname__)
 
 class LoggingManager:

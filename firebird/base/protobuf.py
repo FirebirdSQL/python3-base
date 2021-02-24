@@ -38,6 +38,7 @@ from __future__ import annotations
 from typing import Dict, Any, Callable, cast
 from dataclasses import dataclass
 from pkg_resources import iter_entry_points
+from google.protobuf.message import Message as ProtoMessage
 from google.protobuf.descriptor import EnumDescriptor
 from google.protobuf.struct_pb2 import Struct as StructProto
 from google.protobuf import json_format, struct_pb2, any_pb2, duration_pb2, empty_pb2, \
@@ -62,7 +63,8 @@ class ProtoMessageType(Distinct):
     name: str
     constructor: Callable
     def get_key(self) -> Any:
-        "Returns `name`."
+        """Returns `name`.
+        """
         return self.name
 
 @dataclass(eq=True, order=True, frozen=True)
@@ -71,7 +73,8 @@ class ProtoEnumType(Distinct):
     """
     descriptor: EnumDescriptor
     def get_key(self) -> Any:
-        "Returns `name`."
+        """Returns `name`.
+        """
         return self.name
     def __getattr__(self, name):
         """Returns the value corresponding to the given enum name."""
@@ -108,7 +111,8 @@ class ProtoEnumType(Distinct):
         raise KeyError(f"Enum {self.name} has no name defined for value {number}")
     @property
     def name(self) -> str:
-        "Full enum type name."
+        """Full enum type name.
+        """
         return self.descriptor.full_name
 
 _msgreg: Registry = Registry()
@@ -126,7 +130,7 @@ def dict2struct(value: Dict) -> StructProto:
     struct.update(value)
     return struct
 
-def create_message(name: str, serialized: bytes = None) -> Any:
+def create_message(name: str, serialized: bytes = None) -> ProtoMessage:
     """Returns new protobuf message instance.
 
     Arguments:
@@ -143,6 +147,19 @@ def create_message(name: str, serialized: bytes = None) -> Any:
     if serialized is not None:
         result.ParseFromString(serialized)
     return result
+
+def get_message_factory(name: str) -> Callable:
+    """Returns callable that creates new protobuf messages of specified name.
+
+    Arguments:
+        name: Fully qualified protobuf message name.
+
+    Raises:
+        KeyError: When message type is not registered.
+    """
+    if (msg := _msgreg.get(name)) is None:
+        raise KeyError(f"Unregistered protobuf message '{name}'")
+    return cast(ProtoMessageType, msg).constructor
 
 def is_msg_registered(name: str) -> bool:
     """Returns True if specified `name` refers to registered protobuf message type.
@@ -174,14 +191,15 @@ def get_enum_field_type(msg, field_name: str) -> str:
         raise KeyError(f"Message does not have field '{field_name}'")
     return fdesc.enum_type.full_name
 
-def get_enum_value_name(enum_type_name: str, value: Any) -> str:
+def get_enum_value_name(enum_type_name: str, value: int) -> str:
     """Returns name for the enum value.
     """
     return get_enum_type(enum_type_name).get_value_name(value)
 
 
 def register_decriptor(file_descriptor) -> None:
-    "Registers enums and messages defined by protobuf file DESCRIPTOR."
+    """Registers enums and messages defined by protobuf file DESCRIPTOR.
+    """
     for msg_desc in file_descriptor.message_types_by_name.values():
         _msgreg.store(ProtoMessageType(msg_desc.full_name, msg_desc._concrete_class))
     for enum_desc in file_descriptor.enum_types_by_name.values():
@@ -190,7 +208,7 @@ def register_decriptor(file_descriptor) -> None:
 def load_registered(group: str) -> None: # pragma: no cover
     """Load registered protobuf packages.
 
-    Protobuf packages must register the pb2-file DESCRIPTOR in `entry_point` section of
+    Protobuf packages must register the pb2-file DESCRIPTOR in `entry_points` section of
     `setup.cfg` file.
 
     Arguments:

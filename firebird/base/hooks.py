@@ -46,7 +46,8 @@ from .collections import Registry
 
 @dataclass(order=True, frozen=True)
 class Hook(Distinct):
-    "Hook registration info."
+    """Hook registration info.
+    """
     #: Event identification
     event: Any
     #: Hookable class
@@ -56,11 +57,13 @@ class Hook(Distinct):
     #: List of callbacks
     callbacks: List[Callable] = field(default_factory=list)
     def get_key(self) -> Any:
-        "Returns hook key"
+        """Returns hook key.
+        """
         return (self.event, self.cls, self.instance)
 
 class HookFlag(Flag):
-    "Internally used flags."
+    """Internally used flags.
+    """
     NONE = 0
     INSTANCE = auto()
     CLASS = auto()
@@ -184,7 +187,8 @@ class HookManager(Singleton):
                 for h in self.hooks:
                     self._update_flags(h.event, h.cls, h.instance)
     def remove_all_hooks(self) -> None:
-        "Removes all installed hooks."
+        """Removes all installed hooks.
+        """
         self.hooks.clear()
         self.flags = HookFlag.NONE
     def reset(self) -> None:

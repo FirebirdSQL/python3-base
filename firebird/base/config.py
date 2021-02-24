@@ -42,12 +42,15 @@ that supports:
 * direct manipulation of configuration values
 * reading from (and writing into) configuration in `configparser` format
 * exchanging configuration (for example between processes) using Google protobuf messages
+* application directory scheme
 """
 
 from __future__ import annotations
 from typing import Generic, Type, Any, List, Dict, Union, Sequence, Callable, Optional, \
      TypeVar, cast, get_type_hints
 from abc import ABC, abstractmethod
+import platform
+from pathlib import Path
 from uuid import UUID
 from decimal import Decimal, DecimalException
 from configparser import ConfigParser, DEFAULTSECT
@@ -82,122 +85,91 @@ def create_config(_cls: Type[Config], name: str) -> Config: # pragma: no cover
     return _cls(name)
 
 
-class ApplicationDirectoryScheme(ABC):
-    """Abstract base classes to provide paths to typically used directories that conform
-    to chosen directory scheme.
+class DirectoryScheme:
+    """Class that provide paths to typically used application directories.
+
+    Default scheme uses HOME directory as root for other directories. The HOME is
+    determined as follows:
+
+    1. If environment variable "<app_name>_HOME" exists, its value is used as HOME directory.
+    2. HOME directory is set to current working directory.
 
     Note:
-        You may use `platform.system` call to determine the scheme name suitable
-        for platform where your application is running.
+        All paths are set when the instance is created and can be changed later.
     """
-    @abstractmethod
-    def __init__(self, app_name: str):
+    def __init__(self, name: str, version: str=None):
         """
         Arguments:
-            app_name: Appplication name to be used as HOME directory.
+            name: Appplication name.
+            version: Application version.
         """
+        self.name: str = name
+        self.version: str = version
+        home = self.home
+        self.dir_map: Dict[str, Path] = {'config': home / 'config',
+                                         'run_data': home / 'run_data',
+                                         'logs': home / 'logs',
+                                         'data': home / 'data',
+                                         'tmp': home / 'tmp',
+                                         'cache': home / 'cache',
+                                         'srv': home / 'srv',
+                                         'user_config': home / 'user_config',
+                                         'user_data': home / 'user_data',
+                                         'user_sync': home / 'user_sync',
+                                         'user_cache': home / 'user_cache',
+                                      }
+    def has_home_env(self) -> bool:
+        """Returns True if HOME directory is set by "<app_name>_HOME" environment variable.
+        """
+        return os.getenv(f'{self.name.upper()}_HOME') is not None
     @property
-    @abstractmethod
-    def config(self) -> Path:
-        """Directory for host-specific system-wide configuration files.
+    def home(self) -> Path:
+        """HOME directory. Either path set by "<app_name>_HOME" environment variable, or
+        current working directory.
         """
-    @property
-    @abstractmethod
-    def run_data(self) -> Path:
-        """Directory for run-time variable data that may not persist over boot.
-        """
-    @property
-    @abstractmethod
-    def logs(self) -> Path:
-        """Directory for log files.
-        """
-    @property
-    @abstractmethod
-    def data(self) -> Path:
-        """Directory for state information / persistent data modified by application as
-        it runs.
-        """
-    @property
-    @abstractmethod
-    def tmp(self) -> Path:
-        """Directory for temporary files to be preserved between reboots.
-        """
-    @property
-    @abstractmethod
-    def cache(self) -> Path:
-        """Directory for application cache data.
-
-        Such data are locally generated as a result of time-consuming I/O or calculation.
-        The application must be able to regenerate or restore the data. The cached files
-        can be deleted without loss of data.
-        """
-    @property
-    @abstractmethod
-    def srv(self) -> Path:
-        """Directory for site-specific data served by this system, such as data and
-        scripts for web servers, data offered by FTP servers, and repositories for
-        version control systems etc.
-        """
-    @property
-    @abstractmethod
-    def user_config(self) -> Path:
-        """Directory for user-specific configuration.
-        """
-    @property
-    @abstractmethod
-    def user_data(self) -> Path:
-        """Directory for User local data.
-        """
-    @property
-    @abstractmethod
-    def user_sync(self) -> Path:
-        """Directory for user data synced accross systems (roaming).
-        """
-    @property
-    @abstractmethod
-    def user_cache(self) -> Path:
-        """Directory for user-specific application cache data.
-        """
-
-class _WindowsDirectoryScheme(ApplicationDirectoryScheme):
-    """Provides paths to typically used directories that conform to Windows standards.
-    """
-    def __init__(self, app_name: str):
-        """
-        Arguments:
-            name: Appplication name to be used as HOME directory.
-            scheme: Name of directory scheme.
-        """
-        self.name: str = app_name
-        self.__pd: Path = Path(os.path.expandvars('%PROGRAMDATA%'))
-        self.__lad: Path = Path(os.path.expandvars('%LOCALAPPDATA%'))
-        self.__ad: Path = Path(os.path.expandvars('%APPDATA%'))
+        home = os.getenv(f'{self.name.upper()}_HOME')
+        return Path(home) if home is not None else Path(os.getcwd())
     @property
     def config(self) -> Path:
         """Directory for host-specific system-wide configuration files.
         """
-        return self.__pd / self.name / 'config'
+        return self.dir_map['config']
+    @config.setter
+    def config(self, path: Path) -> None:
+        self.dir_map['config'] = path
     @property
     def run_data(self) -> Path:
         """Directory for run-time variable data that may not persist over boot.
         """
-        return self.__pd / self.name / 'run'
+        return self.dir_map['run_data']
+    @run_data.setter
+    def run_data(self, path: Path) -> None:
+        self.dir_map['run_data'] = path
     @property
     def logs(self) -> Path:
         """Directory for log files.
         """
-        return self.__pd / self.name / 'log'
+        return self.dir_map['logs']
+    @logs.setter
+    def logs(self, path: Path) -> None:
+        self.dir_map['logs'] = path
     @property
     def data(self) -> Path:
         """Directory for state information / persistent data modified by application as
         it runs.
         """
-        return self.__pd / self.name / 'data'
+        return self.dir_map['data']
+    @data.setter
+    def data(self, path: Path) -> None:
+        self.dir_map['data'] = path
     @property
     def tmp(self) -> Path:
         """Directory for temporary files to be preserved between reboots.
         """
-        return self.__pd / self.name / 'tmp'
+        return self.dir_map['tmp']
+    @tmp.setter
+    def tmp(self, path: Path) -> None:
+        self.dir_map['tmp'] = path
     @property
     def cache(self) -> Path:
         """Directory for application cache data.
@@ -206,124 +178,167 @@ class _WindowsDirectoryScheme(ApplicationDirectoryScheme):
         The application must be able to regenerate or restore the data. The cached files
         can be deleted without loss of data.
         """
-        return self.__pd / self.name / 'cache'
+        return self.dir_map['cache']
+    @cache.setter
+    def cache(self, path: Path) -> None:
+        self.dir_map['cache'] = path
     @property
     def srv(self) -> Path:
         """Directory for site-specific data served by this system, such as data and
         scripts for web servers, data offered by FTP servers, and repositories for
         version control systems etc.
         """
-        return self.__pd / self.name / 'srv'
+        return self.dir_map['srv']
+    @srv.setter
+    def srv(self, path: Path) -> None:
+        self.dir_map['srv'] = path
     @property
     def user_config(self) -> Path:
         """Directory for user-specific configuration.
         """
-        return self.__lad / self.name / 'config'
+        return self.dir_map['user_config']
+    @user_config.setter
+    def user_config(self, path: Path) -> None:
+        self.dir_map['user_config'] = path
     @property
     def user_data(self) -> Path:
         """Directory for User local data.
         """
-        return self.__lad / self.name / 'data'
+        return self.dir_map['user_data']
+    @user_data.setter
+    def user_data(self, path: Path) -> None:
+        self.dir_map['user_data'] = path
     @property
     def user_sync(self) -> Path:
         """Directory for user data synced accross systems (roaming).
         """
-        return self.__ad / self.name
+        return self.dir_map['user_sync']
+    @user_sync.setter
+    def user_sync(self, path: Path) -> None:
+        self.dir_map['user_sync'] = path
     @property
     def user_cache(self) -> Path:
         """Directory for user-specific application cache data.
         """
-        return self.__lad / self.name / 'cache'
+        return self.dir_map['user_cache']
+    @user_cache.setter
+    def user_cache(self, path: Path) -> None:
+        self.dir_map['user_cache'] = path
 
-class _LinuxDirectoryScheme(ApplicationDirectoryScheme):
-    """Provides paths to typically used directories that conform to Linux standards.
+
+class WindowsDirectoryScheme(DirectoryScheme):
+    """Directory scheme that conforms to Windows standards.
+
+    If HOME is defined using "<app_name>_HOME" environment variable, only user-specific
+    directories and TMP are set according to platform standars, while general directories
+    remain as defined by base `DirectoryScheme`.
     """
-    def __init__(self, app_name: str):
+    def __init__(self, name: str, version: str=None):
         """
         Arguments:
-            name: Appplication name to be used as HOME directory.
-            scheme: Name of directory scheme.
+            name: Appplication name.
+            version: Application version.
         """
-        self.name: str = app_name
-    @property
-    def config(self) -> Path:
-        """Directory for host-specific system-wide configuration files.
-        """
-        return Path('/etc') / self.name
-    @property
-    def run_data(self) -> Path:
-        """Directory for run-time variable data that may not persist over boot.
-        """
-        return Path('/run') / self.name
-    @property
-    def logs(self) -> Path:
-        """Directory for log files.
-        """
-        return Path('/var/log') / self.name
-    @property
-    def data(self) -> Path:
-        """Directory for state information / persistent data modified by application as
-        it runs.
-        """
-        return Path('/var/lib') / self.name
-    @property
-    def tmp(self) -> Path:
-        """Directory for temporary files to be preserved between reboots.
-        """
-        return Path('/var/tmp') / self.name
-    @property
-    def cache(self) -> Path:
-        """Directory for application cache data.
+        super().__init__(name, version)
+        app_dir = Path(self.name)
+        if self.version is not None:
+            app_dir /= self.version
+        pd = Path(os.path.expandvars('%PROGRAMDATA%'))
+        lad = Path(os.path.expandvars('%LOCALAPPDATA%'))
+        ad = Path(os.path.expandvars('%APPDATA%'))
+        # Set general directories only when HOME is not forced by environment variable.
+        if not self.has_home_env():
+            self.dir_map.update({'config': pd / app_dir / 'config',
+                                 'run_data': pd / app_dir / 'run',
+                                 'logs': pd / app_dir / 'log',
+                                 'data': pd / app_dir / 'data',
+                                 'cache': pd / app_dir / 'cache',
+                                 'srv': pd / app_dir / 'srv',
+                                 })
+        # Always set user-specific directories and TMP
+        self.dir_map.update({'tmp': lad / app_dir / 'tmp',
+                             'user_config': lad / app_dir / 'config',
+                             'user_data': lad / app_dir / 'data',
+                             'user_sync': ad / app_dir,
+                             'user_cache': lad / app_dir / 'cache',
+                             })
 
-        Such data are locally generated as a result of time-consuming I/O or calculation.
-        The application must be able to regenerate or restore the data. The cached files
-        can be deleted without loss of data.
-        """
-        return Path('/var/cache') / self.name
-    @property
-    def srv(self) -> Path:
-        """Directory for site-specific data served by this system, such as data and
-        scripts for web servers, data offered by FTP servers, and repositories for
-        version control systems etc.
-        """
-        return Path('/srv') / self.name
-    @property
-    def user_config(self) -> Path:
-        """Directory for user-specific configuration.
-        """
-        return Path('~/.config') / self.name
-    @property
-    def user_data(self) -> Path:
-        """Directory for User local data.
-        """
-        return Path('~/.local/share') / self.name
-    @property
-    def user_sync(self) -> Path:
-        """Directory for user data synced accross systems (roaming).
-        """
-        return Path('~/.local/sync') / self.name
-    @property
-    def user_cache(self) -> Path:
-        """Directory for user-specific application cache data.
-        """
-        return Path('~/.cache') / self.name
+class LinuxDirectoryScheme(DirectoryScheme):
+    """Directory scheme that conforms to Linux standards.
 
-def get_directory_scheme(name: str, app_name: str) -> ApplicationDirectoryScheme:
-    """Returns new `ApplicationDirectoryScheme` instance suitable for specified platform.
-
-    Arguments:
-        name: Name of Application Directory Scheme.
-        app_name: Appplication name to be used as HOME directory.
-
-    Raises:
-        ValueError: For unknown directory scheme.
+    If HOME is defined using "<app_name>_HOME" environment variable, only user-specific
+    directories and TMP are set according to platform standars, while general directories
+    remain as defined by base `DirectoryScheme`.
     """
-    if name == 'Windows':
-        return _WindowsDirectoryScheme(app_name)
-    elif name == 'Linux':
-        return _LinuxDirectoryScheme(app_name)
-    else:
-        raise ValueError(f"Unknown directory scheme '{name}'")
+    def __init__(self, name: str, version: str=None):
+        """
+        Arguments:
+            name: Appplication name.
+            version: Application version.
+        """
+        super().__init__(name, version)
+        app_dir = Path(self.name)
+        if self.version is not None:
+            app_dir /= self.version
+        # Set general directories only when HOME is not forced by environment variable.
+        if not self.has_home_env():
+            self.dir_map.update({'config': Path('/etc') / app_dir,
+                                 'run_data': Path('/run') / app_dir,
+                                 'logs': Path('/var/log') / app_dir,
+                                 'data': Path('/var/lib') / app_dir,
+                                 'cache': Path('/var/cache') / app_dir,
+                                 'srv': Path('/srv') / app_dir,
+                                 })
+        # Always set user-specific directories and TMP
+        self.dir_map.update({'tmp': Path('/var/tmp') / app_dir,
+                             'user_config': Path('~/.config').expanduser() / app_dir,
+                             'user_data': Path('~/.local/share').expanduser() / app_dir,
+                             'user_sync': Path('~/.local/sync').expanduser() / app_dir,
+                             'user_cache': Path('~/.cache').expanduser() / app_dir,
+                             })
+
+class MacOSDirectoryScheme(DirectoryScheme):
+    """Directory scheme that conforms to MacOS standards.
+
+    If HOME is defined using "<app_name>_HOME" environment variable, only user-specific
+    directories and TMP are set according to platform standars, while general directories
+    remain as defined by base `DirectoryScheme`.
+    """
+    def __init__(self, name: str, version: str=None):
+        """
+        Arguments:
+            name: Appplication name.
+            version: Application version.
+        """
+        super().__init__(name, version)
+        app_dir = Path(self.name)
+        if self.version is not None:
+            app_dir /= self.version
+        pd = Path('/Library/Application Support')
+        lad = Path('~/Library/Application Support').expanduser()
+        # Set general directories only when HOME is not forced by environment variable.
+        if not self.has_home_env():
+            self.dir_map.update({'config': pd / app_dir / 'config',
+                                 'run_data': pd / app_dir / 'run',
+                                 'logs': pd / app_dir / 'log',
+                                 'data': pd / app_dir / 'data',
+                                 'cache': pd / app_dir / 'cache',
+                                 'srv': pd / app_dir / 'srv',
+                                 })
+        # Always set user-specific directories and TMP
+        self.dir_map.update({'tmp': Path(os.getenv('TMPDIR')) / app_dir,
+                             'user_config': lad / app_dir / 'config',
+                             'user_data': lad / app_dir / 'data',
+                             'user_sync': lad / app_dir,
+                             'user_cache': Path('~/Library/Caches').expanduser() / app_dir / 'cache',
+                             })
+
+def get_directory_scheme(app_name: str, version: str=None) -> DirectoryScheme:
+    """Returns directory scheme for current platform.
+    """
+    return {'Windows': WindowsDirectoryScheme,
+            'Linux':LinuxDirectoryScheme,
+            'Darwin': MacOSDirectoryScheme}.get(platform.system(), DirectoryScheme)(app_name, version)
 
 T = TypeVar('T')
 
@@ -422,10 +437,12 @@ class Option(Generic[T], ABC):
     def get_config(self) -> str:
         """Returns string containing text lines suitable for use in configuration file
         processed with `~configparser.ConfigParser`.
-
-        Text lines with configuration start with comment marker ; and end with newline.
         """
         return ''.join(self._get_config_lines())
+    def has_value(self) -> bool:
+        """Returns True if option value is not None.
+        """
+        return self.get_value() is not None
     @abstractmethod
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -435,7 +452,8 @@ class Option(Generic[T], ABC):
         """
     @abstractmethod
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
     @abstractmethod
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -448,10 +466,12 @@ class Option(Generic[T], ABC):
         """
     @abstractmethod
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
     @abstractmethod
     def get_value(self) -> T:
-        "Return current option value."
+        """Returns current option value.
+        """
     @abstractmethod
     def set_value(self, value: T) -> None:
         """Set new option value.
@@ -488,12 +508,15 @@ class Config:
     Important:
         Descendants must define individual options and sub configs as instance attributes.
     """
-    def __init__(self, name: str):
+    def __init__(self, name: str, *, optional: bool=False):
         """
         Arguments:
             name: Name associated with Config (default section name).
+            optional: Whether config is optional (False) or mandatory (True) for
+                      configuration file (see `.load_config()` for details).
         """
         self._name: str = name
+        self._optional: bool = optional
     def validate(self) -> None:
         """Checks whether:
             - all required options have value other than None.
@@ -525,8 +548,6 @@ class Config:
     def get_config(self) -> str:
         """Returns string containing text lines suitable for use in configuration file
         processed with `~configparser.ConfigParser`.
-
-        Text lines with configuration start with comment marker ; and end with newline.
         """
         lines = [f'[{self.name}]\n', ';\n']
         for line in self.get_description().splitlines():
@@ -549,12 +570,16 @@ class Config:
 
         Raises:
             ValueError: When any option value cannot be loadded.
-            KeyError: If section does not exists, and it's not `configparser.DEFAULTSECT`.
+            KeyError: If section does not exists, and config is not `optional` or section is
+                      not `configparser.DEFAULTSECT`.
         """
         if section is None:
             section = self.name
-        if not config.has_section(section) and section != DEFAULTSECT:
-            raise Error(f"Configuration error: section '{section}' not found!")
+        if not config.has_section(section):
+            if self._optional:
+                return
+            elif section != DEFAULTSECT:
+                raise Error(f"Configuration error: section '{section}' not found!")
         try:
             for option in self.options:
                 option.load_config(config, section)
@@ -587,11 +612,19 @@ class Config:
             subcfg.save_proto(proto.configs.get_or_create(subcfg.name))
     @property
     def name(self) -> str:
-        "Name associated with Config (default section name)."
+        """Name associated with Config (default section name).
+        """
         return self._name
     @property
+    def optional(self) -> bool:
+        """Whether config is optional (False) or mandatory (True) for configuration file
+        (see `.load_config()` for details).
+        """
+        return self._optional
+    @property
     def options(self) -> List[Option]:
-        "List of options defined for this Config instance."
+        """List of options defined for this Config instance.
+        """
         return [v for v in vars(self).values() if isinstance(v, Option)]
     @property
     def configs(self) -> List[Config]:
@@ -627,7 +660,8 @@ class StrOption(Option[str]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         if self._value is None:
             return '<UNDEFINED>'
         result = self._value
@@ -651,10 +685,12 @@ class StrOption(Option[str]):
         """
         self._value = value
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return self._value
     def get_value(self) -> str:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: str) -> None:
         """Set new option value.
@@ -718,7 +754,8 @@ class IntOption(Option[int]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         return '<UNDEFINED>' if self._value is None else str(self._value)
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -734,10 +771,12 @@ class IntOption(Option[int]):
             raise ValueError("Negative numbers not allowed")
         self._value = new
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return str(self._value)
     def get_value(self) -> int:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: int) -> None:
         """Set new option value.
@@ -807,7 +846,8 @@ class FloatOption(Option[float]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         return '<UNDEFINED>' if self._value is None else str(self._value)
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -820,10 +860,12 @@ class FloatOption(Option[float]):
         """
         self._value = float(value)
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return str(self._value)
     def get_value(self) -> float:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: float) -> None:
         """Set new option value.
@@ -887,7 +929,8 @@ class DecimalOption(Option[Decimal]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         return '<UNDEFINED>' if self._value is None else str(self._value)
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -903,10 +946,12 @@ class DecimalOption(Option[Decimal]):
         except DecimalException as exc:
             raise ValueError(str(exc))
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return str(self._value)
     def get_value(self) -> Decimal:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: Decimal) -> None:
         """Set new option value.
@@ -971,7 +1016,8 @@ class BoolOption(Option[bool]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         if self._value is None:
             return '<UNDEFINED>'
         return 'yes' if self._value else 'no'
@@ -986,10 +1032,12 @@ class BoolOption(Option[bool]):
         """
         self._value = self.from_str(bool, value)
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return str(self._value)
     def get_value(self) -> bool:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: bool) -> None:
         """Set new option value.
@@ -1054,7 +1102,8 @@ class ZMQAddressOption(Option[ZMQAddress]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         return '<UNDEFINED>' if self._value is None else self._value
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -1067,10 +1116,12 @@ class ZMQAddressOption(Option[ZMQAddress]):
         """
         self._value = ZMQAddress(value)
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return self._value
     def get_value(self) -> ZMQAddress:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: ZMQAddress) -> None:
         """Set new option value.
@@ -1146,7 +1197,8 @@ class EnumOption(Option[Enum]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         return '<UNDEFINED>' if self._value is None else self._value.name.lower()
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -1164,10 +1216,12 @@ class EnumOption(Option[Enum]):
             raise ValueError(f"Illegal value '{value}' for enum type "
                              f"'{self.datatype.__name__}'")
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return self._value.name
     def get_value(self) -> Enum:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: Enum) -> None:
         """Set new option value.
@@ -1245,7 +1299,8 @@ class FlagOption(Option[Flag]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         return '<UNDEFINED>' if self._value is None else self.get_as_str().lower()
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -1264,7 +1319,8 @@ class FlagOption(Option[Flag]):
                 raise ValueError(f"Illegal value '{name}' for flag option '{self.name}'")
         self.set_value(result)
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         if self._value._name_ is not None:
             return self._value.name
         members, uncovered = _decompose(self.datatype, self._value)
@@ -1272,7 +1328,8 @@ class FlagOption(Option[Flag]):
             return f'{members[0]._value_}'
         return ' | '.join([str(m._name_ or m._value_) for m in members])
     def get_value(self) -> Flag:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: Flag) -> None:
         """Set new option value.
@@ -1340,7 +1397,8 @@ class UUIDOption(Option[UUID]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         return '<UNDEFINED>' if self._value is None else str(self._value)
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -1353,10 +1411,12 @@ class UUIDOption(Option[UUID]):
         """
         self._value = UUID(value)
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return 'None' if self._value is None else self._value.hex
     def get_value(self) -> UUID:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: UUID) -> None:
         """Set new option value.
@@ -1416,7 +1476,8 @@ class MIMEOption(Option[MIME]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         return '<UNDEFINED>' if self._value is None else self._value
     def set_as_str(self, value: str) -> None:
         """Set new option value from string.
@@ -1429,10 +1490,12 @@ class MIMEOption(Option[MIME]):
         """
         self._value = MIME(value)
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return 'None' if self._value is None else self._value
     def get_value(self) -> MIME:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: MIME) -> None:
         """Set new option value.
@@ -1479,16 +1542,17 @@ class ListOption(Option[List]):
         """
         Arguments:
             name:        Option name.
-            item_type:   Datatype of list items. It could be a type or sequence of types. If multiple
-                         types are provided, each value in config file must have format:
-                         `type_name:value_as_str`.
+            item_type:   Datatype of list items. It could be a type or sequence of types.
+                         If multiple types are provided, each value in config file must
+                         have format: `type_name:value_as_str`.
             description: Option description. Can span multiple lines.
             required:    True if option must have a value.
             default:     Default option value.
-            separator:   String that separates list item values when options value is read from
-                         `ConfigParser`. It's possible to use a line break as separator.
-                         If separator is `None` [default] and the value contains line breaks, it uses
-                         the line break as separator, otherwise it uses comma as separator.
+            separator:   String that separates list item values when options value is read
+                         from `ConfigParser`. It's possible to use a line break as separator.
+                         If separator is `None` [default] and the value contains line breaks,
+                         it uses the line break as separator, otherwise it uses comma as
+                         separator.
         """
         self._value: List = None
         #: Datatypes of list items. If there is more than one type, each value in
@@ -1514,7 +1578,8 @@ class ListOption(Option[List]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         if self._value is None:
             return '<UNDEFINED>'
         result = [convert_to_str(i) for i in self._value]
@@ -1554,14 +1619,16 @@ class ListOption(Option[List]):
                 new.append(convertor.from_str(itype, item.strip()))
             self._value = new
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         result = [convert_to_str(i) for i in self._value]
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ','
         return sep.join(result)
     def get_value(self) -> List:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: List) -> None:
         """Set new option value.
@@ -1632,7 +1699,8 @@ class PyExprOption(Option[PyExpr]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         if self._value is None:
             return '<UNDEFINED>'
         result = self._value
@@ -1656,10 +1724,12 @@ class PyExprOption(Option[PyExpr]):
         """
         self._value = PyExpr(value)
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return self._value
     def get_value(self) -> PyExpr:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: PyExpr) -> None:
         """Set new option value.
@@ -1727,7 +1797,8 @@ class PyCodeOption(Option[PyCode]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         if self._value is None:
             return '<UNDEFINED>'
         result = self._value
@@ -1752,10 +1823,12 @@ class PyCodeOption(Option[PyCode]):
         value = unindent_verticals(value)
         self._value = PyCode(value)
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return self._value
     def get_value(self) -> PyCode:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: PyCode) -> None:
         """Set new option value.
@@ -1829,7 +1902,8 @@ class PyCallableOption(Option[PyCallable]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         if self._value is None:
             return '<UNDEFINED>'
         result = self._value
@@ -1854,10 +1928,12 @@ class PyCallableOption(Option[PyCallable]):
         value = unindent_verticals(value)
         self.set_value(PyCallable(value))
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         return self._value
     def get_value(self) -> PyCallable:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: PyCallable) -> None:
         """Set new option value.
@@ -1988,7 +2064,8 @@ class ConfigOption(Option[str]):
         """
         return self._value.name
     def get_value(self) -> Config:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: str) -> None:
         """Set new option value.
@@ -2080,7 +2157,8 @@ class ConfigListOption(Option[List]):
         """
         self._value = []
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         if self._value is None:
             return '<UNDEFINED>'
         result = [i.name for i in self._value]
@@ -2107,14 +2185,16 @@ class ConfigListOption(Option[List]):
                 new.append(self.item_type(item.strip()))
             self._value = new
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         result = [i.name for i in self._value]
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ','
         return sep.join(result)
     def get_value(self) -> List:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: List) -> None:
         """Set new option value.
@@ -2224,7 +2304,8 @@ class DataclassOption(Option[Any]):
         """
         self._value = self.default if to_default else None
     def get_formatted(self) -> str:
-        "Return value formatted for use in config file."
+        """Returns value formatted for use in config file.
+        """
         if self._value is None:
             return '<UNDEFINED>'
         result = self._get_str_fields()
@@ -2264,14 +2345,16 @@ class DataclassOption(Option[Any]):
                     raise ValueError(f"Illegal value '{value}' for option '{self.name}'")
             self._value = new_val
     def get_as_str(self) -> str:
-        "Return value as string."
+        """Returns value as string.
+        """
         result = self._get_str_fields()
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ','
         return sep.join(result)
     def get_value(self) -> Any:
-        "Return current option value."
+        """Returns current option value.
+        """
         return self._value
     def set_value(self, value: Any) -> None:
         """Set new option value.
@@ -2315,3 +2398,82 @@ class DataclassOption(Option[Any]):
             proto.options[self.name].as_string = sep.join(result)
     value: Any = property(get_value, set_value, doc="Current option value")
 
+class PathOption(Option[str]):
+    """Configuration option with `pathlib.Path` value.
+    """
+    def __init__(self, name: str, description: str, *, required: bool=False, default: Path=None):
+        """
+        Arguments:
+            name: Option name.
+            description: Option description. Can span multiple lines.
+            required: True if option must have a value.
+            default: Default option value.
+        """
+        self._value: Path = None
+        super().__init__(name, Path, description, required, default)
+    def clear(self, *, to_default: bool=True) -> None:
+        """Clears the option value.
+
+        Arguments:
+            to_default: If True, sets the option value to default value, else to None.
+        """
+        self._value = self.default if to_default else None
+    def get_formatted(self) -> str:
+        """Returns value formatted for use in config file.
+        """
+        return '<UNDEFINED>' if self._value is None else str(self._value)
+    def set_as_str(self, value: str) -> None:
+        """Set new option value from string.
+
+        Arguments:
+            value: New option value.
+
+        Raises:
+            ValueError: When the argument is not a valid option value.
+        """
+        self._value = Path(value)
+    def get_as_str(self) -> str:
+        """Returns value as string.
+        """
+        return str(self._value)
+    def get_value(self) -> Path:
+        """Returns current option value.
+        """
+        return self._value
+    def set_value(self, value: Path) -> None:
+        """Set new option value.
+
+        Arguments:
+            value: New option value.
+
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
+        self._check_value(value)
+        self._value = value
+    def load_proto(self, proto: ConfigProto) -> None:
+        """Deserialize value from `.ConfigProto` message.
+
+        Arguments:
+            proto: Protobuf message that may contains options value.
+
+        Raises:
+            TypeError: When the new value is of the wrong type.
+            ValueError: When the argument is not a valid option value.
+        """
+        if self.name in proto.options:
+            opt = proto.options[self.name]
+            if opt.HasField('as_string'):
+                self.set_as_str(opt.as_string)
+            else:
+                raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
+    def save_proto(self, proto: ConfigProto) -> None:
+        """Serialize value into `.ConfigProto` message.
+
+        Arguments:
+            proto: Protobuf message where option value should be stored.
+        """
+        if self._value is not None:
+            proto.options[self.name].as_string = self.get_as_str()
+    value: Path = property(get_value, set_value, doc="Current option value")
