@@ -241,35 +241,20 @@ option_name =
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.StrOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: str
-;
-; [optional] description
-;
+        lines = """; description
+; Type: str
 ;option_name = DEFAULT
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: str
-;
-; [optional] description
-;
+        lines = """; description
+; Type: str
 option_name = Multiline
    value
 """
         opt.set_value("Multiline\nvalue")
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: str
-;
-; [optional] description
-;
+        lines = """; description
+; Type: str
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -407,34 +392,19 @@ option_name = bad_value
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.IntOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: int
-;
-; [optional] description
-;
+        lines = """; description
+; Type: int
 ;option_name = 3000
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: int
-;
-; [optional] description
-;
+        lines = """; description
+; Type: int
 option_name = 500
 """
         opt.set_value(500)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: int
-;
-; [optional] description
-;
+        lines = """; description
+; Type: int
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -575,34 +545,19 @@ option_name = bad_value
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.FloatOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: float
-;
-; [optional] description
-;
+        lines = """; description
+; Type: float
 ;option_name = 3000.0
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: float
-;
-; [optional] description
-;
+        lines = """; description
+; Type: float
 option_name = 500.0
 """
         opt.set_value(500.0)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: float
-;
-; [optional] description
-;
+        lines = """; description
+; Type: float
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -744,34 +699,19 @@ option_name = bad_value
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.DecimalOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: Decimal
-;
-; [optional] description
-;
+        lines = """; description
+; Type: Decimal
 ;option_name = 3000.0
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: Decimal
-;
-; [optional] description
-;
+        lines = """; description
+; Type: Decimal
 option_name = 500.120
 """
         opt.set_as_str('500.120')
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: Decimal
-;
-; [optional] description
-;
+        lines = """; description
+; Type: Decimal
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -910,34 +850,19 @@ option_name = bad_value
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.BoolOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: bool
-;
-; [optional] description
-;
+        lines = """; description
+; Type: bool
 ;option_name = no
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: bool
-;
-; [optional] description
-;
+        lines = """; description
+; Type: bool
 option_name = yes
 """
         opt.set_value(True)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: bool
-;
-; [optional] description
-;
+        lines = """; description
+; Type: bool
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -1106,38 +1031,20 @@ option_name = 1000
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.EnumOption('option_name', SimpleEnum, 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleEnum
-; values: unknown, ready, running, waiting, suspended, finished, aborted
-;
-; [optional] description
-;
+        lines = """; description
+; Type: enum [unknown, ready, running, waiting, suspended, finished, aborted]
 ;option_name = ready
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleEnum
-; values: unknown, ready, running, waiting, suspended, finished, aborted
-;
-; [optional] description
-;
+        lines = """; description
+; Type: enum [unknown, ready, running, waiting, suspended, finished, aborted]
 option_name = suspended
 """
         # Although NEW_VAL is STOPPED, the printout is SUSPENDED because STOPPED is an alias
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleEnum
-; values: unknown, ready, running, waiting, suspended, finished, aborted
-;
-; [optional] description
-;
+        lines = """; description
+; Type: enum [unknown, ready, running, waiting, suspended, finished, aborted]
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -1145,14 +1052,8 @@ option_name = <UNDEFINED>
         # Reduced option list
         opt = config.EnumOption('option_name', SimpleEnum, 'description',
                                 allowed=[SimpleEnum.UNKNOWN, SimpleEnum.RUNNING])
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleEnum
-; values: unknown, running
-;
-; [optional] description
-;
+        lines = """; description
+; Type: enum [unknown, running]
 ;option_name = <UNDEFINED>
 """
         self.assertEqual(opt.get_config(), lines)
@@ -1330,52 +1231,28 @@ option_name = 1000
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.FlagOption('option_name', SimpleIntFlag, 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleIntFlag
-; values: one, two, three, four, five
-;
-; [optional] description
-;
+        lines = """; description
+; Type: flag [one, two, three, four, five]
 ;option_name = four | three
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleIntFlag
-; values: one, two, three, four, five
-;
-; [optional] description
-;
+        lines = """; description
+; Type: flag [one, two, three, four, five]
 option_name = five
 """
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleIntFlag
-; values: one, two, three, four, five
-;
-; [optional] description
-;
+        lines = """; description
+; Type: flag [one, two, three, four, five]
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
         self.assertEqual(opt.get_config(), lines)
         # Reduced flag list
-        opt = config.EnumOption('option_name', SimpleIntFlag, 'description',
+        opt = config.FlagOption('option_name', SimpleIntFlag, 'description',
                                 allowed=[SimpleIntFlag.ONE, SimpleIntFlag.FOUR])
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleIntFlag
-; values: one, four
-;
-; [optional] description
-;
+        lines = """; description
+; Type: flag [one, four]
 ;option_name = <UNDEFINED>
 """
         self.assertEqual(opt.get_config(), lines)
@@ -1517,34 +1394,19 @@ option_name = BAD_UID
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.UUIDOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: UUID
-;
-; [optional] description
-;
+        lines = """; description
+; Type: UUID
 ;option_name = ede5cc42-de0d-11e9-9b5b-5404a6a1fd6e
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: UUID
-;
-; [optional] description
-;
+        lines = """; description
+; Type: UUID
 option_name = 92ef5c08-de0e-11e9-9b5b-5404a6a1fd6e
 """
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: UUID
-;
-; [optional] description
-;
+        lines = """; description
+; Type: UUID
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -1726,34 +1588,19 @@ option_name = text/plain;charset/utf-8
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.MIMEOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: MIME
-;
-; [optional] description
-;
+        lines = """; description
+; Type: MIME
 ;option_name = text/plain;charset=win1250
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: MIME
-;
-; [optional] description
-;
+        lines = """; description
+; Type: MIME
 option_name = application/x.fb.proto;type=firebird.butler.fbsd.ErrorDescription
 """
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: MIME
-;
-; [optional] description
-;
+        lines = """; description
+; Type: MIME
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -1891,34 +1738,19 @@ option_name = bad_value
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.ZMQAddressOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: ZMQAddress
-;
-; [optional] description
-;
+        lines = """; description
+; Type: ZMQAddress
 ;option_name = tcp://127.0.0.1:8001
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: ZMQAddress
-;
-; [optional] description
-;
+        lines = """; description
+; Type: ZMQAddress
 option_name = inproc://my-address
 """
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: ZMQAddress
-;
-; [optional] description
-;
+        lines = """; description
+; Type: ZMQAddress
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -1941,6 +1773,8 @@ class TestListOption(BaseConfigTest):
     def setUp(self):
         super().setUp()
         self.prepare()
+        x = (self.ITEM_TYPE, ) if isinstance(self.ITEM_TYPE, type) else self.ITEM_TYPE
+        self.TYPE_NAMES = ', '.join(t.__name__ for t in x)
     def prepare(self):
         x = '\n   '
         self.LONG_PRINT = f"\n   {x.join(self.LONG_VAL)}"
@@ -2075,50 +1909,28 @@ option_name =
     def test_get_config(self):
         opt = config.ListOption('option_name', self.ITEM_TYPE, 'description',
                                 default=self.DEFAULT_OPT_VAL)
-        lines = f"""; option_name
-; -----------
-;
-; data type: list
-;
-; [optional] description
-;
+        lines = f"""; description
+; Type: list [{self.TYPE_NAMES}]
 ;option_name = {self.DEFAULT_PRINT}
 """
-        #print(f"\n{opt.get_config()}")
         self.assertEqual(opt.get_config(), lines)
-        lines = f"""; option_name
-; -----------
-;
-; data type: list
-;
-; [optional] description
-;
+        lines = f"""; description
+; Type: list [{self.TYPE_NAMES}]
 option_name = {self.NEW_PRINT}
 """
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: list
-;
-; [optional] description
-;
+        lines = f"""; description
+; Type: list [{self.TYPE_NAMES}]
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
         self.assertEqual(opt.get_config(), lines)
-        lines = f"""; option_name
-; -----------
-;
-; data type: list
-;
-; [optional] description
-;
+        lines = f"""; description
+; Type: list [{self.TYPE_NAMES}]
 option_name = {self.LONG_PRINT}
 """
         opt.set_value(self.LONG_VAL)
-        #print(f'\n{opt.get_config()}')
         self.assertEqual(opt.get_config(), lines)
 
 class TestListOptionInt(TestListOption):
@@ -2499,34 +2311,19 @@ option_name = This is not a valid Python expression
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.PyExprOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: PyExpr
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyExpr
 ;option_name = DEFAULT
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: PyExpr
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyExpr
 option_name = this.value == "VALUE"
 """
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: PyExpr
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyExpr
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -2659,23 +2456,13 @@ option_name = This is not a valid Python code block
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.PyCodeOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: PyCode
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyCode
 ;option_name = DEFAULT
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: PyCode
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyCode
 option_name =
    | def pp(value):
    |     print("Value:",value,file=output)
@@ -2684,13 +2471,8 @@ option_name =
    |     pp(i)"""
         opt.set_value(self.PRESENT_VAL)
         self.assertEqual('\n'.join(x.rstrip() for x in opt.get_config().splitlines()), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: PyCode
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyCode
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -2848,36 +2630,21 @@ option_name =
     def test_get_config(self):
         opt = config.PyCallableOption('option_name', 'description', signature=signature(foo_func),
                                       default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: PyCallable
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyCallable
 ;option_name =
 ;   | def foo(value: int) -> int:
 ;   |     return value"""
         self.assertEqual('\n'.join(x.rstrip() for x in opt.get_config().splitlines()), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: PyCallable
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyCallable
 option_name =
    | def foo(value: int) -> int:
    |     return value * 5"""
         opt.set_value(self.PRESENT_VAL)
         self.assertEqual('\n'.join(x.rstrip() for x in opt.get_config().splitlines()), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: PyCallable
-;
-; [optional] description
-;
+        lines = """; description
+; Type: PyCallable
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -3030,34 +2797,22 @@ option_name = 1000
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.DataclassOption('option_name', SimpleDataclass, 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleDataclass
-;
-; [optional] description
-;
+        lines = """; description
+; Type: list of values, where each list item defines value for a dataclass field.
+; Item format: field_name:value_as_str
 ;option_name = name:default, priority:1, state:READY
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleDataclass
-;
-; [optional] description
-;
+        lines = """; description
+; Type: list of values, where each list item defines value for a dataclass field.
+; Item format: field_name:value_as_str
 option_name = name:master, priority:3, state:SUSPENDED
 """
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: SimpleDataclass
-;
-; [optional] description
-;
+        lines = """; description
+; Type: list of values, where each list item defines value for a dataclass field.
+; Item format: field_name:value_as_str
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -3190,34 +2945,19 @@ option_name =
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.PathOption('option_name', 'description', default=self.DEFAULT_OPT_VAL)
-        lines = f"""; option_name
-; -----------
-;
-; data type: Path
-;
-; [optional] description
-;
+        lines = f"""; description
+; Type: Path
 ;option_name = {self.DEFAULT_OPT_VAL}
 """
         self.assertEqual(opt.get_config(), lines)
-        lines = f"""; option_name
-; -----------
-;
-; data type: Path
-;
-; [optional] description
-;
+        lines = f"""; description
+; Type: Path
 option_name = {self.NEW_VAL}
 """
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.get_config(), lines)
-        lines = """; option_name
-; -----------
-;
-; data type: Path
-;
-; [optional] description
-;
+        lines = """; description
+; Type: Path
 option_name = <UNDEFINED>
 """
         opt.set_value(None)
@@ -3351,97 +3091,53 @@ database = secondary
 ; Simple Config for testing.
 ;
 ; Has three options and two sub-configs.
-;
 
-; opt_str
-; -------
-;
-; data type: str
-;
-; [optional] Simple string option
-;
+; Simple string option
+; Type: str
 ;opt_str = <UNDEFINED>
 
-; opt_int
-; -------
-;
-; data type: str
-;
-; [optional] Simple int option
-;
+; Simple int option
+; Type: str
 ;opt_int = <UNDEFINED>
 
-; enum_list
-; ---------
-;
-; data type: list
-;
-; [optional] List of enum values
-;
+; List of enum values
+; Type: list [SimpleEnum]
 ;enum_list = <UNDEFINED>
 
 [master-db]
 ;
 ; Simple DB config for testing
-;
 
-; database
-; --------
-;
-; data type: str
-;
-; [REQUIRED] Database connection string
-;
+; REQUIRED option.
+; Database connection string
+; Type: str
 ;database = <UNDEFINED>
 
-; user
-; ----
-;
-; data type: str
-;
-; [REQUIRED] User name
-;
+; REQUIRED option.
+; User name
+; Type: str
 ;user = SYSDBA
 
-; password
-; --------
-;
-; data type: str
-;
-; [optional] User password
-;
+; User password
+; Type: str
 ;password = <UNDEFINED>
 
 [backup-db]
 ;
 ; Simple DB config for testing
-;
 
-; database
-; --------
-;
-; data type: str
-;
-; [REQUIRED] Database connection string
-;
+; REQUIRED option.
+; Database connection string
+; Type: str
 ;database = <UNDEFINED>
 
-; user
-; ----
-;
-; data type: str
-;
-; [REQUIRED] User name
-;
+; REQUIRED option.
+; User name
+; Type: str
 ;user = SYSDBA
 
-; password
-; --------
-;
-; data type: str
-;
-; [optional] User password
-;
+; User password
+; Type: str
 ;password = <UNDEFINED>"""
         self.maxDiff = None
         self.assertEqual('\n'.join(x.strip() for x in cfg.get_config().splitlines()), lines)
@@ -3452,97 +3148,53 @@ database = secondary
 ; Simple Config for testing.
 ;
 ; Has three options and two sub-configs.
-;
 
-; opt_str
-; -------
-;
-; data type: str
-;
-; [optional] Simple string option
-;
+; Simple string option
+; Type: str
 opt_str = Lorem ipsum
 
-; opt_int
-; -------
-;
-; data type: str
-;
-; [optional] Simple int option
-;
+; Simple int option
+; Type: str
 ;opt_int = <UNDEFINED>
 
-; enum_list
-; ---------
-;
-; data type: list
-;
-; [optional] List of enum values
-;
+; List of enum values
+; Type: list [SimpleEnum]
 enum_list = READY, FINISHED, ABORTED
 
 [master-db]
 ;
 ; Simple DB config for testing
-;
 
-; database
-; --------
-;
-; data type: str
-;
-; [REQUIRED] Database connection string
-;
+; REQUIRED option.
+; Database connection string
+; Type: str
 database = primary
 
-; user
-; ----
-;
-; data type: str
-;
-; [REQUIRED] User name
-;
+; REQUIRED option.
+; User name
+; Type: str
 user = tester
 
-; password
-; --------
-;
-; data type: str
-;
-; [optional] User password
-;
+; User password
+; Type: str
 password = lockpick
 
 [backup-db]
 ;
 ; Simple DB config for testing
-;
 
-; database
-; --------
-;
-; data type: str
-;
-; [REQUIRED] Database connection string
-;
+; REQUIRED option.
+; Database connection string
+; Type: str
 database = secondary
 
-; user
-; ----
-;
-; data type: str
-;
-; [REQUIRED] User name
-;
+; REQUIRED option.
+; User name
+; Type: str
 ;user = SYSDBA
 
-; password
-; --------
-;
-; data type: str
-;
-; [optional] User password
-;
+; User password
+; Type: str
 password = masterkey"""
         self.assertEqual('\n'.join(x.strip() for x in cfg.get_config().splitlines()), lines)
 

@@ -378,6 +378,8 @@ class Option(Generic[T], ABC):
             raise TypeError(f"Option '{self.name}' value must be a "
                             f"'{self.datatype.__name__}',"
                             f" not '{type(value).__name__}'")
+    def _get_value_description(self) -> str:
+        return f'{self.datatype.__name__}\n'
     def _get_config_lines(self) -> List[str]:
         """Returns list of strings containing text lines suitable for use in configuration
         file processed with `~configparser.ConfigParser`.
@@ -388,18 +390,16 @@ class Option(Generic[T], ABC):
            This function is intended for internal use. To get string describing current
            configuration that is suitable for configuration files, use `get_config` method.
         """
-        lines = [f"; {self.name}\n",
-                 f"; {'-' * len(self.name)}\n",
-                 ";\n",
-                 f"; data type: {self.datatype.__name__}\n",
-                 ";\n"]
+        hdr = f"{self.name} [{self.datatype.__name__}][{'REQUIRED' if self.required else 'optional'}]"
+        lines = []
         if self.required:
-            description = '[REQUIRED] ' + self.description
-        else:
-            description = '[optional] ' + self.description
-        for line in description.split('\n'):
+            lines.append("; REQUIRED option.\n")
+        for line in self.description.strip().splitlines():
             lines.append(f"; {line}\n")
-        lines.append(';\n')
+        first = True
+        for line in self._get_value_description().splitlines():
+            lines.append(f"; {'Type: ' if first else ''}{line}\n")
+            first = False
         value = self.get_value()
         nodef = ';' if value == self.default else ''
         value = '<UNDEFINED>' if value is None else self.get_formatted()
@@ -508,15 +508,17 @@ class Config:
     Important:
         Descendants must define individual options and sub configs as instance attributes.
     """
-    def __init__(self, name: str, *, optional: bool=False):
+    def __init__(self, name: str, *, optional: bool=False, description: str=None):
         """
         Arguments:
             name: Name associated with Config (default section name).
             optional: Whether config is optional (False) or mandatory (True) for
                       configuration file (see `.load_config()` for details).
+            description: Optional configuration description. Can span multiple lines.
         """
         self._name: str = name
         self._optional: bool = optional
+        self._description: str = description if description is not None else self.__doc__
     def validate(self) -> None:
         """Checks whether:
             - all required options have value other than None.
@@ -542,17 +544,16 @@ class Config:
     def get_description(self) -> str:
         """Configuration description. Can span multiple lines.
 
-        Note:  Default implementation returns class doc string.
+        Note:  If description is not provided on instance creation, class doc string.
         """
-        return self.__doc__
+        return '' if self._description is None else self._description
     def get_config(self) -> str:
         """Returns string containing text lines suitable for use in configuration file
         processed with `~configparser.ConfigParser`.
         """
         lines = [f'[{self.name}]\n', ';\n']
-        for line in self.get_description().splitlines():
+        for line in self.get_description().strip().splitlines():
             lines.append(f"; {line}\n")
-        lines.append(';\n')
         for option in self.options:
             lines.append('\n')
             lines.append(option.get_config())
@@ -1180,15 +1181,8 @@ class EnumOption(Option[Enum]):
         self.allowed: Sequence = enum_class if allowed is None else allowed
         self._members: Dict = {i.name.lower(): i for i in self.allowed}
         super().__init__(name, enum_class, description, required, default)
-    def get_config(self) -> str:
-        """Returns string containing text lines suitable for use in configuration file
-        processed with `~configparser.ConfigParser`.
-
-        Text lines with configuration start with comment marker ; and end with newline.
-        """
-        lines: List = super()._get_config_lines()
-        lines.insert(4, f"; values: {', '.join(x.name.lower() for x in self.allowed)}\n")
-        return ''.join(lines)
+    def _get_value_description(self) -> str:
+        return f"enum [{', '.join(x.name.lower() for x in self.allowed)}]\n"
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
@@ -1282,15 +1276,8 @@ class FlagOption(Option[Flag]):
         self.allowed: Sequence = flag_class if allowed is None else allowed
         self._members: Dict = {i.name.lower(): i for i in self.allowed}
         super().__init__(name, flag_class, description, required, default)
-    def get_config(self) -> str:
-        """Returns string containing text lines suitable for use in configuration file
-        processed with `~configparser.ConfigParser`.
-
-        Text lines with configuration start with comment marker ; and end with newline.
-        """
-        lines: List = super()._get_config_lines()
-        lines.insert(4, f"; values: {', '.join(x.name.lower() for x in self.allowed)}\n")
-        return ''.join(lines)
+    def _get_value_description(self) -> str:
+        return f"flag [{', '.join(x.name.lower() for x in self.allowed)}]\n"
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
@@ -1565,6 +1552,8 @@ class ListOption(Option[List]):
         self.separator: Optional[str] = separator
         self._convertor: Convertor = get_convertor(item_type) if isinstance(item_type, type) else None
         super().__init__(name, list, description, required, default)
+    def _get_value_description(self) -> str:
+        return f"list [{', '.join(x.__name__ for x in self.item_types)}]\n"
     def _check_value(self, value: List) -> None:
         super()._check_value(value)
         if value is not None:
@@ -2019,6 +2008,8 @@ class ConfigOption(Option[str]):
         assert isinstance(config, Config)
         self._value: Config = config
         super().__init__(name, str, description, required, default)
+    def _get_value_description(self) -> str:
+        return f"configuration section name\n"
     def validate(self) -> None:
         """Validates option state.
 
@@ -2151,6 +2142,8 @@ class ConfigListOption(Option[List]):
         #: break as separator, otherwise it uses comma as separator.
         self.separator: Optional[str] = separator
         super().__init__(name, list, description, required, [])
+    def _get_value_description(self) -> str:
+        return f"list of configuration section names\n"
     def _check_value(self, value: List) -> None:
         super()._check_value(value)
         if value is not None:
@@ -2297,6 +2290,9 @@ class DataclassOption(Option[Any]):
         #: uses the line break as separator, otherwise it uses comma as separator.
         self.separator: Optional[str] = separator
         super().__init__(name, dataclass, description, required, default)
+    def _get_value_description(self) -> str:
+        return "list of values, where each list item defines value for a dataclass field.\n" \
+               "Item format: field_name:value_as_str\n"
     def _get_str_fields(self) -> List[str]:
         result = []
         if self._value is not None:
