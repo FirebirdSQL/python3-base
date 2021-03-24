@@ -1565,6 +1565,14 @@ class ListOption(Option[List]):
         self.separator: Optional[str] = separator
         self._convertor: Convertor = get_convertor(item_type) if isinstance(item_type, type) else None
         super().__init__(name, list, description, required, default)
+    def _check_value(self, value: List) -> None:
+        super()._check_value(value)
+        if value is not None:
+            i = 0
+            for item in value:
+                if item.__class__ not in self.item_types:
+                    raise ValueError(f"List item[{i}] has wrong type")
+                i += 1
     def _get_as_typed_str(self, value: Any) -> str:
         result = convert_to_str(value)
         if len(self.item_types) > 1:
@@ -1641,13 +1649,7 @@ class ListOption(Option[List]):
             ValueError: When the argument is not a valid option value.
         """
         self._check_value(value)
-        if value is not None:
-            i = 0
-            for item in value:
-                if item.__class__ not in self.item_types:
-                    raise ValueError(f"List item[{i}] has wrong type")
-                i += 1
-        self._value = value
+        self._value = None if value is None else [i for i in value]
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
@@ -2149,13 +2151,21 @@ class ConfigListOption(Option[List]):
         #: break as separator, otherwise it uses comma as separator.
         self.separator: Optional[str] = separator
         super().__init__(name, list, description, required, [])
+    def _check_value(self, value: List) -> None:
+        super()._check_value(value)
+        if value is not None:
+            i = 0
+            for item in value:
+                if item.__class__ is not self.item_type:
+                    raise ValueError(f"List item[{i}] has wrong type")
+                i += 1
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
         Arguments:
             to_default: If True, sets the option value to default value, else to None.
         """
-        self._value = []
+        self._value.clear()
     def get_formatted(self) -> str:
         """Returns value formatted for use in config file.
         """
@@ -2207,13 +2217,10 @@ class ConfigListOption(Option[List]):
             ValueError: When the argument is not a valid option value.
         """
         self._check_value(value)
-        if value is not None:
-            i = 0
-            for item in value:
-                if item.__class__ is not self.item_type:
-                    raise ValueError(f"List item[{i}] has wrong type")
-                i += 1
-        self._value = value
+        if value is None:
+            self.clear()
+        else:
+            self._value = [i for i in value]
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
