@@ -2,6 +2,15 @@
 Changelog
 #########
 
+Version 1.3.0
+=============
+
+* `~firebird.base.config` module:
+
+  - Layout produced by `.get_config()` was changed.
+  - `.Config` has new constructor keyword-only argument `description`.
+  - Fix: uregistered bug in config.ListOption - value and default was the same instance
+
 Version 1.2.0
 =============
 
