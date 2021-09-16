@@ -97,14 +97,19 @@ class DirectoryScheme:
     Note:
         All paths are set when the instance is created and can be changed later.
     """
-    def __init__(self, name: str, version: str=None):
+    def __init__(self, name: str, version: str=None, force_home: bool=False):
         """
         Arguments:
             name: Appplication name.
             version: Application version.
+            force_home: When True, general directories (i.e. all except user-specific and
+                TMP) would be always based on HOME directory.
         """
         self.name: str = name
         self.version: str = version
+        self.force_home: bool = force_home
+        _h = os.getenv(f'{self.name.upper()}_HOME')
+        self.__home: Path = Path(_h) if _h is not None else Path(os.getcwd())
         home = self.home
         self.dir_map: Dict[str, Path] = {'config': home / 'config',
                                          'run_data': home / 'run_data',
@@ -124,11 +129,28 @@ class DirectoryScheme:
         return os.getenv(f'{self.name.upper()}_HOME') is not None
     @property
     def home(self) -> Path:
-        """HOME directory. Either path set by "<app_name>_HOME" environment variable, or
-        current working directory.
+        """HOME directory. Initial value is path set by "<app_name>_HOME" environment
+        variable, or to current working directory when variable is not defined.
+
+        Important:
+            When new value is assigned, the general directories (i.e. all except user-specific
+            and TMP) are redefined as subdirectories of new home path ONLY when HOME was
+            initially defined using "<app_name>_HOME" environment variable, or instance
+            was created with `force_home`=True.
+
+            However, all paths could be still changed individually to any value.
         """
-        home = os.getenv(f'{self.name.upper()}_HOME')
-        return Path(home) if home is not None else Path(os.getcwd())
+        return self.__home
+    @home.setter
+    def home(self, value: Union[Path, str]) -> None:
+        self.__home = value if isinstance(value, Path) else Path(value)
+        if self.has_home_env() or self.force_home:
+            self.dir_map.update({'config': self.__home / 'config',
+                                 'run_data': self.__home / 'run_data',
+                                 'logs': self.__home / 'logs',
+                                 'data': self.__home / 'data',
+                                 'cache': self.__home / 'cache',
+                                 'srv': self.__home / 'srv'})
     @property
     def config(self) -> Path:
         """Directory for host-specific system-wide configuration files.
@@ -229,17 +251,19 @@ class DirectoryScheme:
 class WindowsDirectoryScheme(DirectoryScheme):
     """Directory scheme that conforms to Windows standards.
 
-    If HOME is defined using "<app_name>_HOME" environment variable, only user-specific
-    directories and TMP are set according to platform standars, while general directories
-    remain as defined by base `DirectoryScheme`.
+    If HOME is defined using "<app_name>_HOME" environment variable, or `force_home` parameter
+    is True, only user-specific directories and TMP are set according to platform standars,
+    while general directories remain as defined by base `DirectoryScheme`.
     """
-    def __init__(self, name: str, version: str=None):
+    def __init__(self, name: str, version: str=None, force_home: bool=False):
         """
         Arguments:
             name: Appplication name.
             version: Application version.
+            force_home: When True, general directories (i.e. all except user-specific and
+                TMP) would be always based on HOME directory.
         """
-        super().__init__(name, version)
+        super().__init__(name, version, force_home)
         app_dir = Path(self.name)
         if self.version is not None:
             app_dir /= self.version
@@ -247,7 +271,7 @@ class WindowsDirectoryScheme(DirectoryScheme):
         lad = Path(os.path.expandvars('%LOCALAPPDATA%'))
         ad = Path(os.path.expandvars('%APPDATA%'))
         # Set general directories only when HOME is not forced by environment variable.
-        if not self.has_home_env():
+        if not self.has_home_env() and not force_home:
             self.dir_map.update({'config': pd / app_dir / 'config',
                                  'run_data': pd / app_dir / 'run',
                                  'logs': pd / app_dir / 'log',
@@ -266,22 +290,24 @@ class WindowsDirectoryScheme(DirectoryScheme):
 class LinuxDirectoryScheme(DirectoryScheme):
     """Directory scheme that conforms to Linux standards.
 
-    If HOME is defined using "<app_name>_HOME" environment variable, only user-specific
-    directories and TMP are set according to platform standars, while general directories
-    remain as defined by base `DirectoryScheme`.
+    If HOME is defined using "<app_name>_HOME" environment variable, or `force_home` parameter
+    is True, only user-specific directories and TMP are set according to platform standars,
+    while general directories remain as defined by base `DirectoryScheme`.
     """
-    def __init__(self, name: str, version: str=None):
+    def __init__(self, name: str, version: str=None, force_home: bool=False):
         """
         Arguments:
             name: Appplication name.
             version: Application version.
+            force_home: When True, general directories (i.e. all except user-specific and
+                TMP) would be always based on HOME directory.
         """
-        super().__init__(name, version)
+        super().__init__(name, version, force_home)
         app_dir = Path(self.name)
         if self.version is not None:
             app_dir /= self.version
         # Set general directories only when HOME is not forced by environment variable.
-        if not self.has_home_env():
+        if not self.has_home_env() and not force_home:
             self.dir_map.update({'config': Path('/etc') / app_dir,
                                  'run_data': Path('/run') / app_dir,
                                  'logs': Path('/var/log') / app_dir,
@@ -304,20 +330,20 @@ class MacOSDirectoryScheme(DirectoryScheme):
     directories and TMP are set according to platform standars, while general directories
     remain as defined by base `DirectoryScheme`.
     """
-    def __init__(self, name: str, version: str=None):
+    def __init__(self, name: str, version: str=None, force_home: bool=False):
         """
         Arguments:
             name: Appplication name.
             version: Application version.
         """
-        super().__init__(name, version)
+        super().__init__(name, version, force_home)
         app_dir = Path(self.name)
         if self.version is not None:
             app_dir /= self.version
         pd = Path('/Library/Application Support')
         lad = Path('~/Library/Application Support').expanduser()
         # Set general directories only when HOME is not forced by environment variable.
-        if not self.has_home_env():
+        if not self.has_home_env() and not force_home:
             self.dir_map.update({'config': pd / app_dir / 'config',
                                  'run_data': pd / app_dir / 'run',
                                  'logs': pd / app_dir / 'log',
@@ -333,12 +359,19 @@ class MacOSDirectoryScheme(DirectoryScheme):
                              'user_cache': Path('~/Library/Caches').expanduser() / app_dir / 'cache',
                              })
 
-def get_directory_scheme(app_name: str, version: str=None) -> DirectoryScheme:
+def get_directory_scheme(app_name: str, version: str=None, *, force_home: bool=False) -> DirectoryScheme:
     """Returns directory scheme for current platform.
+
+    Arguments:
+        app_name: Application name
+        version: Application version string
+        force_home: When True, the general directies are always set to subdirectories of
+                    `DirectoryScheme.home` directory. When False, these the home is used
+                    ONLY when it's set by "<app_name>_HOME" environment variable.
     """
     return {'Windows': WindowsDirectoryScheme,
             'Linux':LinuxDirectoryScheme,
-            'Darwin': MacOSDirectoryScheme}.get(platform.system(), DirectoryScheme)(app_name, version)
+            'Darwin': MacOSDirectoryScheme}.get(platform.system(), DirectoryScheme)(app_name, version, force_home)
 
 T = TypeVar('T')
 

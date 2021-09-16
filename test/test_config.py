@@ -3213,7 +3213,6 @@ class TestApplicationDirScheme(BaseConfigTest):
         if platform.system() != 'Windows':
             self.skipTest("Only for Windows")
         scheme = config.get_directory_scheme(self.app_name)
-        # 'C:/Users/pavel/AppData/Local/test_app/tmp'
         self.assertEqual(scheme.config, Path('c:/ProgramData/test_app/config'))
         self.assertEqual(scheme.run_data, Path('c:/ProgramData/test_app/run'))
         self.assertEqual(scheme.logs, Path('c:/ProgramData/test_app/log'))
@@ -3225,7 +3224,55 @@ class TestApplicationDirScheme(BaseConfigTest):
         self.assertEqual(scheme.user_data, Path('~/AppData/Local/test_app/data').expanduser())
         self.assertEqual(scheme.user_sync, Path('~/AppData/Roaming/test_app').expanduser())
         self.assertEqual(scheme.user_cache, Path('~/AppData/Local/test_app/cache').expanduser())
-    def test_02_linux(self):
+    @mock.patch.dict(os.environ, {f'{app_name.upper()}_HOME': 'c:/mydir/apphome/'})
+    def test_02_widnows_home_env(self):
+        if platform.system() != 'Windows':
+            self.skipTest("Only for Windows")
+        scheme = config.get_directory_scheme(self.app_name)
+        self.assertEqual(scheme.config, Path('c:/mydir/apphome/config'))
+        self.assertEqual(scheme.run_data, Path('c:/mydir/apphome/run_data'))
+        self.assertEqual(scheme.logs, Path('c:/mydir/apphome/logs'))
+        self.assertEqual(scheme.data, Path('c:/mydir/apphome/data'))
+        self.assertEqual(scheme.tmp, Path('~/AppData/Local/test_app/tmp').expanduser())
+        self.assertEqual(scheme.cache, Path('c:/mydir/apphome/cache'))
+        self.assertEqual(scheme.srv, Path('c:/mydir/apphome/srv'))
+        self.assertEqual(scheme.user_config, Path('~/AppData/Local/test_app/config').expanduser())
+        self.assertEqual(scheme.user_data, Path('~/AppData/Local/test_app/data').expanduser())
+        self.assertEqual(scheme.user_sync, Path('~/AppData/Roaming/test_app').expanduser())
+        self.assertEqual(scheme.user_cache, Path('~/AppData/Local/test_app/cache').expanduser())
+    @mock.patch('os.getcwd', return_value='c:/mydir/apphome/')
+    def test_03_widnows_home_forced(self, *args):
+        if platform.system() != 'Windows':
+            self.skipTest("Only for Windows")
+        scheme = config.get_directory_scheme(self.app_name)
+        self.assertEqual(scheme.config, Path('c:/mydir/apphome/config'))
+        self.assertEqual(scheme.run_data, Path('c:/mydir/apphome/run_data'))
+        self.assertEqual(scheme.logs, Path('c:/mydir/apphome/logs'))
+        self.assertEqual(scheme.data, Path('c:/mydir/apphome/data'))
+        self.assertEqual(scheme.tmp, Path('~/AppData/Local/test_app/tmp').expanduser())
+        self.assertEqual(scheme.cache, Path('c:/mydir/apphome/cache'))
+        self.assertEqual(scheme.srv, Path('c:/mydir/apphome/srv'))
+        self.assertEqual(scheme.user_config, Path('~/AppData/Local/test_app/config').expanduser())
+        self.assertEqual(scheme.user_data, Path('~/AppData/Local/test_app/data').expanduser())
+        self.assertEqual(scheme.user_sync, Path('~/AppData/Roaming/test_app').expanduser())
+        self.assertEqual(scheme.user_cache, Path('~/AppData/Local/test_app/cache').expanduser())
+    def test_04_widnows_home_change(self, *args):
+        if platform.system() != 'Windows':
+            self.skipTest("Only for Windows")
+        scheme = config.get_directory_scheme(self.app_name)
+        scheme.home = 'c:/mydir/apphome/'
+        self.assertEqual(scheme.config, Path('c:/mydir/apphome/config'))
+        self.assertEqual(scheme.run_data, Path('c:/mydir/apphome/run_data'))
+        self.assertEqual(scheme.logs, Path('c:/mydir/apphome/logs'))
+        self.assertEqual(scheme.data, Path('c:/mydir/apphome/data'))
+        self.assertEqual(scheme.tmp, Path('~/AppData/Local/test_app/tmp').expanduser())
+        self.assertEqual(scheme.cache, Path('c:/mydir/apphome/cache'))
+        self.assertEqual(scheme.srv, Path('c:/mydir/apphome/srv'))
+        self.assertEqual(scheme.user_config, Path('~/AppData/Local/test_app/config').expanduser())
+        self.assertEqual(scheme.user_data, Path('~/AppData/Local/test_app/data').expanduser())
+        self.assertEqual(scheme.user_sync, Path('~/AppData/Roaming/test_app').expanduser())
+        self.assertEqual(scheme.user_cache, Path('~/AppData/Local/test_app/cache').expanduser())
+    def test_05_linux_default(self):
         if platform.system() != 'Linux':
             self.skipTest("Only for Linux")
         scheme = config.get_directory_scheme(self.app_name)
@@ -3240,12 +3287,60 @@ class TestApplicationDirScheme(BaseConfigTest):
         self.assertEqual(scheme.user_data, Path('~/.local/share/test_app').expanduser())
         self.assertEqual(scheme.user_sync, Path('~/.local/sync/test_app').expanduser())
         self.assertEqual(scheme.user_cache, Path('~/.cache/test_app').expanduser())
+    @mock.patch.dict(os.environ, {f'{app_name.upper()}_HOME': '/mydir/apphome/'})
+    def test_06_linux_home_env(self):
+        if platform.system() != 'Linux':
+            self.skipTest("Only for Linux")
+        scheme = config.get_directory_scheme(self.app_name)
+        self.assertEqual(scheme.config, Path('/mydir/apphome/config'))
+        self.assertEqual(scheme.run_data, Path('/mydir/apphome/run_data'))
+        self.assertEqual(scheme.logs, Path('/mydir/apphome/logs'))
+        self.assertEqual(scheme.data, Path('/mydir/apphome/data'))
+        self.assertEqual(scheme.tmp, Path('/var/tmp/test_app'))
+        self.assertEqual(scheme.cache, Path('/mydir/apphome/cache'))
+        self.assertEqual(scheme.srv, Path('/mydir/apphome/srv'))
+        self.assertEqual(scheme.user_config, Path('~/.config/test_app').expanduser())
+        self.assertEqual(scheme.user_data, Path('~/.local/share/test_app').expanduser())
+        self.assertEqual(scheme.user_sync, Path('~/.local/sync/test_app').expanduser())
+        self.assertEqual(scheme.user_cache, Path('~/.cache/test_app').expanduser())
+    @mock.patch('os.getcwd', return_value='/mydir/apphome/')
+    def test_07_linux_home_forced(self, *args):
+        if platform.system() != 'Linux':
+            self.skipTest("Only for Linux")
+        scheme = config.get_directory_scheme(self.app_name, force_home=True)
+        self.assertEqual(scheme.config, Path('/mydir/apphome/config'))
+        self.assertEqual(scheme.run_data, Path('/mydir/apphome/run_data'))
+        self.assertEqual(scheme.logs, Path('/mydir/apphome/logs'))
+        self.assertEqual(scheme.data, Path('/mydir/apphome/data'))
+        self.assertEqual(scheme.tmp, Path('/var/tmp/test_app'))
+        self.assertEqual(scheme.cache, Path('/mydir/apphome/cache'))
+        self.assertEqual(scheme.srv, Path('/mydir/apphome/srv'))
+        self.assertEqual(scheme.user_config, Path('~/.config/test_app').expanduser())
+        self.assertEqual(scheme.user_data, Path('~/.local/share/test_app').expanduser())
+        self.assertEqual(scheme.user_sync, Path('~/.local/sync/test_app').expanduser())
+        self.assertEqual(scheme.user_cache, Path('~/.cache/test_app').expanduser())
+    def test_08_linux_home_change(self, *args):
+        if platform.system() != 'Linux':
+            self.skipTest("Only for Linux")
+        scheme = config.get_directory_scheme(self.app_name, force_home=True)
+        scheme.home = '/mydir/apphome/'
+        self.assertEqual(scheme.config, Path('/mydir/apphome/config'))
+        self.assertEqual(scheme.run_data, Path('/mydir/apphome/run_data'))
+        self.assertEqual(scheme.logs, Path('/mydir/apphome/logs'))
+        self.assertEqual(scheme.data, Path('/mydir/apphome/data'))
+        self.assertEqual(scheme.tmp, Path('/var/tmp/test_app'))
+        self.assertEqual(scheme.cache, Path('/mydir/apphome/cache'))
+        self.assertEqual(scheme.srv, Path('/mydir/apphome/srv'))
+        self.assertEqual(scheme.user_config, Path('~/.config/test_app').expanduser())
+        self.assertEqual(scheme.user_data, Path('~/.local/share/test_app').expanduser())
+        self.assertEqual(scheme.user_sync, Path('~/.local/sync/test_app').expanduser())
+        self.assertEqual(scheme.user_cache, Path('~/.cache/test_app').expanduser())
 
 if __name__ == '__main__':
     unittest_main()
 
-#class TestFloatOption(BaseConfigTest):
-    #"Unit tests for firebird.base.config.FloatOption"
+#class Test<TYPE>Option(BaseConfigTest):
+    #"Unit tests for firebird.base.config.<TYPE>Option"
     #def setUp(self):
         #super().setUp()
     #def test_simple(self):
