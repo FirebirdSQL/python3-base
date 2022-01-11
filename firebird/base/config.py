@@ -59,7 +59,7 @@ from enum import Enum, Flag, _decompose
 from pathlib import Path
 import os
 from .config_pb2 import ConfigProto
-from .types import Error, MIME, ZMQAddress, PyExpr, PyCode, PyCallable
+from .types import Error, UNDEFINED, MIME, ZMQAddress, PyExpr, PyCode, PyCallable
 from .strconv import get_convertor, convert_to_str, Convertor
 
 PROTO_CONFIG = 'firebird.base.ConfigProto'
@@ -552,6 +552,11 @@ class Config:
         self._name: str = name
         self._optional: bool = optional
         self._description: str = description if description is not None else self.__doc__
+    def __setattr__(self, name, value):
+        for attr in vars(self).values():
+            if isinstance(attr, Option) and attr.name == name:
+                raise ValueError('Cannot assign values to option itself, use `option.value` instead')
+        super().__setattr__(name, value)
     def validate(self) -> None:
         """Checks whether:
             - all required options have value other than None.

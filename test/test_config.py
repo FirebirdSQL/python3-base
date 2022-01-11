@@ -3029,6 +3029,11 @@ database = secondary
         self.assertIsNone(cfg.backup_db.database.value)
         self.assertEqual(cfg.backup_db.user.value, 'SYSDBA')
         self.assertIsNone(cfg.backup_db.password.value)
+        #
+        with self.assertRaises(ValueError) as cm:
+            cfg.opt_str = 'value'
+        self.assertEqual(cm.exception.args,
+                         ('Cannot assign values to option itself, use `option.value` instead',))
     def test_2_load_config(self):
         cfg = SimpleConfig()
         #

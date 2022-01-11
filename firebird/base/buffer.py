@@ -220,17 +220,22 @@ class MemoryBuffer:
         """Write tagged 8 byte number (c_ulonglong).
         """
         self.write_number(value, 8)
-    def write_string(self, value: str, *, encoding='ascii') -> None:
+    def write_string(self, value: str, *, encoding: str='ascii', errors: str='strict') -> None:
         """Write zero-terminated string.
         """
-        self.write(value.encode(encoding))
+        self.write(value.encode(encoding, errors))
         self.write_byte(0)
-    def write_pascal_string(self, value: str, *, encoding='ascii') -> None:
+    def write_pascal_string(self, value: str, *, encoding: str='ascii', errors: str='strict') -> None:
         """Write tagged Pascal string (2 byte length followed by data).
         """
-        value = value.encode(encoding)
-        size = len(value)
-        self.write_byte(size)
+        value = value.encode(encoding, errors)
+        self.write_byte(len(value))
+        self.write(value)
+    def write_sized_string(self, value: str, *, encoding: str='ascii', errors: str='strict') -> None:
+        """Write string (2 byte length followed by data).
+        """
+        value = value.encode(encoding, errors)
+        self.write_short(len(value))
         self.write(value)
     def read(self, size: int=-1) -> bytes:
         """Reads specified number of bytes, or all remaining data.
@@ -248,43 +253,43 @@ class MemoryBuffer:
         result = (0).from_bytes(self.raw[self.pos: self.pos + size], self.byteorder.value, signed=signed)
         self.pos += size
         return result
-    def read_byte(self, *, signed=False) -> int:
+    def read_byte(self, *, signed: bool=False) -> int:
         """Read 1 byte number (c_ubyte).
         """
         return self.read_number(1, signed=signed)
-    def read_short(self, *, signed=False) -> int:
+    def read_short(self, *, signed: bool=False) -> int:
         """Read 2 byte number (c_ushort).
         """
         return self.read_number(2, signed=signed)
-    def read_int(self, *, signed=False) -> int:
+    def read_int(self, *, signed: bool=False) -> int:
         """Read 4 byte number (c_uint).
         """
         return self.read_number(4, signed=signed)
-    def read_bigint(self, *, signed=False) -> int:
+    def read_bigint(self, *, signed: bool=False) -> int:
         """Read 8 byte number (c_ulonglong).
         """
         return self.read_number(8, signed=signed)
-    def read_sized_int(self, *, signed=False) -> int:
+    def read_sized_int(self, *, signed: bool=False) -> int:
         """Read number cluster (2 byte length followed by data).
         """
         return self.read_number(self.read_short(), signed=signed)
-    def read_string(self, *, encoding='ascii') -> str:
+    def read_string(self, *, encoding: str='ascii', errors: str='strict') -> str:
         """Read null-terminated string.
         """
         i = self.pos
         while i < self.buffer_size and safe_ord(self.raw[i]) != 0:
             i += 1
-        result = self.read(i - self.pos).decode(encoding)
+        result = self.read(i - self.pos).decode(encoding, errors)
         self.pos += 1
         return result
-    def read_pascal_string(self, *, encoding='ascii') -> str:
+    def read_pascal_string(self, *, encoding: str='ascii', errors: str='strict') -> str:
         """Read Pascal string (1 byte length followed by string data).
         """
-        return self.read(self.read_byte()).decode(encoding)
-    def read_sized_string(self, *, encoding='ascii') -> str:
+        return self.read(self.read_byte()).decode(encoding, errors)
+    def read_sized_string(self, *, encoding: str='ascii', errors: str='strict') -> str:
         """Read string (2 byte length followed by data).
         """
-        return self.read(self.read_short()).decode(encoding)
+        return self.read(self.read_short()).decode(encoding, errors)
     def read_bytes(self) -> bytes:
         """Read content of binary cluster (2 bytes data length followed by data).
         """

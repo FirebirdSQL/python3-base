@@ -178,6 +178,12 @@ class TestBuffer(unittest.TestCase):
         self.assertEqual(buf.pos, 7)
         self.assertBuffer(buf, b'\x06string')
         self.assertTrue(buf.is_eof())
+    def test_write_sized_string(self):
+        buf = MemoryBuffer(0, factory=self.factory)
+        buf.write_sized_string('string')
+        self.assertEqual(buf.pos, 8)
+        self.assertBuffer(buf, b'\x06\x00string')
+        self.assertTrue(buf.is_eof())
     def test_write_past_size(self):
         buf = MemoryBuffer(0, max_size=5, factory=self.factory)
         buf.write(b'ABCDE')

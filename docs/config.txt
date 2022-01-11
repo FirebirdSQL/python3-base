@@ -36,7 +36,8 @@ The framework is based around two classes:
 Additionally, the `.ApplicationDirectoryScheme` abstract base class defines set of mostly
 used application directories. The function `.get_directory_scheme()` could be then used
 to obtain instance that implements platform-specific standards for file-system location
-for these directories. Currently, only "Windows" and "Linux" directory schemes are supported.
+for these directories. Currently, only "Windows", "Linux" and "MacOS" directory schemes
+are supported.
 
 .. note::
     You may use `platform.system` call to determine the scheme name suitable for platform
