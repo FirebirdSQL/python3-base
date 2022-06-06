@@ -2,6 +2,12 @@
 Changelog
 #########
 
+Version 1.4.0
+=============
+
+* Upgrade to protobuf 4.21.1. As this upgrade has consequences, please read
+  https://developers.google.com/protocol-buffers/docs/news/2022-05-06#python-updates
+
 Version 1.3.1
 =============
 
