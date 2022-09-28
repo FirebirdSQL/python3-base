@@ -1,0 +1,68 @@
+.. module:: firebird.base.protobuf
+   :synopsis: Registry for Google Protocol Buffer messages and enums
+
+#################################################################
+protobuf - Registry for Google Protocol Buffer messages and enums
+#################################################################
+
+Overview
+========
+
+This module provides central registry for Google Protocol Buffer messages and enums.
+The generated `*_pb2.py` protobuf files could be registered using `register_decriptor`
+or `load_registered` function. The registry could be then used to obtain information
+about protobuf messages or enum types, or to create message instances or enum values.
+
+Functions
+=========
+
+register_decriptor
+------------------
+.. autofunction:: register_decriptor
+
+load_registered
+---------------
+.. autofunction:: load_registered
+
+is_msg_registered
+-----------------
+.. autofunction:: is_msg_registered
+
+is_enum_registered
+------------------
+.. autofunction:: is_enum_registered
+
+get_enum_type
+-------------
+.. autofunction:: get_enum_type
+
+get_enum_value_name
+-------------------
+.. autofunction:: get_enum_value_name
+
+create_message
+--------------
+.. autofunction:: create_message
+
+get_enum_field_type
+-------------------
+.. autofunction:: get_enum_field_type
+
+struct2dict
+-----------
+.. autofunction:: struct2dict
+
+dict2struct
+-----------
+.. autofunction:: dict2struct
+
+Data classes
+============
+
+ProtoMessageType
+----------------
+.. autoclass:: ProtoMessageType
+
+ProtoEnumType
+-------------
+.. autoclass:: ProtoEnumType

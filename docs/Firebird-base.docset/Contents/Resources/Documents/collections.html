@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
+<title>collections - Various collection types — Firebird-base 1.4.1 documentation</title>
+<link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
+<link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
+<script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+<script src="_static/jquery.js"></script>
+<script src="_static/underscore.js"></script>
+<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/sphinx_highlight.js"></script>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="strconv.html" rel="next" title="strconv - Data conversion from/to string"/>
+<link href="types.html" rel="prev" title="types - Common data types"/>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<script src="_static/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="_static/js/jquery-fix.js" type="text/javascript"></script>
+<script src="_static/bootstrap-2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="_static/bootstrap-sphinx.js" type="text/javascript"></script>
+</head><body>
+<div class="navbar navbar-inverse navbar-fixed-top" id="navbar">
+<div class="navbar-inner">
+<div class="container">
+<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+<button class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="brand" href="index.html">
+          Firebird-base</a>
+<span class="navbar-text pull-left"><b>1.4.1</b></span>
+<div class="nav-collapse">
+<ul class="nav">
+<li class="divider-vertical"></li>
+<li><a href="introduction.html">Introduction</a></li>
+<li><a href="modules.html">Modules</a></li>
+<li><a href="genindex.html">Index</a></li>
+<li><a href="changelog.html">Changelog</a></li>
+<li><a href="license.html">License</a></li>
+<li class="dropdown globaltoc-container">
+<a data-target="#" data-toggle="dropdown" href="index.html" id="dLabelGlobalToc" role="button">Site <b class="caret"></b></a>
+<ul aria-labelledby="dLabelGlobalToc" class="dropdown-menu globaltoc" role="menu"></ul>
+</li>
+<li class="dropdown">
+<a data-target="#" data-toggle="dropdown" href="#" id="dLabelLocalToc" role="button">Page <b class="caret"></b></a>
+<ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
+<li><a class="reference internal" href="#">collections - Various collection types</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#types-for-type-hints-annotations">Types for type hints &amp; annotations</a><ul>
+<li><a class="reference internal" href="#firebird.base.collections.Item"><code class="docutils literal notranslate"><span class="pre">Item</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.TypeSpec"><code class="docutils literal notranslate"><span class="pre">TypeSpec</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.ItemExpr"><code class="docutils literal notranslate"><span class="pre">ItemExpr</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.FilterExpr"><code class="docutils literal notranslate"><span class="pre">FilterExpr</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.CheckExpr"><code class="docutils literal notranslate"><span class="pre">CheckExpr</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#collections">Collections</a><ul>
+<li><a class="reference internal" href="#baseobjectcollection">BaseObjectCollection</a><ul>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection.all"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection.all()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection.any"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection.any()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection.contains"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection.contains()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection.filter"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection.filter()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection.filterfalse"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection.filterfalse()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection.find"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection.find()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection.occurrence"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection.occurrence()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.BaseObjectCollection.report"><code class="docutils literal notranslate"><span class="pre">BaseObjectCollection.report()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#datalist">DataList</a><ul>
+<li><a class="reference internal" href="#firebird.base.collections.DataList"><code class="docutils literal notranslate"><span class="pre">DataList</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.__init__"><code class="docutils literal notranslate"><span class="pre">DataList.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.append"><code class="docutils literal notranslate"><span class="pre">DataList.append()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.clear"><code class="docutils literal notranslate"><span class="pre">DataList.clear()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.extend"><code class="docutils literal notranslate"><span class="pre">DataList.extend()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.extract"><code class="docutils literal notranslate"><span class="pre">DataList.extract()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.freeze"><code class="docutils literal notranslate"><span class="pre">DataList.freeze()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.get"><code class="docutils literal notranslate"><span class="pre">DataList.get()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.insert"><code class="docutils literal notranslate"><span class="pre">DataList.insert()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.remove"><code class="docutils literal notranslate"><span class="pre">DataList.remove()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.sort"><code class="docutils literal notranslate"><span class="pre">DataList.sort()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.split"><code class="docutils literal notranslate"><span class="pre">DataList.split()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.frozen"><code class="docutils literal notranslate"><span class="pre">DataList.frozen</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.key_expr"><code class="docutils literal notranslate"><span class="pre">DataList.key_expr</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.DataList.type_spec"><code class="docutils literal notranslate"><span class="pre">DataList.type_spec</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#registry">Registry</a><ul>
+<li><a class="reference internal" href="#firebird.base.collections.Registry"><code class="docutils literal notranslate"><span class="pre">Registry</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.__init__"><code class="docutils literal notranslate"><span class="pre">Registry.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.clear"><code class="docutils literal notranslate"><span class="pre">Registry.clear()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.copy"><code class="docutils literal notranslate"><span class="pre">Registry.copy()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.extend"><code class="docutils literal notranslate"><span class="pre">Registry.extend()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.get"><code class="docutils literal notranslate"><span class="pre">Registry.get()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.pop"><code class="docutils literal notranslate"><span class="pre">Registry.pop()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.popitem"><code class="docutils literal notranslate"><span class="pre">Registry.popitem()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.remove"><code class="docutils literal notranslate"><span class="pre">Registry.remove()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.store"><code class="docutils literal notranslate"><span class="pre">Registry.store()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.collections.Registry.update"><code class="docutils literal notranslate"><span class="pre">Registry.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#make-lambda">make_lambda</a><ul>
+<li><a class="reference internal" href="#firebird.base.collections.make_lambda"><code class="docutils literal notranslate"><span class="pre">make_lambda()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+</ul>
+<form action="search.html" class="navbar-form navbar-right" method="get">
+<div class="form-group">
+<input class="form-control" name="q" placeholder="Search" type="text"/>
+</div>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+</div>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="body span12 content" role="main">
+<span class="target" id="module-firebird.base.collections"></span><section id="collections-various-collection-types">
+<a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.base.collections"></a><h1>collections - Various collection types<a class="headerlink" href="#collections-various-collection-types" title="Permalink to this heading">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
+<p>This module provides data structures that behave much like builtin <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> types,
+but with direct support of operations that can use structured data stored in container, and
+which would normally require utilization of <a class="reference external" href="https://docs.python.org/3/library/operator.html#module-operator" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">operator</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functools.html#module-functools" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">functools</span></code></a> or other means.</p>
+<p>All containers provide next operations:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#filter" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">filterfalse</span></code> that return generator that yields items for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is
+evaluated as True (or False).</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find</span></code> that returns first item for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True, or default.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code> that returns True if there is any item for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">occurrence</span></code> that returns number of items for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#all" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">all</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/functions.html#any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">any</span></code></a> that return True if <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True for all or any list element(s).</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">report</span></code> that returns generator that yields data produced by expression(s) evaluated on
+list items.</p></li>
+</ul>
+<p>Individual collection types provide additional operations like splitting and extracting
+based on expression etc.</p>
+<p>Expressions used by these methods could be strings that contain Python expression
+referencing the collection item(s), or lambda functions.</p>
+</section>
+<section id="types-for-type-hints-annotations">
+<h2>Types for type hints &amp; annotations<a class="headerlink" href="#types-for-type-hints-annotations" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.collections.Item">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">Item</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.collections.Item"></a><a class="headerlink" href="#firebird.base.collections.Item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection Item</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.collections.TypeSpec">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">TypeSpec</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.collections.TypeSpec"></a><a class="headerlink" href="#firebird.base.collections.TypeSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection Item type specification</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>]]</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.collections.ItemExpr">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">ItemExpr</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.collections.ItemExpr"></a><a class="headerlink" href="#firebird.base.collections.ItemExpr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection Item sort expression</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>]]]</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.collections.FilterExpr">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">FilterExpr</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.collections.FilterExpr"></a><a class="headerlink" href="#firebird.base.collections.FilterExpr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter expression</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.collections.CheckExpr">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">CheckExpr</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.collections.CheckExpr"></a><a class="headerlink" href="#firebird.base.collections.CheckExpr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check expression</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]</p>
+</dd></dl>
+</section>
+<section id="collections">
+<h2>Collections<a class="headerlink" href="#collections" title="Permalink to this heading">¶</a></h2>
+<section id="baseobjectcollection">
+<h3>BaseObjectCollection<a class="headerlink" href="#baseobjectcollection" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">BaseObjectCollection</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.collections.BaseObjectCollection"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class for collection of objects.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection.all">
+<span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.BaseObjectCollection.all"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True for all list elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – Bool expression, a callable accepting one parameter and returning bool or
+bool expression as string referencing list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ABC"</span><span class="p">))</span>
+<span class="n">L</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="s1">'item.name.startswith("ABC")'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection.any">
+<span class="sig-name descname"><span class="pre">any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.BaseObjectCollection.any"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection.any" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True for any list element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – Bool expression, a callable accepting one parameter and returnin bool or
+bool expression as string referencing list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ABC"</span><span class="p">))</span>
+<span class="n">L</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="s1">'item.name.startswith("ABC")'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.BaseObjectCollection.contains"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection.contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if there is any item for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Bool expression, a callable accepting one parameter and returning bool or
+bool expression as string referencing list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ABC"</span><span class="p">)):</span>
+    <span class="o">...</span>
+<span class="k">if</span> <span class="n">L</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">'item.name.startswith("ABC")'</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.BaseObjectCollection.filter"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns generator that yields items for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – Bool expression, a callable accepting one parameter and returning bool or
+bool expression as string referencing list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ABC"</span><span class="p">))</span>
+<span class="n">L</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">'item.name.startswith("ABC")'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generator" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection.filterfalse">
+<span class="sig-name descname"><span class="pre">filterfalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.BaseObjectCollection.filterfalse"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection.filterfalse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns generator that yields items for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – Bool expression, a callable accepting one parameter and returning bool or
+bool expression as string referencing list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">filterfalse</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ABC"</span><span class="p">))</span>
+<span class="n">L</span><span class="o">.</span><span class="n">filterfalse</span><span class="p">(</span><span class="s1">'item.name.startswith("ABC")'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generator" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection.find">
+<span class="sig-name descname"><span class="pre">find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.BaseObjectCollection.find"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection.find" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns first item for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True, or default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – Bool expression, a callable accepting one parameter and returning bool or
+bool expression as string referencing list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Default value returned when Items is not found.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ABC"</span><span class="p">))</span>
+<span class="n">L</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">'item.name.startswith("ABC")'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection.occurrence">
+<span class="sig-name descname"><span class="pre">occurrence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.BaseObjectCollection.occurrence"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection.occurrence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return number of items for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – Bool expression, a callable accepting one parameter and returning bool or
+bool expression as string referencing list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">occurrence</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ABC"</span><span class="p">))</span>
+<span class="n">L</span><span class="o">.</span><span class="n">occurrence</span><span class="p">(</span><span class="s1">'item.name.startswith("ABC")'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.BaseObjectCollection.report">
+<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.BaseObjectCollection.report"></a><a class="headerlink" href="#firebird.base.collections.BaseObjectCollection.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns generator that yields data produced by expression(s) evaluated on list items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>args</strong> – <p>Parameter(s) could be one from:</p>
+<ul class="simple">
+<li><p>A callable accepting one parameter and returning data for output</p></li>
+<li><p>One or more expressions as string referencing item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># generator of tuples with item.name and item.size</span>
+
+<span class="n">L</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+<span class="n">L</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s1">'item.name'</span><span class="p">,</span><span class="s1">'item.size'</span><span class="p">)</span>
+
+<span class="c1"># generator of item names</span>
+
+<span class="n">L</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="n">L</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s1">'item.name'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generator" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="datalist">
+<h3>DataList<a class="headerlink" href="#datalist" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">DataList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_expr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.collections.DataList"></a><a class="headerlink" href="#firebird.base.collections.DataList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>, <a class="reference internal" href="#firebird.base.collections.BaseObjectCollection" title="firebird.base.collections.BaseObjectCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseObjectCollection</span></code></a></p>
+<p>List of data (objects) with additional functionality.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_expr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.__init__"></a><a class="headerlink" href="#firebird.base.collections.DataList.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>]) – Sequence to initialize the collection.</p></li>
+<li><p><strong>type_spec</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>]]) – Reject instances that are not instances of specified types.</p></li>
+<li><p><strong>key_expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Key expression. Must contain item referrence as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>, for example
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">item.attribute_name</span></code>. If <strong>all</strong> classes specified in <a class="reference internal" href="#firebird.base.collections.DataList.type_spec" title="firebird.base.collections.DataList.type_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">type_spec</span></code></a>
+are descendants of <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a>, the default value is <code class="xref py py-obj docutils literal notranslate"><span class="pre">item.get_key()</span></code>,
+otherwise the default is <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
+<li><p><strong>frozen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Create frozen list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – When initialization sequence contains invalid instance.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.append"></a><a class="headerlink" href="#firebird.base.collections.DataList.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an item to the end of the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – When item is not an instance of allowed class, or list is frozen</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.clear"></a><a class="headerlink" href="#firebird.base.collections.DataList.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all items from the list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – When list is frozen.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.extend">
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.extend"></a><a class="headerlink" href="#firebird.base.collections.DataList.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extend the list by appending all the items in the given iterable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – When item is not an instance of allowed class, or list is frozen</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.extract">
+<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.extract"></a><a class="headerlink" href="#firebird.base.collections.DataList.extract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move/copy items for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is evaluated as True into new <a class="reference internal" href="#firebird.base.collections.DataList" title="firebird.base.collections.DataList"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataList</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – A callable accepting one parameter or expression as string referencing list item
+as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p></li>
+<li><p><strong>copy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – When True, items are not removed from source DataList.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – When list is frozen and <a class="reference external" href="https://docs.python.org/3/library/copy.html#module-copy" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a> is False.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"ABC"</span><span class="p">))</span>
+<span class="n">L</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="s1">'item.name.startswith("ABC")'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.base.collections.DataList" title="firebird.base.collections.DataList"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataList</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.freeze">
+<span class="sig-name descname"><span class="pre">freeze</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.freeze"></a><a class="headerlink" href="#firebird.base.collections.DataList.freeze" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set list to immutable (frozen) state.</p>
+<p>Freezing list makes internal map from <a class="reference internal" href="#firebird.base.collections.DataList.key_expr" title="firebird.base.collections.DataList.key_expr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">key_expr</span></code></a> to item index that significantly
+speeds up retrieval by key using the <a class="reference internal" href="#firebird.base.collections.DataList.get" title="firebird.base.collections.DataList.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get()</span></code></a> method.</p>
+<p>It’s not possible to <code class="xref py py-obj docutils literal notranslate"><span class="pre">add</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">delete</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">change</span></code> items in frozen list, but <a class="reference internal" href="#firebird.base.collections.DataList.sort" title="firebird.base.collections.DataList.sort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort</span></code></a>
+is allowed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.get"></a><a class="headerlink" href="#firebird.base.collections.DataList.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns item with given key using default key expression. Returns <code class="xref py py-obj docutils literal notranslate"><span class="pre">default</span></code>
+value if item is not found.</p>
+<p>Uses very fast method to look up value of default key expression in <a class="reference internal" href="#firebird.base.collections.DataList.frozen" title="firebird.base.collections.DataList.frozen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">frozen</span></code></a> list,
+otherwise it uses slower list traversal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Searched value.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Default value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="types.html#firebird.base.types.Error" title="firebird.base.types.Error"><strong>Error</strong></a> – If key expression is not defined.</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Search using default key expression (fast for frozen list)</span>
+<span class="n">L</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ITEM_NAME'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.insert"></a><a class="headerlink" href="#firebird.base.collections.DataList.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert item before index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – When item is not an instance of allowed class, or list is frozen</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.remove"></a><a class="headerlink" href="#firebird.base.collections.DataList.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove first occurrence of item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If the value is not present, or list is frozen</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.sort">
+<span class="sig-name descname"><span class="pre">sort</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.sort"></a><a class="headerlink" href="#firebird.base.collections.DataList.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort items in-place, optionaly using attribute values as key or key expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attrs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>]) – List of attribute names.</p></li>
+<li><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Key expression, a callable accepting one parameter or expression
+as string referencing list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p></li>
+<li><p><strong>Important</strong> – Only one parameter (<code class="xref py py-obj docutils literal notranslate"><span class="pre">attrs</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code>) could be specified.
+If none is present then uses default list sorting rule.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s1">'name'</span><span class="p">,</span><span class="s1">'degree'</span><span class="p">])</span>       <span class="c1"># Sort by item.name, item.degree</span>
+<span class="n">L</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span> <span class="c1"># Sort by upper item.name</span>
+<span class="n">L</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">expr</span><span class="o">=</span><span class="s1">'item.name.upper()'</span><span class="p">)</span>      <span class="c1"># Sort by upper item.name</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.DataList.split"></a><a class="headerlink" href="#firebird.base.collections.DataList.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return two new <a class="reference internal" href="#firebird.base.collections.DataList" title="firebird.base.collections.DataList"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataList</span></code></a> instances, first with items for which <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> is
+evaluated as True and second for <code class="xref py py-obj docutils literal notranslate"><span class="pre">expr</span></code> evaluated as False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – A callable accepting one parameter or expression as string referencing
+list item as <code class="xref py py-obj docutils literal notranslate"><span class="pre">item</span></code>.</p></li>
+<li><p><strong>frozen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Create frozen lists.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">below</span><span class="p">,</span> <span class="n">above</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">below</span><span class="p">,</span> <span class="n">above</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'item.size &gt; 100'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference internal" href="#firebird.base.collections.DataList" title="firebird.base.collections.DataList"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataList</span></code></a>, <a class="reference internal" href="#firebird.base.collections.DataList" title="firebird.base.collections.DataList"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataList</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.frozen">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frozen</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.collections.DataList.frozen"></a><a class="headerlink" href="#firebird.base.collections.DataList.frozen" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if list items couldn’t be changed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.key_expr">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">key_expr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.collections.DataList.key_expr"></a><a class="headerlink" href="#firebird.base.collections.DataList.key_expr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Key expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="firebird.base.collections.DataList.type_spec">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="types.html#firebird.base.types.Sentinel" title="firebird.base.types.Sentinel"><span class="pre">Sentinel</span></a><span class="p"><span class="pre">]</span></span></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.collections.DataList.type_spec"></a><a class="headerlink" href="#firebird.base.collections.DataList.type_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specification of valid type(s) for list values, or <a class="reference internal" href="types.html#firebird.base.types.UNDEFINED" title="firebird.base.types.UNDEFINED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a> if there is
+no such constraint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>], <a class="reference internal" href="types.html#firebird.base.types.Sentinel" title="firebird.base.types.Sentinel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sentinel</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="registry">
+<h3>Registry<a class="headerlink" href="#registry" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">Registry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.collections.Registry"></a><a class="headerlink" href="#firebird.base.collections.Registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#firebird.base.collections.BaseObjectCollection" title="firebird.base.collections.BaseObjectCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseObjectCollection</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a>]</p>
+<p>Mapping container for <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> objects.</p>
+<p>Any method that expects a <code class="xref py py-obj docutils literal notranslate"><span class="pre">key</span></code> also acepts <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> instance.</p>
+<dl class="simple">
+<dt>To store items into registry with existence check, use:</dt><dd><ul class="simple">
+<li><p>R.store(item)</p></li>
+<li><p>R.extend(items) or R.extend(item)</p></li>
+</ul>
+</dd>
+<dt>To update items in registry (added if not present), use:</dt><dd><ul class="simple">
+<li><p>R[key] = item</p></li>
+<li><p>R.update(items) or R.update(item)</p></li>
+</ul>
+</dd>
+<dt>To check presence of item or key in registry, use:</dt><dd><ul class="simple">
+<li><p>key in R</p></li>
+</ul>
+</dd>
+<dt>To retrieve items from registry, use:</dt><dd><ul class="simple">
+<li><p>R.get(key, default=None)</p></li>
+<li><p>R[key]</p></li>
+<li><p>R.pop(key, default=None)</p></li>
+<li><p>R.popitem(last=True)</p></li>
+</ul>
+</dd>
+<dt>To delete items from registry, use:</dt><dd><ul class="simple">
+<li><p>R.remove(item)</p></li>
+<li><p>del R[key]</p></li>
+</ul>
+</dd>
+</dl>
+<p>Whenever a <code class="xref py py-obj docutils literal notranslate"><span class="pre">key</span></code> is required, you can use either a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code> instance, or any value
+that represens a key value for instances of stored type.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.__init__"></a><a class="headerlink" href="#firebird.base.collections.Registry.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference internal" href="#firebird.base.collections.Registry" title="firebird.base.collections.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Either a <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> instance, or sequence or mapping of <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a>
+instances.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.clear"></a><a class="headerlink" href="#firebird.base.collections.Registry.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all items from registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.copy"></a><a class="headerlink" href="#firebird.base.collections.Registry.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shalow copy of the registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.base.collections.Registry" title="firebird.base.collections.Registry"><code class="xref py py-class docutils literal notranslate"><span class="pre">Registry</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.extend">
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_from</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.extend"></a><a class="headerlink" href="#firebird.base.collections.Registry.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store one or more items to the registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>_from</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>]) – Either a <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> instance, or sequence or mapping of <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a>
+instances.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.get"></a><a class="headerlink" href="#firebird.base.collections.Registry.get" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.pop"></a><a class="headerlink" href="#firebird.base.collections.Registry.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove specified <code class="xref py py-obj docutils literal notranslate"><span class="pre">key</span></code> and return the corresponding <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> object. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">key</span></code>
+is not found, the <code class="xref py py-obj docutils literal notranslate"><span class="pre">default</span></code> is returned if given, otherwise <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyError</span></code></a> is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.popitem">
+<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">last</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.popitem"></a><a class="headerlink" href="#firebird.base.collections.Registry.popitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns and removes a <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> object. The objects are returned in LIFO order
+if <code class="xref py py-obj docutils literal notranslate"><span class="pre">last</span></code> is true or FIFO order if false.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.remove"></a><a class="headerlink" href="#firebird.base.collections.Registry.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes item from registry (same as: del R[item]).</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.store">
+<span class="sig-name descname"><span class="pre">store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.store"></a><a class="headerlink" href="#firebird.base.collections.Registry.store" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – When item is already registered.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.collections.Registry.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_from</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.collections.Registry.update"></a><a class="headerlink" href="#firebird.base.collections.Registry.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update items in the registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>_from</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>]) – Either a <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> instance, or sequence or mapping of <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a>
+instances.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</section>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
+<section id="make-lambda">
+<h3>make_lambda<a class="headerlink" href="#make-lambda" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="firebird.base.collections.make_lambda">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.collections.</span></span><span class="sig-name descname"><span class="pre">make_lambda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'item'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.collections.make_lambda"></a><a class="headerlink" href="#firebird.base.collections.make_lambda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes lambda function from expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Python expression as string.</p></li>
+<li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Comma-separated list of names that should be used as lambda parameters</p></li>
+<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – Dictionary passed as <code class="xref py py-obj docutils literal notranslate"><span class="pre">context</span></code> to <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</section>
+</section>
+</section>
+</div>
+</div>
+</div>
+<footer class="footer">
+<div class="container">
+<p class="pull-right">
+<a href="#">Back to top</a>
+</p>
+<p>
+        © Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+</p>
+</div>
+</footer>
+</body>
+</html>

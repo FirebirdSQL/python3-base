@@ -338,9 +338,6 @@ class TraceConfig(BaseTraceConfig):
     """
     def __init__(self, name: str):
         super().__init__(name)
-        #: Trace flags [required]
-        self.flags: FlagOption = \
-            FlagOption('flags', TraceFlag, "Trace flags", required=True)
         #: When True, unregistered classes are registered automatically
         self.autoregister: BoolOption = \
             BoolOption('autoregister',

@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
+<title>trace - Trace/audit for class instances — Firebird-base 1.4.1 documentation</title>
+<link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
+<link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
+<script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+<script src="_static/jquery.js"></script>
+<script src="_static/underscore.js"></script>
+<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/sphinx_highlight.js"></script>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="protobuf.html" rel="next" title="protobuf - Registry for Google Protocol Buffer messages and enums"/>
+<link href="logging.html" rel="prev" title="logging - Context-based logging"/>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<script src="_static/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="_static/js/jquery-fix.js" type="text/javascript"></script>
+<script src="_static/bootstrap-2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="_static/bootstrap-sphinx.js" type="text/javascript"></script>
+</head><body>
+<div class="navbar navbar-inverse navbar-fixed-top" id="navbar">
+<div class="navbar-inner">
+<div class="container">
+<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+<button class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="brand" href="index.html">
+          Firebird-base</a>
+<span class="navbar-text pull-left"><b>1.4.1</b></span>
+<div class="nav-collapse">
+<ul class="nav">
+<li class="divider-vertical"></li>
+<li><a href="introduction.html">Introduction</a></li>
+<li><a href="modules.html">Modules</a></li>
+<li><a href="genindex.html">Index</a></li>
+<li><a href="changelog.html">Changelog</a></li>
+<li><a href="license.html">License</a></li>
+<li class="dropdown globaltoc-container">
+<a data-target="#" data-toggle="dropdown" href="index.html" id="dLabelGlobalToc" role="button">Site <b class="caret"></b></a>
+<ul aria-labelledby="dLabelGlobalToc" class="dropdown-menu globaltoc" role="menu"></ul>
+</li>
+<li class="dropdown">
+<a data-target="#" data-toggle="dropdown" href="#" id="dLabelLocalToc" role="button">Page <b class="caret"></b></a>
+<ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
+<li><a class="reference internal" href="#">trace - Trace/audit for class instances</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#trace-configuration">Trace configuration</a></li>
+<li><a class="reference internal" href="#enums-flags">Enums &amp; Flags</a><ul>
+<li><a class="reference internal" href="#traceflag">TraceFlag</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TraceFlag"><code class="docutils literal notranslate"><span class="pre">TraceFlag</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TraceFlag.ACTIVE"><code class="docutils literal notranslate"><span class="pre">TraceFlag.ACTIVE</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceFlag.AFTER"><code class="docutils literal notranslate"><span class="pre">TraceFlag.AFTER</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceFlag.BEFORE"><code class="docutils literal notranslate"><span class="pre">TraceFlag.BEFORE</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceFlag.FAIL"><code class="docutils literal notranslate"><span class="pre">TraceFlag.FAIL</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceFlag.NONE"><code class="docutils literal notranslate"><span class="pre">TraceFlag.NONE</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#add-trace">add_trace</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.add_trace"><code class="docutils literal notranslate"><span class="pre">add_trace()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#remove-trace">remove_trace</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.remove_trace"><code class="docutils literal notranslate"><span class="pre">remove_trace()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trace-object">trace_object</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.trace_object"><code class="docutils literal notranslate"><span class="pre">trace_object()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trace-manager">Trace manager</a><ul>
+<li><a class="reference internal" href="#tracemanager">TraceManager</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager"><code class="docutils literal notranslate"><span class="pre">TraceManager</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.add_trace"><code class="docutils literal notranslate"><span class="pre">TraceManager.add_trace()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.clear"><code class="docutils literal notranslate"><span class="pre">TraceManager.clear()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.clear_flag"><code class="docutils literal notranslate"><span class="pre">TraceManager.clear_flag()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.is_registered"><code class="docutils literal notranslate"><span class="pre">TraceManager.is_registered()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.load_config"><code class="docutils literal notranslate"><span class="pre">TraceManager.load_config()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.register"><code class="docutils literal notranslate"><span class="pre">TraceManager.register()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.remove_trace"><code class="docutils literal notranslate"><span class="pre">TraceManager.remove_trace()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.set_flag"><code class="docutils literal notranslate"><span class="pre">TraceManager.set_flag()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.trace_object"><code class="docutils literal notranslate"><span class="pre">TraceManager.trace_object()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.flags"><code class="docutils literal notranslate"><span class="pre">TraceManager.flags</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceManager.trace_active"><code class="docutils literal notranslate"><span class="pre">TraceManager.trace_active</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trace-audit-decorator">Trace/audit decorator</a><ul>
+<li><a class="reference internal" href="#traced">traced</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.traced"><code class="docutils literal notranslate"><span class="pre">traced</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.traced.__init__"><code class="docutils literal notranslate"><span class="pre">traced.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.log_after"><code class="docutils literal notranslate"><span class="pre">traced.log_after()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.log_before"><code class="docutils literal notranslate"><span class="pre">traced.log_before()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.log_failed"><code class="docutils literal notranslate"><span class="pre">traced.log_failed()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.set_after_msg"><code class="docutils literal notranslate"><span class="pre">traced.set_after_msg()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.set_before_msg"><code class="docutils literal notranslate"><span class="pre">traced.set_before_msg()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.set_fail_msg"><code class="docutils literal notranslate"><span class="pre">traced.set_fail_msg()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.agent"><code class="docutils literal notranslate"><span class="pre">traced.agent</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.callback"><code class="docutils literal notranslate"><span class="pre">traced.callback</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.context"><code class="docutils literal notranslate"><span class="pre">traced.context</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.extra"><code class="docutils literal notranslate"><span class="pre">traced.extra</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.flags"><code class="docutils literal notranslate"><span class="pre">traced.flags</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.has_result"><code class="docutils literal notranslate"><span class="pre">traced.has_result</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.level"><code class="docutils literal notranslate"><span class="pre">traced.level</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.max_len"><code class="docutils literal notranslate"><span class="pre">traced.max_len</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.msg_after"><code class="docutils literal notranslate"><span class="pre">traced.msg_after</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.msg_before"><code class="docutils literal notranslate"><span class="pre">traced.msg_before</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.msg_failed"><code class="docutils literal notranslate"><span class="pre">traced.msg_failed</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.topic"><code class="docutils literal notranslate"><span class="pre">traced.topic</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.traced.with_args"><code class="docutils literal notranslate"><span class="pre">traced.with_args</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mixins">Mixins</a><ul>
+<li><a class="reference internal" href="#tracedmixin">TracedMixin</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMixin"><code class="docutils literal notranslate"><span class="pre">TracedMixin</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#globals">Globals</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.trace_manager"><code class="docutils literal notranslate"><span class="pre">trace_manager</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id1">Trace Configuration</a><ul>
+<li><a class="reference internal" href="#basetraceconfig">BaseTraceConfig</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.agent"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.agent</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.context"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.context</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.flags"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.flags</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.has_result"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.has_result</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.level"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.level</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.max_param_length"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.max_param_length</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.msg_after"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.msg_after</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.msg_before"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.msg_before</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.msg_failed"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.msg_failed</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.topic"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.topic</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.with_args"><code class="docutils literal notranslate"><span class="pre">BaseTraceConfig.with_args</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tracedmethodconfig">TracedMethodConfig</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.agent"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.agent</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.context"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.context</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.flags"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.flags</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.has_result"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.has_result</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.level"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.level</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.max_param_length"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.max_param_length</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.method"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.method</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.msg_after"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.msg_after</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.msg_before"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.msg_before</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.msg_failed"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.msg_failed</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.topic"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.topic</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.with_args"><code class="docutils literal notranslate"><span class="pre">TracedMethodConfig.with_args</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tracedclassconfig">TracedClassConfig</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.agent"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.agent</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.apply_to_descendants"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.apply_to_descendants</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.context"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.context</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.flags"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.flags</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.has_result"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.has_result</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.level"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.level</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.max_param_length"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.max_param_length</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.methods"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.methods</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.msg_after"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.msg_after</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.msg_before"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.msg_before</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.msg_failed"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.msg_failed</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.source"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.source</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.special"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.special</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.topic"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.topic</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TracedClassConfig.with_args"><code class="docutils literal notranslate"><span class="pre">TracedClassConfig.with_args</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#traceconfig">TraceConfig</a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig"><code class="docutils literal notranslate"><span class="pre">TraceConfig</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.agent"><code class="docutils literal notranslate"><span class="pre">TraceConfig.agent</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.autoregister"><code class="docutils literal notranslate"><span class="pre">TraceConfig.autoregister</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.classes"><code class="docutils literal notranslate"><span class="pre">TraceConfig.classes</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.context"><code class="docutils literal notranslate"><span class="pre">TraceConfig.context</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.flags"><code class="docutils literal notranslate"><span class="pre">TraceConfig.flags</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.has_result"><code class="docutils literal notranslate"><span class="pre">TraceConfig.has_result</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.level"><code class="docutils literal notranslate"><span class="pre">TraceConfig.level</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.max_param_length"><code class="docutils literal notranslate"><span class="pre">TraceConfig.max_param_length</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.msg_after"><code class="docutils literal notranslate"><span class="pre">TraceConfig.msg_after</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.msg_before"><code class="docutils literal notranslate"><span class="pre">TraceConfig.msg_before</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.msg_failed"><code class="docutils literal notranslate"><span class="pre">TraceConfig.msg_failed</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.topic"><code class="docutils literal notranslate"><span class="pre">TraceConfig.topic</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.trace.TraceConfig.with_args"><code class="docutils literal notranslate"><span class="pre">TraceConfig.with_args</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+</ul>
+<form action="search.html" class="navbar-form navbar-right" method="get">
+<div class="form-group">
+<input class="form-control" name="q" placeholder="Search" type="text"/>
+</div>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+</div>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="body span12 content" role="main">
+<span class="target" id="module-firebird.base.trace"></span><section id="trace-trace-audit-for-class-instances">
+<a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.base.trace"></a><h1>trace - Trace/audit for class instances<a class="headerlink" href="#trace-trace-audit-for-class-instances" title="Permalink to this heading">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
+<p>This module provides trace/audit logging for functions or object methods through context-based
+logging provided by <a class="reference internal" href="logging.html#module-firebird.base.logging" title="firebird.base.logging: Context-based logging"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logging</span></code></a> module.</p>
+<p>The trace logging is performed by <a class="reference internal" href="#firebird.base.trace.traced" title="firebird.base.trace.traced"><code class="xref py py-obj docutils literal notranslate"><span class="pre">traced</span></code></a> decorator. You can use this decorator directly,
+or use <a class="reference internal" href="#firebird.base.trace.TracedMixin" title="firebird.base.trace.TracedMixin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TracedMixin</span></code></a> class to automatically decorate methods of class instances on creation.
+Each decorated callable could log messages before execution, after successful execution or
+on failed execution (when unhandled execption is raised by callable). The trace decorator
+can automatically add <code class="xref py py-obj docutils literal notranslate"><span class="pre">agent</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">context</span></code> information, and include parameters passed to
+callable, execution time, return value, information about raised exception etc. to log messages.</p>
+<p>The trace logging is managed by <a class="reference internal" href="#firebird.base.trace.TraceManager" title="firebird.base.trace.TraceManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraceManager</span></code></a>, that allows dynamic configuration of traced
+callables at runtime.</p>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<p>The following program is an example of small but complex enough code that you can use to experiment with code tracing options. The parts relevant to tracing are highlighted in the code by embedded comments.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># test-trace.py</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">monotonic</span>
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span> <span class="nn">firebird.base.types</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">firebird.base.logging</span> <span class="kn">import</span> <span class="n">LogLevel</span><span class="p">,</span> <span class="n">LoggingIdMixin</span><span class="p">,</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">firebird.base.trace</span> <span class="kn">import</span> <span class="n">TracedMixin</span><span class="p">,</span> <span class="n">add_trace</span><span class="p">,</span> <span class="n">trace_manager</span><span class="p">,</span> <span class="n">TraceFlag</span><span class="p">,</span> <span class="n">traced</span>
+
+<span class="k">class</span> <span class="nc">Mood</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="s2">"Agent moods"</span>
+    <span class="n">ANGRY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">SAD</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">NEUTRAL</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">PLEASED</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">HAPPY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">LoggingIdMixin</span><span class="p">,</span> <span class="n">TracedMixin</span><span class="p">):</span> <span class="c1"># LOGGING &amp; TRACE</span>
+    <span class="s2">"Sample virtual human agent"</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mood</span><span class="p">:</span> <span class="n">Mood</span><span class="o">=</span><span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mood</span><span class="p">:</span> <span class="n">Mood</span> <span class="o">=</span> <span class="n">mood</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Person</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># &gt;&gt;&gt; LOGGING &amp; TRACE</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_logging_id_</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+    <span class="c1"># &lt;&lt;&lt; LOGGING &amp; TRACE</span>
+    <span class="k">def</span> <span class="nf">change_mood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">+</span> <span class="n">offset</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="o">&lt;</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span>
+        <span class="k">elif</span> <span class="n">result</span> <span class="o">&gt;</span> <span class="n">Mood</span><span class="o">.</span><span class="n">HAPPY</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">HAPPY</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">msg</span> <span class="o">==</span> <span class="s2">"what you are doing here"</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">change_mood</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">'awful'</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">change_mood</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">'nice'</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">'wonderful'</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">'pleased'</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">!=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">change_mood</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">'happy'</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">!=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">change_mood</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">'very nice'</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">!=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">change_mood</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">'get lost'</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">change_mood</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">change_mood</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">change_mood</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">process_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mood</span><span class="p">:</span> <span class="n">Mood</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">to</span> <span class="o">==</span> <span class="s1">'greeting'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">mood</span> <span class="o">&gt;</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">PLEASED</span>
+                <span class="k">elif</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span>
+                <span class="k">elif</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">HAPPY</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span> <span class="ow">and</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span>
+        <span class="k">elif</span> <span class="n">to</span> <span class="o">==</span> <span class="s1">'chat'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span> <span class="ow">and</span> <span class="n">mood</span> <span class="o">&gt;</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span> <span class="ow">and</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">PLEASED</span> <span class="ow">and</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">HAPPY</span> <span class="ow">and</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span>
+        <span class="k">elif</span> <span class="n">to</span> <span class="o">==</span> <span class="s1">'bye'</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span>
+                <span class="k">elif</span> <span class="n">mood</span> <span class="o">&gt;</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">PLEASED</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">HAPPY</span> <span class="ow">and</span> <span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">=</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span>
+    <span class="k">def</span> <span class="nf">meet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Person</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">greeting</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Person</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mood</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="c1"># &gt;&gt;&gt; LOGGING</span>
+        <span class="n">get_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="o">=</span><span class="s1">'Person'</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Processing "</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s1">" from [</span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span><span class="p">)</span>
+        <span class="c1"># &lt;&lt;&lt; LOGGING</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span>
+    <span class="k">def</span> <span class="nf">greeting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Person</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Hi </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, I'm </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Hi"</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Hi </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Hi </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, I'm </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">. I'm </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> to meet you."</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_response</span><span class="p">(</span><span class="s1">'greeting'</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">chat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">"What you are doing here?"</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">"The weather is awful today, don't you think?"</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">"It's a fine day, don't you think?"</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">PLEASED</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">"It's a very nice day, don't you think?"</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Today is a wonderful day!"</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_response</span><span class="p">(</span><span class="s1">'chat'</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">bye</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="p">:</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partners</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Get lost!"</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Bye"</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Bye, </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">."</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">PLEASED</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"See you, </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Bye, </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">. Have a nice day!"</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_response</span><span class="p">(</span><span class="s1">'bye'</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">ANGRY</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s2">"I hate this meeting!"</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s2">"It was a waste of time!"</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">NEUTRAL</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s2">"It was OK."</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mood</span> <span class="o">==</span> <span class="n">Mood</span><span class="o">.</span><span class="n">PLEASED</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s2">"Nice meeting, I think."</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s2">"What a wonderful meeting!"</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]"</span>
+
+<span class="k">def</span> <span class="nf">meeting</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">persons</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Person</span><span class="p">]):</span>
+    <span class="s2">"Simulation of virtual agents meeting"</span>
+
+    <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">:</span>
+        <span class="n">person</span><span class="o">.</span><span class="n">log_context</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">monotonic</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Meeting started..."</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Attendees: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">other</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">person</span><span class="p">:</span>
+                <span class="n">person</span><span class="o">.</span><span class="n">meet</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">:</span>
+        <span class="n">person</span><span class="o">.</span><span class="n">chat</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">:</span>
+        <span class="n">person</span><span class="o">.</span><span class="n">bye</span><span class="p">()</span>
+
+    <span class="n">e</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Meeting closed in </span><span class="si">{</span><span class="n">e</span><span class="p">[:</span><span class="n">e</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span><span class="si">}</span><span class="s2"> sec."</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Outcome: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">test_trace</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="n">Mood</span><span class="p">,</span> <span class="n">second</span><span class="p">:</span> <span class="n">Mood</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- without trace ----------"</span><span class="p">)</span>
+    <span class="n">meeting</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">Person</span><span class="p">(</span><span class="s1">'Alex'</span><span class="p">,</span> <span class="n">first</span><span class="p">),</span> <span class="n">Person</span><span class="p">(</span><span class="s1">'David'</span><span class="p">,</span> <span class="n">second</span><span class="p">)])</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- trace ------------------"</span><span class="p">)</span>
+    <span class="c1"># &gt;&gt;&gt; TRACE</span>
+    <span class="n">add_trace</span><span class="p">(</span><span class="n">Person</span><span class="p">,</span> <span class="s1">'greeting'</span><span class="p">,</span> <span class="n">traced</span><span class="p">)</span>
+    <span class="n">add_trace</span><span class="p">(</span><span class="n">Person</span><span class="p">,</span> <span class="s1">'bye'</span><span class="p">,</span> <span class="n">traced</span><span class="p">)</span>
+    <span class="n">add_trace</span><span class="p">(</span><span class="n">Person</span><span class="p">,</span> <span class="s1">'chat'</span><span class="p">,</span> <span class="n">traced</span><span class="p">)</span>
+    <span class="n">add_trace</span><span class="p">(</span><span class="n">Person</span><span class="p">,</span> <span class="s1">'change_mood'</span><span class="p">,</span> <span class="n">traced</span><span class="p">)</span>
+    <span class="n">add_trace</span><span class="p">(</span><span class="n">Person</span><span class="p">,</span> <span class="s1">'process'</span><span class="p">,</span> <span class="n">traced</span><span class="p">,</span> <span class="n">with_args</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">add_trace</span><span class="p">(</span><span class="n">Person</span><span class="p">,</span> <span class="s1">'process_response'</span><span class="p">,</span> <span class="n">traced</span><span class="p">)</span>
+    <span class="c1"># &lt;&lt;&lt; TRACE</span>
+    <span class="n">meeting</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">Person</span><span class="p">(</span><span class="s1">'Alex'</span><span class="p">,</span> <span class="n">first</span><span class="p">),</span> <span class="n">Person</span><span class="p">(</span><span class="s1">'David'</span><span class="p">,</span> <span class="n">second</span><span class="p">)])</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+    <span class="c1"># &gt;&gt;&gt; LOGGING</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">LogLevel</span><span class="o">.</span><span class="n">NOTSET</span><span class="p">)</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+    <span class="n">sh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">'</span><span class="si">%(levelname)-10s</span><span class="s1">: [</span><span class="si">%(topic)s</span><span class="s1">][</span><span class="si">%(agent)s</span><span class="s1">][</span><span class="si">%(context)s</span><span class="s1">] </span><span class="si">%(message)s</span><span class="s1">'</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span>
+    <span class="c1"># &lt;&lt;&lt; LOGGING</span>
+    <span class="c1"># &gt;&gt;&gt; TRACE</span>
+    <span class="n">trace_manager</span><span class="o">.</span><span class="n">trace</span> <span class="o">|=</span> <span class="n">TraceFlag</span><span class="o">.</span><span class="n">ACTIVE</span>
+    <span class="n">trace_manager</span><span class="o">.</span><span class="n">trace</span> <span class="o">|=</span> <span class="p">(</span><span class="n">TraceFlag</span><span class="o">.</span><span class="n">FAIL</span> <span class="o">|</span> <span class="n">TraceFlag</span><span class="o">.</span><span class="n">BEFORE</span> <span class="o">|</span> <span class="n">TraceFlag</span><span class="o">.</span><span class="n">AFTER</span><span class="p">)</span>
+    <span class="c1"># &lt;&lt;&lt; TRACE</span>
+    <span class="n">test_trace</span><span class="p">(</span><span class="s1">'TEST-1'</span><span class="p">,</span> <span class="n">Mood</span><span class="o">.</span><span class="n">SAD</span><span class="p">,</span> <span class="n">Mood</span><span class="o">.</span><span class="n">PLEASED</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br/></div>
+</div>
+<p><strong>Output from sample code</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&gt; python test-trace.py
+- without trace ----------
+Meeting started...
+Attendees: Alex [SAD], David [PLEASED]
+[Alex] Hi David
+DEBUG     : [Person][PLEASED David][TEST-1] Processing "Hi David" from [Alex]
+[David] Hi Alex, I'm David. I'm PLEASED to meet you.
+DEBUG     : [Person][SAD Alex][TEST-1] Processing "Hi Alex, I'm David. I'm PLEASED to meet you." from [David]
+[Alex] It's a fine day, don't you think?
+DEBUG     : [Person][PLEASED David][TEST-1] Processing "It's a fine day, don't you think?" from [Alex]
+[David] It's a very nice day, don't you think?
+DEBUG     : [Person][NEUTRAL Alex][TEST-1] Processing "It's a very nice day, don't you think?" from [David]
+[Alex] Bye, David. Have a nice day!
+DEBUG     : [Person][PLEASED David][TEST-1] Processing "Bye, David. Have a nice day!" from [Alex]
+[David] Bye, Alex. Have a nice day!
+DEBUG     : [Person][HAPPY Alex][TEST-1] Processing "Bye, Alex. Have a nice day!" from [David]
+Meeting closed in 0.00071 sec.
+Outcome: Alex [HAPPY], David [HAPPY]
+- trace ------------------
+Meeting started...
+Attendees: Alex [SAD], David [PLEASED]
+DEBUG     : [trace][SAD Alex][TEST-1] &gt;&gt;&gt; greeting(other=David [PLEASED])
+[Alex] Hi David
+DEBUG     : [Person][PLEASED David][TEST-1] Processing "Hi David" from [Alex]
+DEBUG     : [trace][PLEASED David][TEST-1] &gt;&gt;&gt; process
+DEBUG     : [trace][PLEASED David][TEST-1] &lt;&lt;&lt; process[0.00002]
+DEBUG     : [trace][SAD Alex][TEST-1] &gt;&gt;&gt; process_response(to='greeting', mood=&lt;Mood.PLEASED: 4&gt;)
+DEBUG     : [trace][SAD Alex][TEST-1] &lt;&lt;&lt; process_response[0.00000]
+DEBUG     : [trace][SAD Alex][TEST-1] &lt;&lt;&lt; greeting[0.00050]
+DEBUG     : [trace][PLEASED David][TEST-1] &gt;&gt;&gt; greeting(other=Alex [SAD])
+[David] Hi Alex, I'm David. I'm PLEASED to meet you.
+DEBUG     : [Person][SAD Alex][TEST-1] Processing "Hi Alex, I'm David. I'm PLEASED to meet you." from [David]
+DEBUG     : [trace][SAD Alex][TEST-1] &gt;&gt;&gt; process
+DEBUG     : [trace][SAD Alex][TEST-1] &gt;&gt;&gt; change_mood(offset=1)
+DEBUG     : [trace][SAD Alex][TEST-1] &lt;&lt;&lt; change_mood[0.00000]
+DEBUG     : [trace][SAD Alex][TEST-1] &lt;&lt;&lt; process[0.00018]
+DEBUG     : [trace][PLEASED David][TEST-1] &gt;&gt;&gt; process_response(to='greeting', mood=&lt;Mood.NEUTRAL: 3&gt;)
+DEBUG     : [trace][PLEASED David][TEST-1] &lt;&lt;&lt; process_response[0.00000]
+DEBUG     : [trace][PLEASED David][TEST-1] &lt;&lt;&lt; greeting[0.00061]
+DEBUG     : [trace][NEUTRAL Alex][TEST-1] &gt;&gt;&gt; chat()
+[Alex] It's a fine day, don't you think?
+DEBUG     : [Person][PLEASED David][TEST-1] Processing "It's a fine day, don't you think?" from [Alex]
+DEBUG     : [trace][PLEASED David][TEST-1] &gt;&gt;&gt; process
+DEBUG     : [trace][PLEASED David][TEST-1] &lt;&lt;&lt; process[0.00000]
+DEBUG     : [trace][NEUTRAL Alex][TEST-1] &gt;&gt;&gt; process_response(to='chat', mood=&lt;Mood.PLEASED: 4&gt;)
+DEBUG     : [trace][NEUTRAL Alex][TEST-1] &lt;&lt;&lt; process_response[0.00000]
+DEBUG     : [trace][NEUTRAL Alex][TEST-1] &lt;&lt;&lt; chat[0.00045]
+DEBUG     : [trace][PLEASED David][TEST-1] &gt;&gt;&gt; chat()
+[David] It's a very nice day, don't you think?
+DEBUG     : [Person][NEUTRAL Alex][TEST-1] Processing "It's a very nice day, don't you think?" from [David]
+DEBUG     : [trace][NEUTRAL Alex][TEST-1] &gt;&gt;&gt; process
+DEBUG     : [trace][NEUTRAL Alex][TEST-1] &gt;&gt;&gt; change_mood(offset=1)
+DEBUG     : [trace][NEUTRAL Alex][TEST-1] &lt;&lt;&lt; change_mood[0.00000]
+DEBUG     : [trace][PLEASED Alex][TEST-1] &gt;&gt;&gt; change_mood(offset=1)
+DEBUG     : [trace][PLEASED Alex][TEST-1] &lt;&lt;&lt; change_mood[0.00000]
+DEBUG     : [trace][NEUTRAL Alex][TEST-1] &lt;&lt;&lt; process[0.00035]
+DEBUG     : [trace][PLEASED David][TEST-1] &gt;&gt;&gt; process_response(to='chat', mood=&lt;Mood.HAPPY: 5&gt;)
+DEBUG     : [trace][PLEASED David][TEST-1] &lt;&lt;&lt; process_response[0.00000]
+DEBUG     : [trace][PLEASED David][TEST-1] &lt;&lt;&lt; chat[0.00077]
+DEBUG     : [trace][HAPPY Alex][TEST-1] &gt;&gt;&gt; bye()
+[Alex] Bye, David. Have a nice day!
+DEBUG     : [Person][PLEASED David][TEST-1] Processing "Bye, David. Have a nice day!" from [Alex]
+DEBUG     : [trace][PLEASED David][TEST-1] &gt;&gt;&gt; process
+DEBUG     : [trace][PLEASED David][TEST-1] &gt;&gt;&gt; change_mood(offset=1)
+DEBUG     : [trace][PLEASED David][TEST-1] &lt;&lt;&lt; change_mood[0.00000]
+DEBUG     : [trace][PLEASED David][TEST-1] &lt;&lt;&lt; process[0.00017]
+DEBUG     : [trace][HAPPY Alex][TEST-1] &gt;&gt;&gt; process_response(to='bye', mood=&lt;Mood.HAPPY: 5&gt;)
+DEBUG     : [trace][HAPPY Alex][TEST-1] &lt;&lt;&lt; process_response[0.00000]
+DEBUG     : [trace][HAPPY Alex][TEST-1] &lt;&lt;&lt; bye[0.00060] Result: What a wonderful meeting!
+DEBUG     : [trace][HAPPY David][TEST-1] &gt;&gt;&gt; bye()
+[David] Bye, Alex. Have a nice day!
+DEBUG     : [Person][HAPPY Alex][TEST-1] Processing "Bye, Alex. Have a nice day!" from [David]
+DEBUG     : [trace][HAPPY Alex][TEST-1] &gt;&gt;&gt; process
+DEBUG     : [trace][HAPPY Alex][TEST-1] &gt;&gt;&gt; change_mood(offset=1)
+DEBUG     : [trace][HAPPY Alex][TEST-1] &lt;&lt;&lt; change_mood[0.00000]
+DEBUG     : [trace][HAPPY Alex][TEST-1] &lt;&lt;&lt; process[0.00018]
+DEBUG     : [trace][HAPPY David][TEST-1] &gt;&gt;&gt; process_response(to='bye', mood=&lt;Mood.HAPPY: 5&gt;)
+DEBUG     : [trace][HAPPY David][TEST-1] &lt;&lt;&lt; process_response[0.00000]
+DEBUG     : [trace][HAPPY David][TEST-1] &lt;&lt;&lt; bye[0.00059] Result: What a wonderful meeting!
+Meeting closed in 0.00466 sec.
+Outcome: Alex [HAPPY], David [HAPPY]
+</pre></div>
+</div>
+</section>
+<section id="trace-configuration">
+<h2>Trace configuration<a class="headerlink" href="#trace-configuration" title="Permalink to this heading">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 1.1.0.</span></p>
+</div>
+<p>Trace supports configuration based on <a class="reference internal" href="config.html#module-firebird.base.config" title="firebird.base.config: Configuration definitions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a>.</p>
+<p><strong>Sample configuration file</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">trace</span><span class="p">]</span>
+<span class="n">flags</span> <span class="o">=</span> <span class="n">ACTIVE</span> <span class="o">|</span> <span class="n">FAIL</span>
+<span class="p">;</span><span class="n">flags</span> <span class="o">=</span> <span class="n">ACTIVE</span> <span class="o">|</span> <span class="n">BEFORE</span> <span class="o">|</span> <span class="n">AFTER</span> <span class="o">|</span> <span class="n">FAIL</span>
+<span class="n">classes</span> <span class="o">=</span> <span class="n">trace_ChannelManager</span><span class="p">,</span> <span class="n">trace_Channel</span><span class="p">,</span> <span class="n">trace_TextIOServiceImpl</span><span class="p">,</span> <span class="n">trace_PipeServerHandler</span>
+
+<span class="p">[</span><span class="n">trace_PipeServerHandler</span><span class="p">]</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">saturnin</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">fbdp</span><span class="o">.</span><span class="n">PipeServerHandler</span>
+<span class="n">methods</span> <span class="o">=</span> <span class="n">close</span><span class="p">,</span> <span class="n">send_ready</span><span class="p">,</span> <span class="n">send_close</span>
+
+<span class="p">[</span><span class="n">trace_ChannelManager</span><span class="p">]</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">saturnin</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">ChannelManager</span>
+<span class="n">special</span> <span class="o">=</span> <span class="n">trace_defer</span>
+
+<span class="p">[</span><span class="n">trace_Channel</span><span class="p">]</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">saturnin</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">Channel</span>
+<span class="n">methods</span> <span class="o">=</span> <span class="n">send</span><span class="p">,</span> <span class="n">receive</span><span class="p">,</span> <span class="n">close</span><span class="p">,</span> <span class="n">bind</span><span class="p">,</span> <span class="n">unbind</span><span class="p">,</span> <span class="n">connect</span><span class="p">,</span> <span class="n">disconnect</span>
+
+<span class="p">[</span><span class="n">trace_DealerChannel</span><span class="p">]</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">saturnin</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">DealerChannel</span>
+<span class="n">methods</span> <span class="o">=</span> <span class="n">send</span><span class="p">,</span> <span class="n">receive</span><span class="p">,</span> <span class="n">close</span><span class="p">,</span> <span class="n">bind</span><span class="p">,</span> <span class="n">unbind</span><span class="p">,</span> <span class="n">connect</span><span class="p">,</span> <span class="n">disconnect</span>
+
+<span class="p">[</span><span class="n">trace_SimpleService</span><span class="p">]</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">saturnin</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">classic</span><span class="o">.</span><span class="n">SimpleService</span>
+<span class="n">methods</span> <span class="o">=</span> <span class="n">validate</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">initialize</span><span class="p">,</span> <span class="n">start</span>
+<span class="n">with_args</span> <span class="o">=</span> <span class="n">no</span>
+
+<span class="p">[</span><span class="n">trace_TextIOServiceImpl</span><span class="p">]</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">saturnin</span><span class="o">.</span><span class="n">sdk</span><span class="o">.</span><span class="n">micro</span><span class="o">.</span><span class="n">textio</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">TextIOServiceImpl</span>
+<span class="n">methods</span> <span class="o">=</span> <span class="n">initialize</span><span class="p">,</span> <span class="n">configure</span><span class="p">,</span> <span class="n">validate</span><span class="p">,</span> <span class="n">finalize</span>
+<span class="n">with_args</span> <span class="o">=</span> <span class="n">no</span>
+
+<span class="p">[</span><span class="n">trace_defer</span><span class="p">]</span>
+<span class="n">method</span> <span class="o">=</span> <span class="n">defer</span>
+<span class="n">max_param_length</span> <span class="o">=</span> <span class="mi">50</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#firebird.base.trace.TraceManager.load_config" title="firebird.base.trace.TraceManager.load_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_config()</span></code></a>, <a class="reference internal" href="#firebird.base.trace.BaseTraceConfig" title="firebird.base.trace.BaseTraceConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTraceConfig</span></code></a>,
+<a class="reference internal" href="#firebird.base.trace.TracedMethodConfig" title="firebird.base.trace.TracedMethodConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TracedMethodConfig</span></code></a>, <a class="reference internal" href="#firebird.base.trace.TracedClassConfig" title="firebird.base.trace.TracedClassConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TracedClassConfig</span></code></a> and
+<a class="reference internal" href="#firebird.base.trace.TraceConfig" title="firebird.base.trace.TraceConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraceConfig</span></code></a>.</p>
+</div>
+</section>
+<section id="enums-flags">
+<h2>Enums &amp; Flags<a class="headerlink" href="#enums-flags" title="Permalink to this heading">¶</a></h2>
+<section id="traceflag">
+<h3>TraceFlag<a class="headerlink" href="#traceflag" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceFlag">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">TraceFlag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.trace.TraceFlag"></a><a class="headerlink" href="#firebird.base.trace.TraceFlag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntFlag" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntFlag</span></code></a></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingManager</span></code> trace/audit flags.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceFlag.ACTIVE">
+<span class="sig-name descname"><span class="pre">ACTIVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceFlag.ACTIVE"></a><a class="headerlink" href="#firebird.base.trace.TraceFlag.ACTIVE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceFlag.AFTER">
+<span class="sig-name descname"><span class="pre">AFTER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceFlag.AFTER"></a><a class="headerlink" href="#firebird.base.trace.TraceFlag.AFTER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceFlag.BEFORE">
+<span class="sig-name descname"><span class="pre">BEFORE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceFlag.BEFORE"></a><a class="headerlink" href="#firebird.base.trace.TraceFlag.BEFORE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceFlag.FAIL">
+<span class="sig-name descname"><span class="pre">FAIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceFlag.FAIL"></a><a class="headerlink" href="#firebird.base.trace.TraceFlag.FAIL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceFlag.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceFlag.NONE"></a><a class="headerlink" href="#firebird.base.trace.TraceFlag.NONE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+</dd></dl>
+</section>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
+<section id="add-trace">
+<h3>add_trace<a class="headerlink" href="#add-trace" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="firebird.base.trace.add_trace">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">add_trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decorator=&lt;class</span> <span class="pre">'firebird.base.trace.traced'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.trace.add_trace"></a><a class="headerlink" href="#firebird.base.trace.add_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">trace_manager.add_trace()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</section>
+<section id="remove-trace">
+<h3>remove_trace<a class="headerlink" href="#remove-trace" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="firebird.base.trace.remove_trace">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">remove_trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.trace.remove_trace"></a><a class="headerlink" href="#firebird.base.trace.remove_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">trace_manager.remove_trace()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</section>
+<section id="trace-object">
+<h3>trace_object<a class="headerlink" href="#trace-object" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="firebird.base.trace.trace_object">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">trace_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.trace.trace_object"></a><a class="headerlink" href="#firebird.base.trace.trace_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">trace_manager.trace_object()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</section>
+</section>
+<section id="trace-manager">
+<h2>Trace manager<a class="headerlink" href="#trace-manager" title="Permalink to this heading">¶</a></h2>
+<section id="tracemanager">
+<h3>TraceManager<a class="headerlink" href="#tracemanager" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">TraceManager</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.trace.TraceManager"></a><a class="headerlink" href="#firebird.base.trace.TraceManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Trace manager.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.add_trace">
+<span class="sig-name descname"><span class="pre">add_trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decorator=&lt;class</span> <span class="pre">'firebird.base.trace.traced'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.add_trace"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.add_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add/update trace specification for class method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>) – Registered traced class</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Name of class method that should be instrumented for trace</p></li>
+<li><p><strong>decorator</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>) – Decorator that should be used for trace instrumentation of this method</p></li>
+<li><p><strong>args</strong> – Positional arguments for decorator</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments for decorator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.clear"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all trace specifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.clear_flag">
+<span class="sig-name descname"><span class="pre">clear_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.clear_flag"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.clear_flag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear flag specified by <code class="xref py py-obj docutils literal notranslate"><span class="pre">flag</span></code> mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.is_registered">
+<span class="sig-name descname"><span class="pre">is_registered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.is_registered"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.is_registered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if class is registered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.load_config">
+<span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trace'</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.load_config"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.load_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update trace from configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/configparser.html#configparser.ConfigParser" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigParser</span></code></a>) – ConfigParser instance with trace configuration.</p></li>
+<li><p><strong>section</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Name of ConfigParser section that should be used to get trace
+configuration.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Uses <a class="reference internal" href="#firebird.base.trace.TraceConfig" title="firebird.base.trace.TraceConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraceConfig</span></code></a>, <a class="reference internal" href="#firebird.base.trace.TracedClassConfig" title="firebird.base.trace.TracedClassConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TracedClassConfig</span></code></a> and <a class="reference internal" href="#firebird.base.trace.TracedMethodConfig" title="firebird.base.trace.TracedMethodConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TracedMethodConfig</span></code></a> to process
+the configuration.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Does not <a class="reference internal" href="#firebird.base.trace.TraceManager.clear" title="firebird.base.trace.TraceManager.clear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear()</span></code></a> existing trace specifications.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.register">
+<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.register"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register class for trace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>) – Class to be registered.</p>
+</dd>
+</dl>
+<p>Does nothing if class is already registered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.remove_trace">
+<span class="sig-name descname"><span class="pre">remove_trace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.remove_trace"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.remove_trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove trace specification for class method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>) – Registered traced class</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Name of class method</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.set_flag">
+<span class="sig-name descname"><span class="pre">set_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.set_flag"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.set_flag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set flag specified by <code class="xref py py-obj docutils literal notranslate"><span class="pre">flag</span></code> mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.trace_object">
+<span class="sig-name descname"><span class="pre">trace_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.TraceManager.trace_object"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.trace_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instruments object’s methods with decorator according to trace configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Determines the response if the object class is not registered for trace.
+Raises exception when True, or return the instance as is when False [default].</p>
+</dd>
+</dl>
+<p>Only methods registered with <a class="reference internal" href="#firebird.base.trace.TraceManager.add_trace" title="firebird.base.trace.TraceManager.add_trace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_trace()</span></code></a> are instrumented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Decorated instance.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – When object class is not registered and <code class="xref py py-obj docutils literal notranslate"><span class="pre">strict</span></code> is True.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.flags">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.base.trace.TraceFlag" title="firebird.base.trace.TraceFlag"><span class="pre">TraceFlag</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.trace.TraceManager.flags"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace flags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.base.trace.TraceFlag" title="firebird.base.trace.TraceFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlag</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceManager.trace_active">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trace_active</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.trace.TraceManager.trace_active"></a><a class="headerlink" href="#firebird.base.trace.TraceManager.trace_active" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if trace is active.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</section>
+</section>
+<section id="trace-audit-decorator">
+<h2>Trace/audit decorator<a class="headerlink" href="#trace-audit-decorator" title="Permalink to this heading">¶</a></h2>
+<section id="traced">
+<h3>traced<a class="headerlink" href="#traced" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.trace.traced">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">traced</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trace'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_failed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TraceFlag.NONE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">LogLevel.DEBUG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_param_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNLIMITED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.trace.traced"></a><a class="headerlink" href="#firebird.base.trace.traced" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base decorator for logging of callables, suitable for trace/audit.</p>
+<p>It’s not applied on decorated function/method if <code class="xref py py-obj docutils literal notranslate"><span class="pre">FBASE_TRACE</span></code> environment variable is
+set to False, or if <code class="xref py py-obj docutils literal notranslate"><span class="pre">FBASE_TRACE</span></code> is not defined and <a class="reference external" href="https://docs.python.org/3/library/constants.html#debug__" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__debug__</span></code></a> is False (optimized
+Python code).</p>
+<p>Both positional and keyword arguments of decorated callable are available by name for
+f-string type message interpolation as <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> passed to logger as positional argument.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trace'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_before</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_failed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TraceFlag.NONE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">LogLevel.DEBUG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_param_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNLIMITED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.traced.__init__"></a><a class="headerlink" href="#firebird.base.trace.traced.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Agent identification</p></li>
+<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Context identification</p></li>
+<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Trace/audit logging topic</p></li>
+<li><p><strong>msg_before</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Trace/audit message logged before decorated function</p></li>
+<li><p><strong>msg_after</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Trace/audit message logged after decorated function</p></li>
+<li><p><strong>msg_failed</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Trace/audit message logged when decorated function raises an exception</p></li>
+<li><p><strong>flags</strong> (<a class="reference internal" href="#firebird.base.trace.TraceFlag" title="firebird.base.trace.TraceFlag"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlag</span></code></a>) – Trace flags override</p></li>
+<li><p><strong>level</strong> (<a class="reference internal" href="logging.html#firebird.base.logging.LogLevel" title="firebird.base.logging.LogLevel"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogLevel</span></code></a>) – Logging level for trace/audit messages</p></li>
+<li><p><strong>max_param_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Max. length of parameters (longer will be trimmed)</p></li>
+<li><p><strong>extra</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>]) – Extra data for <code class="xref py py-obj docutils literal notranslate"><span class="pre">LogRecord</span></code></p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>]]) – Callback function that gets the agent identification as argument,
+and must return True/False indicating whether trace is allowed.</p></li>
+<li><p><strong>has_result</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Indicator whether function has result value. If True, <code class="xref py py-obj docutils literal notranslate"><span class="pre">_result_</span></code>
+is available for interpolation in <a class="reference internal" href="#firebird.base.trace.traced.msg_after" title="firebird.base.trace.traced.msg_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">msg_after</span></code></a>. The <code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT</span></code> value means,
+that value for this argument should be decided from function return value
+annotation.</p></li>
+<li><p><strong>with_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If True, function arguments are available for interpolation in
+<a class="reference internal" href="#firebird.base.trace.traced.msg_before" title="firebird.base.trace.traced.msg_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">msg_before</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.log_after">
+<span class="sig-name descname"><span class="pre">log_after</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.traced.log_after"></a><a class="headerlink" href="#firebird.base.trace.traced.log_after" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executed after decorated callable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.log_before">
+<span class="sig-name descname"><span class="pre">log_before</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.traced.log_before"></a><a class="headerlink" href="#firebird.base.trace.traced.log_before" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executed before decorated callable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.log_failed">
+<span class="sig-name descname"><span class="pre">log_failed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.traced.log_failed"></a><a class="headerlink" href="#firebird.base.trace.traced.log_failed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executed when decorated callable raises an exception.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.set_after_msg">
+<span class="sig-name descname"><span class="pre">set_after_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.traced.set_after_msg"></a><a class="headerlink" href="#firebird.base.trace.traced.set_after_msg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the DEFAULT after message f-string template.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.set_before_msg">
+<span class="sig-name descname"><span class="pre">set_before_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.traced.set_before_msg"></a><a class="headerlink" href="#firebird.base.trace.traced.set_before_msg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the DEFAULT before message f-string template.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.set_fail_msg">
+<span class="sig-name descname"><span class="pre">set_fail_msg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sig</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.trace.traced.set_fail_msg"></a><a class="headerlink" href="#firebird.base.trace.traced.set_fail_msg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the DEFAULT fail message f-string template.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.agent">
+<span class="sig-name descname"><span class="pre">agent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.agent"></a><a class="headerlink" href="#firebird.base.trace.traced.agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Agent identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.callback">
+<span class="sig-name descname"><span class="pre">callback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.callback"></a><a class="headerlink" href="#firebird.base.trace.traced.callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback function that gets the agent identification as argument,
+and must return True/False indicating whether trace is allowed.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.context">
+<span class="sig-name descname"><span class="pre">context</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.context"></a><a class="headerlink" href="#firebird.base.trace.traced.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.extra">
+<span class="sig-name descname"><span class="pre">extra</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.extra"></a><a class="headerlink" href="#firebird.base.trace.traced.extra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extra data for <code class="xref py py-obj docutils literal notranslate"><span class="pre">LogRecord</span></code></p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.base.trace.TraceFlag" title="firebird.base.trace.TraceFlag"><span class="pre">TraceFlag</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.flags"></a><a class="headerlink" href="#firebird.base.trace.traced.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace flags override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.has_result">
+<span class="sig-name descname"><span class="pre">has_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.has_result"></a><a class="headerlink" href="#firebird.base.trace.traced.has_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator whether function has result value. If True, <code class="xref py py-obj docutils literal notranslate"><span class="pre">_result_</span></code> is available
+for interpolation in <a class="reference internal" href="#firebird.base.trace.traced.msg_after" title="firebird.base.trace.traced.msg_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">msg_after</span></code></a>.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.level">
+<span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="logging.html#firebird.base.logging.LogLevel" title="firebird.base.logging.LogLevel"><span class="pre">LogLevel</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.level"></a><a class="headerlink" href="#firebird.base.trace.traced.level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logging level for trace/audit messages</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.max_len">
+<span class="sig-name descname"><span class="pre">max_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.max_len"></a><a class="headerlink" href="#firebird.base.trace.traced.max_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Max. length of parameters (longer will be trimmed)</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.msg_after">
+<span class="sig-name descname"><span class="pre">msg_after</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.msg_after"></a><a class="headerlink" href="#firebird.base.trace.traced.msg_after" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged after decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.msg_before">
+<span class="sig-name descname"><span class="pre">msg_before</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.msg_before"></a><a class="headerlink" href="#firebird.base.trace.traced.msg_before" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged before decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.msg_failed">
+<span class="sig-name descname"><span class="pre">msg_failed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.msg_failed"></a><a class="headerlink" href="#firebird.base.trace.traced.msg_failed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged when decorated function raises an exception</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.topic">
+<span class="sig-name descname"><span class="pre">topic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.topic"></a><a class="headerlink" href="#firebird.base.trace.traced.topic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit logging topic</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.traced.with_args">
+<span class="sig-name descname"><span class="pre">with_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.traced.with_args"></a><a class="headerlink" href="#firebird.base.trace.traced.with_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, function arguments are available for interpolation in <a class="reference internal" href="#firebird.base.trace.traced.msg_before" title="firebird.base.trace.traced.msg_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">msg_before</span></code></a></p>
+</dd></dl>
+</dd></dl>
+</section>
+</section>
+<section id="mixins">
+<h2>Mixins<a class="headerlink" href="#mixins" title="Permalink to this heading">¶</a></h2>
+<section id="tracedmixin">
+<h3>TracedMixin<a class="headerlink" href="#tracedmixin" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMixin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">TracedMixin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.trace.TracedMixin"></a><a class="headerlink" href="#firebird.base.trace.TracedMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Mixin class that automatically registers descendants for trace and instruments
+instances on creation.</p>
+</dd></dl>
+</section>
+</section>
+<section id="globals">
+<h2>Globals<a class="headerlink" href="#globals" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.trace.trace_manager">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">trace_manager</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.trace.trace_manager"></a><a class="headerlink" href="#firebird.base.trace.trace_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace manager</p>
+</dd></dl>
+</section>
+<section id="id1">
+<h2>Trace Configuration<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
+<section id="basetraceconfig">
+<h3>BaseTraceConfig<a class="headerlink" href="#basetraceconfig" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">BaseTraceConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.trace.BaseTraceConfig"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="config.html#firebird.base.config.Config" title="firebird.base.config.Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a></p>
+<p>Base configuration for trace.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.agent">
+<span class="sig-name descname"><span class="pre">agent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.agent"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Agent identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.context">
+<span class="sig-name descname"><span class="pre">context</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.context"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.FlagOption" title="firebird.base.config.FlagOption"><span class="pre">FlagOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.flags"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace flags override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.has_result">
+<span class="sig-name descname"><span class="pre">has_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.has_result"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.has_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator whether function has result value</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.level">
+<span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.EnumOption" title="firebird.base.config.EnumOption"><span class="pre">EnumOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.level"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logging level for trace/audit messages</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.max_param_length">
+<span class="sig-name descname"><span class="pre">max_param_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.IntOption" title="firebird.base.config.IntOption"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.max_param_length"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.max_param_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Max. length of parameters (longer will be trimmed)</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.msg_after">
+<span class="sig-name descname"><span class="pre">msg_after</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.msg_after"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.msg_after" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged after decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.msg_before">
+<span class="sig-name descname"><span class="pre">msg_before</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.msg_before"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.msg_before" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged before decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.msg_failed">
+<span class="sig-name descname"><span class="pre">msg_failed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.msg_failed"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.msg_failed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged when decorated function raises an exception</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.topic">
+<span class="sig-name descname"><span class="pre">topic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.topic"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.topic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit logging topic</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.BaseTraceConfig.with_args">
+<span class="sig-name descname"><span class="pre">with_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.BaseTraceConfig.with_args"></a><a class="headerlink" href="#firebird.base.trace.BaseTraceConfig.with_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, function arguments are available for interpolation in <a class="reference internal" href="#firebird.base.trace.BaseTraceConfig.msg_before" title="firebird.base.trace.BaseTraceConfig.msg_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">msg_before</span></code></a></p>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="tracedmethodconfig">
+<h3>TracedMethodConfig<a class="headerlink" href="#tracedmethodconfig" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">TracedMethodConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.trace.TracedMethodConfig"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#firebird.base.trace.BaseTraceConfig" title="firebird.base.trace.BaseTraceConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTraceConfig</span></code></a></p>
+<p>Configuration of traced Python method.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.agent">
+<span class="sig-name descname"><span class="pre">agent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.agent"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Agent identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.context">
+<span class="sig-name descname"><span class="pre">context</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.context"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.FlagOption" title="firebird.base.config.FlagOption"><span class="pre">FlagOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.flags"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace flags override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.has_result">
+<span class="sig-name descname"><span class="pre">has_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.has_result"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.has_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator whether function has result value</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.level">
+<span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.EnumOption" title="firebird.base.config.EnumOption"><span class="pre">EnumOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.level"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logging level for trace/audit messages</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.max_param_length">
+<span class="sig-name descname"><span class="pre">max_param_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.IntOption" title="firebird.base.config.IntOption"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.max_param_length"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.max_param_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Max. length of parameters (longer will be trimmed)</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.method"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class method name [required]</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.msg_after">
+<span class="sig-name descname"><span class="pre">msg_after</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.msg_after"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.msg_after" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged after decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.msg_before">
+<span class="sig-name descname"><span class="pre">msg_before</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.msg_before"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.msg_before" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged before decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.msg_failed">
+<span class="sig-name descname"><span class="pre">msg_failed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.msg_failed"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.msg_failed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged when decorated function raises an exception</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.topic">
+<span class="sig-name descname"><span class="pre">topic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.topic"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.topic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit logging topic</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedMethodConfig.with_args">
+<span class="sig-name descname"><span class="pre">with_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedMethodConfig.with_args"></a><a class="headerlink" href="#firebird.base.trace.TracedMethodConfig.with_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, function arguments are available for interpolation in <a class="reference internal" href="#firebird.base.trace.TracedMethodConfig.msg_before" title="firebird.base.trace.TracedMethodConfig.msg_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">msg_before</span></code></a></p>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="tracedclassconfig">
+<h3>TracedClassConfig<a class="headerlink" href="#tracedclassconfig" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">TracedClassConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.trace.TracedClassConfig"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#firebird.base.trace.BaseTraceConfig" title="firebird.base.trace.BaseTraceConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTraceConfig</span></code></a></p>
+<p>Configuration of traced Python class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.agent">
+<span class="sig-name descname"><span class="pre">agent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.agent"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Agent identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.apply_to_descendants">
+<span class="sig-name descname"><span class="pre">apply_to_descendants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.apply_to_descendants"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.apply_to_descendants" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.context">
+<span class="sig-name descname"><span class="pre">context</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.context"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.FlagOption" title="firebird.base.config.FlagOption"><span class="pre">FlagOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.flags"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace flags override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.has_result">
+<span class="sig-name descname"><span class="pre">has_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.has_result"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.has_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator whether function has result value</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.level">
+<span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.EnumOption" title="firebird.base.config.EnumOption"><span class="pre">EnumOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.level"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logging level for trace/audit messages</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.max_param_length">
+<span class="sig-name descname"><span class="pre">max_param_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.IntOption" title="firebird.base.config.IntOption"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.max_param_length"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.max_param_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Max. length of parameters (longer will be trimmed)</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.ListOption" title="firebird.base.config.ListOption"><span class="pre">ListOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.methods"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>Names of traced class methods</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.msg_after">
+<span class="sig-name descname"><span class="pre">msg_after</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.msg_after"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.msg_after" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged after decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.msg_before">
+<span class="sig-name descname"><span class="pre">msg_before</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.msg_before"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.msg_before" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged before decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.msg_failed">
+<span class="sig-name descname"><span class="pre">msg_failed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.msg_failed"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.msg_failed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged when decorated function raises an exception</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.source">
+<span class="sig-name descname"><span class="pre">source</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.source"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fully qualified class name [required]</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.special">
+<span class="sig-name descname"><span class="pre">special</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.ConfigListOption" title="firebird.base.config.ConfigListOption"><span class="pre">ConfigListOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.special"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.special" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration sections with extended config of traced class methods</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.topic">
+<span class="sig-name descname"><span class="pre">topic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.topic"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.topic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit logging topic</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TracedClassConfig.with_args">
+<span class="sig-name descname"><span class="pre">with_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TracedClassConfig.with_args"></a><a class="headerlink" href="#firebird.base.trace.TracedClassConfig.with_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, function arguments are available for interpolation in <a class="reference internal" href="#firebird.base.trace.TracedClassConfig.msg_before" title="firebird.base.trace.TracedClassConfig.msg_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">msg_before</span></code></a></p>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="traceconfig">
+<h3>TraceConfig<a class="headerlink" href="#traceconfig" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.trace.</span></span><span class="sig-name descname"><span class="pre">TraceConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.trace.TraceConfig"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#firebird.base.trace.BaseTraceConfig" title="firebird.base.trace.BaseTraceConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTraceConfig</span></code></a></p>
+<p>Trace manager configuration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.agent">
+<span class="sig-name descname"><span class="pre">agent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.agent"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Agent identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.autoregister">
+<span class="sig-name descname"><span class="pre">autoregister</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.autoregister"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.autoregister" title="Permalink to this definition">¶</a></dt>
+<dd><p>When True, unregistered classes are registered automatically</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.classes">
+<span class="sig-name descname"><span class="pre">classes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.ConfigListOption" title="firebird.base.config.ConfigListOption"><span class="pre">ConfigListOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.classes"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.classes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration sections with traced Python classes</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.context">
+<span class="sig-name descname"><span class="pre">context</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.context"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context identification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.FlagOption" title="firebird.base.config.FlagOption"><span class="pre">FlagOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.flags"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace flags override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.has_result">
+<span class="sig-name descname"><span class="pre">has_result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.has_result"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.has_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator whether function has result value</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.level">
+<span class="sig-name descname"><span class="pre">level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.EnumOption" title="firebird.base.config.EnumOption"><span class="pre">EnumOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.level"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logging level for trace/audit messages</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.max_param_length">
+<span class="sig-name descname"><span class="pre">max_param_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.IntOption" title="firebird.base.config.IntOption"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.max_param_length"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.max_param_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Max. length of parameters (longer will be trimmed)</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.msg_after">
+<span class="sig-name descname"><span class="pre">msg_after</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.msg_after"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.msg_after" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged after decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.msg_before">
+<span class="sig-name descname"><span class="pre">msg_before</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.msg_before"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.msg_before" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged before decorated function</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.msg_failed">
+<span class="sig-name descname"><span class="pre">msg_failed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.msg_failed"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.msg_failed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit message logged when decorated function raises an exception</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.topic">
+<span class="sig-name descname"><span class="pre">topic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.StrOption" title="firebird.base.config.StrOption"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.topic"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.topic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace/audit logging topic</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.base.trace.TraceConfig.with_args">
+<span class="sig-name descname"><span class="pre">with_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="config.html#firebird.base.config.BoolOption" title="firebird.base.config.BoolOption"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.trace.TraceConfig.with_args"></a><a class="headerlink" href="#firebird.base.trace.TraceConfig.with_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>If True, function arguments are available for interpolation in <a class="reference internal" href="#firebird.base.trace.TraceConfig.msg_before" title="firebird.base.trace.TraceConfig.msg_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">msg_before</span></code></a></p>
+</dd></dl>
+</dd></dl>
+</section>
+</section>
+</section>
+</div>
+</div>
+</div>
+<footer class="footer">
+<div class="container">
+<p class="pull-right">
+<a href="#">Back to top</a>
+</p>
+<p>
+        © Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+</p>
+</div>
+</footer>
+</body>
+</html>

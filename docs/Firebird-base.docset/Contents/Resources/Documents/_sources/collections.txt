@@ -1,0 +1,64 @@
+.. module:: firebird.base.collections
+   :synopsis: Various collection types
+
+######################################
+collections - Various collection types
+######################################
+
+Overview
+========
+
+This module provides data structures that behave much like builtin `list` and `dict` types,
+but with direct support of operations that can use structured data stored in container, and
+which would normally require utilization of `operator`, `functools` or other means.
+
+All containers provide next operations:
+
+* `filter` and `filterfalse` that return generator that yields items for which `expr` is
+  evaluated as True (or False).
+* `find` that returns first item for which `expr` is evaluated as True, or default.
+* `contains` that returns True if there is any item for which `expr` is evaluated as True.
+* `occurrence` that returns number of items for which `expr` is evaluated as True.
+* `all` and `any` that return True if `expr` is evaluated as True for all or any list element(s).
+* `report` that returns generator that yields data produced by expression(s) evaluated on
+  list items.
+
+Individual collection types provide additional operations like splitting and extracting
+based on expression etc.
+
+Expressions used by these methods could be strings that contain Python expression
+referencing the collection item(s), or lambda functions.
+
+Types for type hints & annotations
+==================================
+
+.. autodata:: Item
+.. autodata:: TypeSpec
+.. autodata:: ItemExpr
+.. autodata:: FilterExpr
+.. autodata:: CheckExpr
+
+Collections
+===========
+
+BaseObjectCollection
+--------------------
+.. autoclass:: BaseObjectCollection
+
+DataList
+--------
+.. autoclass:: DataList
+
+Registry
+--------
+.. autoclass:: Registry
+
+Functions
+=========
+
+make_lambda
+-----------
+.. autofunction:: make_lambda
+
+
+

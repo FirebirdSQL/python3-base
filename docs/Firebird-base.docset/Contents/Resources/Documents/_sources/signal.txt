@@ -1,0 +1,194 @@
+.. module:: firebird.base.signal
+    :synopsis: Callback system based on Signals and Slots, and "Delphi events"
+
+########################################################################
+signal - Callback system based on Signals and Slots, and "Delphi events"
+########################################################################
+
+Overview
+========
+
+This module provides two callback mechanisms: one based on signals and slots similar to Qt
+signal/slot, and second based on optional method delegation similar to events in Delphi.
+
+In both cases, the callback callables could be functions, instance or class methods,
+partials and lambda functions. The `inspect` module is used to define the signature for
+callbacks, and to validate that only compatible callables are assigned.
+
+.. important::
+
+   All type annotations in signatures are significant, so callbacks must have exactly the
+   same annotations as signatures used by signals or events. The sole exception are excess
+   keyword  arguments with default values defined on connected callable.
+
+.. tip::
+
+   You may use `functools.partial` to adapt callable with different signatures. However,
+   you can "mask" only keyword arguments (without default) and leading positional arguments
+   (as any positional argument binded by name will not mask-out parameter from signature
+   introspection).
+
+Signals and Slots
+-----------------
+
+Signals and slots are suitable for 1:N notification schemes. The `Signal` works as a point
+to which one or more Slots could be connected. When `Signal` is "emitted", all connected
+slots are called (executed). It's possible to pass parameters to slot callables, but any
+value returned by slot callable is ignored. The Signal contructor takes `inspect.Signature`
+argument that defines the required signature that callables (slots) must have to connect
+to this signal.
+
+This mechanism is provided in two forms:
+
+- The `Signal` class to create signal instances for direct use.
+- The `signal` decorator to define signals on classes. This decorator works like builtin
+  `property` (without setter and deleter), where the 'getter' method is used only to define
+  the signature required for slots.
+
+**Example:**
+
+.. code-block::
+
+    class Emitor:
+        def __init__(self, name: str):
+            self.name = name
+        def showtime(self):
+            self.signal_a(self, 'They Live!', 42)
+        @signal
+        def signal_a(self, source: Emitor, msg: str, value: int) -> None:
+            "Documentation for signal"
+
+    class Receptor:
+        def __init__(self, name: str):
+            self.name = name
+        def on_signal_a(self, source: Emitor, msg: str, value: int) -> None:
+            print(f"{self.name} received signal from {source.name} ({msg=}, {value=})")
+        @classmethod
+        def cls_on_signal_a(cls, source: Emitor, msg: str, value: int) -> None:
+            print(f"{cls.__name__} received signal from {source.name} ({msg=}, {value=})")
+
+    def on_signal_a(source: Emitor, msg: str, value: int):
+        print(f"Function 'on_signal_a' received signal from {source.name} ({msg=}, {value=})")
+
+    e1 = Emitor('e1')
+    e2 = Emitor('e2')
+    r1 = Receptor('r1')
+    r2 = Receptor('r2')
+    #
+    e1.signal_a.connect(r1.on_signal_a)
+    e1.signal_a.connect(r2.on_signal_a)
+    e1.signal_a.connect(r1.cls_on_signal_a)
+    e2.signal_a.connect(on_signal_a)
+    e2.signal_a.connect(r2.on_signal_a)
+    #
+    e1.showtime()
+    e2.showtime()
+
+|
+
+**Output from sample code**::
+
+    r1 received signal from e1 (msg='They Live!', value=42)
+    r2 received signal from e1 (msg='They Live!', value=42)
+    Receptor received signal from e1 (msg='They Live!', value=42)
+    Function 'on_signal_a' received signal from e2 (msg='They Live!', value=42)
+    r2 received signal from e2 (msg='They Live!', value=42)
+
+
+Events
+------
+
+Events are suitable for optional callbacks that delegate some functionality to other class
+or function.
+
+The 'event' works as a point to which one 'slot' could be connected. The event itself
+acts as callable, that executes the connected slot (if assigned). Events may have parameters
+and return values. Events could be defined only on classes using `eventsocket` decorator,
+that works like builtin `property` (without deleter), where the 'getter' method is used only
+to define the signature required for slot, and 'setter' is used to assign the callable.
+To disconnect the callable from event, simply assign None to the event.
+
+**Example:**
+
+.. code-block::
+
+    class Component:
+        def __init__(self, name: str):
+            self.name = name
+        @eventsocket
+        def on_init(self, source: Component, arg: str) -> bool:
+            "Documentation for event"
+        @eventsocket
+        def on_exit(self, source: Component) -> None:
+            "Documentation for event"
+        def showtime(self) -> None:
+            print(f"{self.name}.on_init handler is {'SET' if self.on_init.is_set() else 'NOT SET'}")
+            print(f"{self.name}.on_exit handler is {'SET' if self.on_exit.is_set() else 'NOT SET'}")
+            print("Event handler returned", self.on_init(self, 'argument'))
+            print(f"{self.name} does something...")
+            self.on_exit(self)
+
+    class Container:
+        def __init__(self):
+            self.c1 = Component('C1')
+            self.c1.on_init = self.event_init
+            self.c2 = Component('C2')
+            self.c2.on_init = self.event_init
+            self.c2.on_exit = self.event_exit
+            self.c3 = Component('C3')
+            self.c3.on_exit = self.event_exit
+        def event_init(self, source: Component, arg: str) -> bool:
+            print(f"Handlig {source.name}.on_init({arg=})")
+            return source is self.c2
+        def event_exit(self, source: Component) -> None:
+            print(f"Handlig {source.name}.on_exit()")
+        def showtime(self) -> None:
+            self.c1.showtime()
+            self.c2.showtime()
+            self.c3.showtime()
+
+    cn = Container()
+    cn.showtime()
+
+|
+
+**Output from sample code**::
+
+    C1.on_init handler is SET
+    C1.on_exit handler is NOT SET
+    Handlig C1.on_init(arg='argument')
+    Event handler returned False
+    C1 does something...
+    C2.on_init handler is SET
+    C2.on_exit handler is SET
+    Handlig C2.on_init(arg='argument')
+    Event handler returned True
+    C2 does something...
+    Handlig C2.on_exit()
+    C3.on_init handler is NOT SET
+    C3.on_exit handler is SET
+    Event handler returned None
+    C3 does something...
+    Handlig C3.on_exit()
+
+Classes
+=======
+
+Signal
+------
+.. autoclass:: Signal
+
+_EventSocket
+------------
+.. autoclass:: _EventSocket
+
+Decorators
+==========
+
+signal
+------
+.. autoclass:: signal
+
+eventsocket
+-----------
+.. autoclass:: eventsocket

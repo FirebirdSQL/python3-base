@@ -1,0 +1,42 @@
+
+####################################
+The Firebird Base library for Python
+####################################
+
+The `firebird-base` package provides common Python 3 modules used by `Firebird Project`_
+in various development projects. However, these modules have general applicability outside
+the scope of development for Firebird RDBMS.
+
+Topic covered by `firebird-base` package:
+
+- General data types like `singletons`, `sentinels` and objects with identity.
+- Unified system for data conversion from/to string.
+- `DataList` and `Registry` collection types with advanced data-processing cappabilities.
+- Work with structured binary buffers.
+- Global registry of Google `protobuf` messages and enumerations.
+- Extended configuration system based on `ConfigParser`.
+- Context-based logging.
+- Trace/audit for class instances.
+- General "hook" mechanism.
+- Callback system based on Signals and Slots, and "Delphi events".
+
+
+.. note:: Requires Python 3.8+
+
+.. toctree::
+   :maxdepth: 1
+   :includehidden:
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   introduction
+   modules
+   changelog
+   license
+
+|
+|
+
+.. _Firebird Project: http://www.firebirdsql.org

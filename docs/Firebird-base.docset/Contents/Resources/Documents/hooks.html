@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
+<title>hooks - Hook manager — Firebird-base 1.4.1 documentation</title>
+<link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
+<link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
+<script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+<script src="_static/jquery.js"></script>
+<script src="_static/underscore.js"></script>
+<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/sphinx_highlight.js"></script>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="logging.html" rel="next" title="logging - Context-based logging"/>
+<link href="buffer.html" rel="prev" title="buffer - Memory buffer manager"/>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<script src="_static/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="_static/js/jquery-fix.js" type="text/javascript"></script>
+<script src="_static/bootstrap-2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="_static/bootstrap-sphinx.js" type="text/javascript"></script>
+</head><body>
+<div class="navbar navbar-inverse navbar-fixed-top" id="navbar">
+<div class="navbar-inner">
+<div class="container">
+<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+<button class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="brand" href="index.html">
+          Firebird-base</a>
+<span class="navbar-text pull-left"><b>1.4.1</b></span>
+<div class="nav-collapse">
+<ul class="nav">
+<li class="divider-vertical"></li>
+<li><a href="introduction.html">Introduction</a></li>
+<li><a href="modules.html">Modules</a></li>
+<li><a href="genindex.html">Index</a></li>
+<li><a href="changelog.html">Changelog</a></li>
+<li><a href="license.html">License</a></li>
+<li class="dropdown globaltoc-container">
+<a data-target="#" data-toggle="dropdown" href="index.html" id="dLabelGlobalToc" role="button">Site <b class="caret"></b></a>
+<ul aria-labelledby="dLabelGlobalToc" class="dropdown-menu globaltoc" role="menu"></ul>
+</li>
+<li class="dropdown">
+<a data-target="#" data-toggle="dropdown" href="#" id="dLabelLocalToc" role="button">Page <b class="caret"></b></a>
+<ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
+<li><a class="reference internal" href="#">hooks - Hook manager</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#architecture">Architecture</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#register-class">register_class</a><ul>
+<li><a class="reference internal" href="#firebird.base.hooks.register_class"><code class="docutils literal notranslate"><span class="pre">register_class()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#register-name">register_name</a><ul>
+<li><a class="reference internal" href="#firebird.base.hooks.register_name"><code class="docutils literal notranslate"><span class="pre">register_name()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#add-hook">add_hook</a><ul>
+<li><a class="reference internal" href="#firebird.base.hooks.add_hook"><code class="docutils literal notranslate"><span class="pre">add_hook()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#get-callbacks">get_callbacks</a><ul>
+<li><a class="reference internal" href="#firebird.base.hooks.get_callbacks"><code class="docutils literal notranslate"><span class="pre">get_callbacks()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hookmanager">HookManager</a><ul>
+<li><a class="reference internal" href="#firebird.base.hooks.HookManager"><code class="docutils literal notranslate"><span class="pre">HookManager</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.base.hooks.HookManager.add_hook"><code class="docutils literal notranslate"><span class="pre">HookManager.add_hook()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.hooks.HookManager.get_callbacks"><code class="docutils literal notranslate"><span class="pre">HookManager.get_callbacks()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.hooks.HookManager.register_class"><code class="docutils literal notranslate"><span class="pre">HookManager.register_class()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.hooks.HookManager.register_name"><code class="docutils literal notranslate"><span class="pre">HookManager.register_name()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.hooks.HookManager.remove_all_hooks"><code class="docutils literal notranslate"><span class="pre">HookManager.remove_all_hooks()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.hooks.HookManager.remove_hook"><code class="docutils literal notranslate"><span class="pre">HookManager.remove_hook()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.hooks.HookManager.reset"><code class="docutils literal notranslate"><span class="pre">HookManager.reset()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#globals">Globals</a><ul>
+<li><a class="reference internal" href="#firebird.base.hooks.hook_manager"><code class="docutils literal notranslate"><span class="pre">hook_manager</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+</ul>
+<form action="search.html" class="navbar-form navbar-right" method="get">
+<div class="form-group">
+<input class="form-control" name="q" placeholder="Search" type="text"/>
+</div>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+</div>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="body span12 content" role="main">
+<span class="target" id="module-firebird.base.hooks"></span><section id="hooks-hook-manager">
+<a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.base.hooks"></a><h1>hooks - Hook manager<a class="headerlink" href="#hooks-hook-manager" title="Permalink to this heading">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
+<p>This module provides a general framework for callbacks and “hookable” events.</p>
+<section id="architecture">
+<h3>Architecture<a class="headerlink" href="#architecture" title="Permalink to this heading">¶</a></h3>
+<p>The callback extension mechanism is based on the following:</p>
+<ul>
+<li><p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">Event</span> <span class="pre">source</span></code> provides one or more “hookable events” that work like connection points.
+The event source represents “origin of event” and is always identified by class, class
+instance or name. Event sources that are identified by classes (or their instances) must
+be registered along with events they provide.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Event</span></code> is typically linked to particular event source, but it’s not mandatory and it’s
+possible to define global events. Event is represented as value of any type, that must
+be unique in used context (particular event source or global).</p>
+<p>Each event should be properly documented along with required signature for callback
+function.</p>
+</li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Event</span> <span class="pre">provider</span></code> is a class or function that implements the event for event source, and
+asks the <a class="reference internal" href="#firebird.base.hooks.hook_manager" title="firebird.base.hooks.hook_manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager</span></code></a> for list of event consumers (callbacks) registered for particular
+event and source.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Event</span> <span class="pre">consumer</span></code> is a function or class method that implements the callback for particular
+event. The callback must be registered in <a class="reference internal" href="#firebird.base.hooks.hook_manager" title="firebird.base.hooks.hook_manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager</span></code></a> before it could be called by
+event providers.</p></li>
+</ul>
+<p>The architecture supports multiple usage strategies:</p>
+<ul class="simple">
+<li><p>If event provider uses class instance to identify the event source, it’s possible to
+register callbacks to all instances (by registering to class), or particular instance(s).</p></li>
+<li><p>It’s possible to register callback to particular instance by name, if instance is associated
+with name by <a class="reference internal" href="#firebird.base.hooks.register_name" title="firebird.base.hooks.register_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_name()</span></code></a> function.</p></li>
+<li><p>It’s possible to register callback to <a class="reference internal" href="types.html#firebird.base.types.ANY" title="firebird.base.types.ANY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ANY</span></code></a> event from particular source, or particular
+event from <a class="reference internal" href="types.html#firebird.base.types.ANY" title="firebird.base.types.ANY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ANY</span></code></a> source, or even to <a class="reference internal" href="types.html#firebird.base.types.ANY" title="firebird.base.types.ANY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ANY</span></code></a> event from <a class="reference internal" href="types.html#firebird.base.types.ANY" title="firebird.base.types.ANY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ANY</span></code></a> source.</p></li>
+</ul>
+</section>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span> <span class="nn">firebird.base.types</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">firebird.base.hooks</span> <span class="kn">import</span> <span class="n">hook_manager</span>
+
+<span class="k">class</span> <span class="nc">MyEvents</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="s2">"Sample definition of events"</span>
+    <span class="n">CREATE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">ACTION</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">MyHookable</span><span class="p">:</span>
+    <span class="s2">"Example of hookable class, i.e. a class that calls hooks registered for events."</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">hook_manager</span><span class="o">.</span><span class="n">get_callbacks</span><span class="p">(</span><span class="n">MyEvents</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MyEvents</span><span class="o">.</span><span class="n">CREATE</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.CREATE hook call outcome: ERROR (</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.CREATE hook call outcome: OK"</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.ACTION!"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">hook_manager</span><span class="o">.</span><span class="n">get_callbacks</span><span class="p">(</span><span class="n">MyEvents</span><span class="o">.</span><span class="n">ACTION</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MyEvents</span><span class="o">.</span><span class="n">ACTION</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.ACTION hook call outcome: ERROR (</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.ACTION hook call outcome: OK"</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MyHook</span><span class="p">:</span>
+    <span class="s2">"Example of hook implementation"</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subject</span><span class="p">:</span> <span class="n">MyHookable</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">MyEvents</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hook </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> event </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> called by </span><span class="si">{</span><span class="n">subject</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">err_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subject</span><span class="p">:</span> <span class="n">MyHookable</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">MyEvents</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Error in hook"</span><span class="p">)</span>
+
+
+<span class="c1"># Example code that installs and uses hooks</span>
+
+<span class="n">hook_manager</span><span class="o">.</span><span class="n">register_class</span><span class="p">(</span><span class="n">MyHookable</span><span class="p">,</span> <span class="n">MyEvents</span><span class="p">)</span>
+<span class="n">hook_A</span><span class="p">:</span> <span class="n">MyHook</span> <span class="o">=</span> <span class="n">MyHook</span><span class="p">(</span><span class="s1">'Hook-A'</span><span class="p">)</span>
+<span class="n">hook_B</span><span class="p">:</span> <span class="n">MyHook</span> <span class="o">=</span> <span class="n">MyHook</span><span class="p">(</span><span class="s1">'Hook-B'</span><span class="p">)</span>
+<span class="n">hook_C</span><span class="p">:</span> <span class="n">MyHook</span> <span class="o">=</span> <span class="n">MyHook</span><span class="p">(</span><span class="s1">'Hook-C'</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Install hooks"</span><span class="p">)</span>
+<span class="n">hook_manager</span><span class="o">.</span><span class="n">add_hook</span><span class="p">(</span><span class="n">MyEvents</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">MyHookable</span><span class="p">,</span> <span class="n">hook_A</span><span class="o">.</span><span class="n">callback</span><span class="p">)</span>
+<span class="n">hook_manager</span><span class="o">.</span><span class="n">add_hook</span><span class="p">(</span><span class="n">MyEvents</span><span class="o">.</span><span class="n">CREATE</span><span class="p">,</span> <span class="n">MyHookable</span><span class="p">,</span> <span class="n">hook_B</span><span class="o">.</span><span class="n">err_callback</span><span class="p">)</span>
+<span class="n">hook_manager</span><span class="o">.</span><span class="n">add_hook</span><span class="p">(</span><span class="n">MyEvents</span><span class="o">.</span><span class="n">ACTION</span><span class="p">,</span> <span class="n">MyHookable</span><span class="p">,</span> <span class="n">hook_C</span><span class="o">.</span><span class="n">callback</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Create event sources, emits CREATE"</span><span class="p">)</span>
+<span class="n">src_A</span><span class="p">:</span> <span class="n">MyHookable</span> <span class="o">=</span> <span class="n">MyHookable</span><span class="p">(</span><span class="s1">'Source-A'</span><span class="p">)</span>
+<span class="n">src_B</span><span class="p">:</span> <span class="n">MyHookable</span> <span class="o">=</span> <span class="n">MyHookable</span><span class="p">(</span><span class="s1">'Source-B'</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Install instance hooks"</span><span class="p">)</span>
+<span class="n">hook_manager</span><span class="o">.</span><span class="n">add_hook</span><span class="p">(</span><span class="n">MyEvents</span><span class="o">.</span><span class="n">ACTION</span><span class="p">,</span> <span class="n">src_A</span><span class="p">,</span> <span class="n">hook_A</span><span class="o">.</span><span class="n">callback</span><span class="p">)</span>
+<span class="n">hook_manager</span><span class="o">.</span><span class="n">add_hook</span><span class="p">(</span><span class="n">MyEvents</span><span class="o">.</span><span class="n">ACTION</span><span class="p">,</span> <span class="n">src_B</span><span class="p">,</span> <span class="n">hook_B</span><span class="o">.</span><span class="n">callback</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"And action!"</span><span class="p">)</span>
+<span class="n">src_A</span><span class="o">.</span><span class="n">action</span><span class="p">()</span>
+<span class="n">src_B</span><span class="o">.</span><span class="n">action</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Output from sample code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Install hooks
+Create event sources, emits CREATE
+Hook Hook-A event CREATE called by Source-A
+Source-A.CREATE hook call outcome: OK
+Hook Hook-B event CREATE called by Source-A
+Source-A.CREATE hook call outcome: ERROR (Error in hook)
+Hook Hook-A event CREATE called by Source-B
+Source-B.CREATE hook call outcome: OK
+Hook Hook-B event CREATE called by Source-B
+Source-B.CREATE hook call outcome: ERROR (Error in hook)
+Install instance hooks
+And action!
+Source-A.ACTION!
+Hook Hook-A event ACTION called by Source-A
+Source-A.ACTION hook call outcome: OK
+Hook Hook-C event ACTION called by Source-A
+Source-A.ACTION hook call outcome: OK
+Source-B.ACTION!
+Hook Hook-B event ACTION called by Source-B
+Source-B.ACTION hook call outcome: OK
+Hook Hook-C event ACTION called by Source-B
+Source-B.ACTION hook call outcome: OK
+</pre></div>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
+<section id="register-class">
+<h3>register_class<a class="headerlink" href="#register-class" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="firebird.base.hooks.register_class">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.hooks.</span></span><span class="sig-name descname"><span class="pre">register_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.hooks.register_class"></a><a class="headerlink" href="#firebird.base.hooks.register_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager.register_class()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</section>
+<section id="register-name">
+<h3>register_name<a class="headerlink" href="#register-name" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="firebird.base.hooks.register_name">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.hooks.</span></span><span class="sig-name descname"><span class="pre">register_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.hooks.register_name"></a><a class="headerlink" href="#firebird.base.hooks.register_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager.register_name()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</section>
+<section id="add-hook">
+<h3>add_hook<a class="headerlink" href="#add-hook" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="firebird.base.hooks.add_hook">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.hooks.</span></span><span class="sig-name descname"><span class="pre">add_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.hooks.add_hook"></a><a class="headerlink" href="#firebird.base.hooks.add_hook" title="Permalink to this definition">¶</a></dt>
+<dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager.add_hook()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</section>
+<section id="get-callbacks">
+<h3>get_callbacks<a class="headerlink" href="#get-callbacks" title="Permalink to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="firebird.base.hooks.get_callbacks">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.hooks.</span></span><span class="sig-name descname"><span class="pre">get_callbacks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.hooks.get_callbacks"></a><a class="headerlink" href="#firebird.base.hooks.get_callbacks" title="Permalink to this definition">¶</a></dt>
+<dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager.get_callbacks()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</section>
+</section>
+<section id="hookmanager">
+<h2>HookManager<a class="headerlink" href="#hookmanager" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.base.hooks.HookManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.hooks.</span></span><span class="sig-name descname"><span class="pre">HookManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.hooks.HookManager"></a><a class="headerlink" href="#firebird.base.hooks.HookManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="types.html#firebird.base.types.Singleton" title="firebird.base.types.Singleton"><code class="xref py py-class docutils literal notranslate"><span class="pre">Singleton</span></code></a></p>
+<p>Hook manager.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.hooks.HookManager.add_hook">
+<span class="sig-name descname"><span class="pre">add_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.hooks.HookManager.add_hook"></a><a class="headerlink" href="#firebird.base.hooks.HookManager.add_hook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new hook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Event identificator.</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Hookable class or instance, or instance name.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>) – Callback function.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The signature of <code class="xref py py-obj docutils literal notranslate"><span class="pre">callback</span></code> must conform to requirements for particular hookable event.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – When <code class="xref py py-obj docutils literal notranslate"><span class="pre">subject</span></code> is not registered as hookable.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – When <code class="xref py py-obj docutils literal notranslate"><span class="pre">event</span></code> is not supported by specified <code class="xref py py-obj docutils literal notranslate"><span class="pre">subject</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.hooks.HookManager.get_callbacks">
+<span class="sig-name descname"><span class="pre">get_callbacks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.hooks.HookManager.get_callbacks"></a><a class="headerlink" href="#firebird.base.hooks.HookManager.get_callbacks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of all callbacks installed for specified event and hookable subject.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Event identificator.</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Hookable class or instance, or name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.hooks.HookManager.register_class">
+<span class="sig-name descname"><span class="pre">register_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.hooks.HookManager.register_class"></a><a class="headerlink" href="#firebird.base.hooks.HookManager.register_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register hookable class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>) – Class that supports hooks.</p></li>
+<li><p><strong>events</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Set" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Set</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Supported events.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Events could be specified using an <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a> type or set of event identificators.
+When Enum is used (recommended), all enum values are registered as hookable events.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.hooks.HookManager.register_name">
+<span class="sig-name descname"><span class="pre">register_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.hooks.HookManager.register_name"></a><a class="headerlink" href="#firebird.base.hooks.HookManager.register_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associate name with hookable instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>instance</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Instance of registered hookable class.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Unique name assigned to instance.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.hooks.HookManager.remove_all_hooks">
+<span class="sig-name descname"><span class="pre">remove_all_hooks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.hooks.HookManager.remove_all_hooks"></a><a class="headerlink" href="#firebird.base.hooks.HookManager.remove_all_hooks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all installed hooks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.hooks.HookManager.remove_hook">
+<span class="sig-name descname"><span class="pre">remove_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.hooks.HookManager.remove_hook"></a><a class="headerlink" href="#firebird.base.hooks.HookManager.remove_hook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove hook callback installed by <a class="reference internal" href="#firebird.base.hooks.add_hook" title="firebird.base.hooks.add_hook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hook()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Event identificator.</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Hookable class or instance.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>) – Callback function.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>For successful removal, the argument values must be exactly the same as used in
+<a class="reference internal" href="#firebird.base.hooks.add_hook" title="firebird.base.hooks.add_hook"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hook()</span></code></a> call.</p>
+<p>The method does nothing if described hook is not installed.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.base.hooks.HookManager.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.hooks.HookManager.reset"></a><a class="headerlink" href="#firebird.base.hooks.HookManager.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all installed hooks and unregisters all hookable classes and instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="globals">
+<h2>Globals<a class="headerlink" href="#globals" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.hooks.hook_manager">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.hooks.</span></span><span class="sig-name descname"><span class="pre">hook_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.base.hooks.HookManager" title="firebird.base.hooks.HookManager"><span class="pre">HookManager</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;firebird.base.hooks.HookManager</span> <span class="pre">object&gt;</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.hooks.hook_manager"></a><a class="headerlink" href="#firebird.base.hooks.hook_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook manager</p>
+</dd></dl>
+</section>
+</section>
+</div>
+</div>
+</div>
+<footer class="footer">
+<div class="container">
+<p class="pull-right">
+<a href="#">Back to top</a>
+</p>
+<p>
+        © Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+</p>
+</div>
+</footer>
+</body>
+</html>
