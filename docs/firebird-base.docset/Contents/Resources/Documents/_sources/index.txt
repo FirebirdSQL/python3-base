@@ -23,6 +23,9 @@ Topic covered by `firebird-base` package:
 
 .. note:: Requires Python 3.8+
 
+.. tip:: You can download docset fro Dash_ (MacOS) or Zeal_ (Windows / Linux) documentation
+   readers from releases_ at github.
+
 .. toctree::
    :maxdepth: 1
    :includehidden:
@@ -40,3 +43,6 @@ Topic covered by `firebird-base` package:
 |
 
 .. _Firebird Project: http://www.firebirdsql.org
+.. _releases: https://github.com/FirebirdSQL/python3-base/releases
+.. _Dash: https://kapeli.com/dash
+.. _Zeal: https://zealdocs.org/
