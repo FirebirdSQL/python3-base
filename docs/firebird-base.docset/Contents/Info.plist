@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>Firebird-base</string>
+	<string>firebird-base</string>
 	<key>CFBundleName</key>
-	<string>Firebird-base</string>
+	<string>firebird-base</string>
 	<key>DashDocSetDeclaredInStyle</key>
 	<string>originalName</string>
 	<key>DashDocSetFallbackURL</key>
