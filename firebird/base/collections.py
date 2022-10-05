@@ -56,10 +56,10 @@ referencing the collection item(s), or lambda functions.
 """
 
 from __future__ import annotations
-from typing import T, Type, Union, Any, Dict, List, Tuple, Mapping, Sequence, Generator, \
+from typing import Type, Union, Any, Dict, List, Tuple, Mapping, Sequence, Generator, \
      Iterable, Callable, cast
 from operator import attrgetter
-import copy
+import copy as std_copy
 from .types import Error, Distinct, Sentinel, UNDEFINED
 
 
@@ -75,7 +75,7 @@ def make_lambda(expr: str, params: str='item', context: Dict[str, Any]=None):
 
 
 #: Collection Item
-Item = Type[Any]
+Item = Any
 #: Collection Item type specification
 TypeSpec = Union[Type, Tuple[Type]]
 #: Collection Item sort expression
@@ -230,7 +230,7 @@ class BaseObjectCollection:
                 return True
         return False
 
-class DataList(List[T], BaseObjectCollection):
+class DataList(List[Item], BaseObjectCollection):
     """List of data (objects) with additional functionality.
     """
     def __init__(self, items: Iterable=None, type_spec: TypeSpec=UNDEFINED,
@@ -584,7 +584,7 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         data = self._reg
         try:
             self._reg = {}
-            c = copy.copy(self)
+            c = std_copy.copy(self)
         finally:
             self._reg = data
         c.update(self)

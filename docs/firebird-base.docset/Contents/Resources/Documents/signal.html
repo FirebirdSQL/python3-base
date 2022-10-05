@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>signal - Callback system based on Signals and Slots, and “Delphi events” — Firebird-base 1.4.1 documentation</title>
+<title>signal - Callback system based on Signals and Slots, and “Delphi events” — Firebird-base 1.4.2 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -13,6 +13,7 @@
 <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
+<link href="_static/fb-favicon.png" rel="shortcut icon"/>
 <link href="genindex.html" rel="index" title="Index"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="changelog.html" rel="next" title="Changelog"/>
@@ -37,7 +38,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.4.1</b></span>
+<span class="navbar-text pull-left"><b>1.4.2</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -60,7 +61,6 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#classes">Classes</a><ul>
-<li><a class="reference internal" href="#signal">Signal</a><ul>
 <li><a class="reference internal" href="#firebird.base.signal.Signal"><code class="docutils literal notranslate"><span class="pre">Signal</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.signal.Signal.__init__"><code class="docutils literal notranslate"><span class="pre">Signal.__init__()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.signal.Signal.clear"><code class="docutils literal notranslate"><span class="pre">Signal.clear()</span></code></a></li>
@@ -70,26 +70,15 @@
 <li><a class="reference internal" href="#firebird.base.signal.Signal.block"><code class="docutils literal notranslate"><span class="pre">Signal.block</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#eventsocket">_EventSocket</a><ul>
 <li><a class="reference internal" href="#firebird.base.signal._EventSocket"><code class="docutils literal notranslate"><span class="pre">_EventSocket</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.signal._EventSocket.is_set"><code class="docutils literal notranslate"><span class="pre">_EventSocket.is_set()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#decorators">Decorators</a><ul>
-<li><a class="reference internal" href="#id1">signal</a><ul>
 <li><a class="reference internal" href="#firebird.base.signal.signal"><code class="docutils literal notranslate"><span class="pre">signal</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id2">eventsocket</a><ul>
 <li><a class="reference internal" href="#firebird.base.signal.eventsocket"><code class="docutils literal notranslate"><span class="pre">eventsocket</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -112,9 +101,9 @@
 <div class="container">
 <div class="row">
 <div class="body span12 content" role="main">
-<span class="target" id="module-firebird.base.signal"></span><section id="signal-callback-system-based-on-signals-and-slots-and-delphi-events">
+<span class="target" id="module-firebird.base.signal"></span><a class="dashAnchor" name="//apple_ref/cpp/Section/signal - Callback system based on Signals and Slots, and “Delphi events”"></a><section id="signal-callback-system-based-on-signals-and-slots-and-delphi-events">
 <a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.base.signal"></a><h1>signal - Callback system based on Signals and Slots, and “Delphi events”<a class="headerlink" href="#signal-callback-system-based-on-signals-and-slots-and-delphi-events" title="Permalink to this heading">¶</a></h1>
-<section id="overview">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Overview"></a><section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
 <p>This module provides two callback mechanisms: one based on signals and slots similar to Qt
 signal/slot, and second based on optional method delegation similar to events in Delphi.</p>
@@ -134,7 +123,7 @@ you can “mask” only keyword arguments (without default) and leading position
 (as any positional argument binded by name will not mask-out parameter from signature
 introspection).</p>
 </div>
-<section id="signals-and-slots">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Signals and Slots"></a><section id="signals-and-slots">
 <h3>Signals and Slots<a class="headerlink" href="#signals-and-slots" title="Permalink to this heading">¶</a></h3>
 <p>Signals and slots are suitable for 1:N notification schemes. The <a class="reference internal" href="#firebird.base.signal.Signal" title="firebird.base.signal.Signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Signal</span></code></a> works as a point
 to which one or more Slots could be connected. When <a class="reference internal" href="#firebird.base.signal.Signal" title="firebird.base.signal.Signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Signal</span></code></a> is “emitted”, all connected
@@ -198,7 +187,7 @@ the signature required for slots.</p></li>
 </pre></div>
 </div>
 </section>
-<section id="events">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Events"></a><section id="events">
 <h3>Events<a class="headerlink" href="#events" title="Permalink to this heading">¶</a></h3>
 <p>Events are suitable for optional callbacks that delegate some functionality to other class
 or function.</p>
@@ -272,23 +261,26 @@ To disconnect the callable from event, simply assign None to the event.</p>
 </div>
 </section>
 </section>
-<section id="classes">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Classes"></a><section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h2>
-<section id="signal">
-<h3>Signal<a class="headerlink" href="#signal" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">Signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.Signal"></a><a class="headerlink" href="#firebird.base.signal.Signal" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">Signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.10)"><span class="pre">Signature</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.Signal"></a><a class="headerlink" href="#firebird.base.signal.Signal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The Signal is the core object that handles connection with slots and emission.</p>
 <p>Slots are callables that are called when signal is emitted (the return value is ignored).
 They could be functions, instance or class methods, partials and lambda functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>signature</strong> (<em>Signature</em>) – </p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.__init__"></a><a class="headerlink" href="#firebird.base.signal.Signal.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.10)"><span class="pre">Signature</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.__init__"></a><a class="headerlink" href="#firebird.base.signal.Signal.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>signature</strong> (<a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signature</span></code></a>) – Signature for slots.</p>
+<dd class="field-odd"><p><strong>signature</strong> (<a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.10)"><em>Signature</em></a>) – Signature for slots.</p>
 </dd>
 </dl>
 <div class="admonition important">
@@ -310,48 +302,48 @@ by name will not mask-out parameter from signature introspection).</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.clear"></a><a class="headerlink" href="#firebird.base.signal.Signal.clear" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.clear"></a><a class="headerlink" href="#firebird.base.signal.Signal.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clears the signal of all connected slots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.connect">
-<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.connect"></a><a class="headerlink" href="#firebird.base.signal.Signal.connect" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.connect"></a><a class="headerlink" href="#firebird.base.signal.Signal.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connects the signal to callable that will receive the signal when emitted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>slot</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>) – Callable with signature that match the signature defined for signal.</p>
+<dd class="field-odd"><p><strong>slot</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a>) – Callable with signature that match the signature defined for signal.</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – When callable signature does not match the signature of signal.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.disconnect">
-<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.disconnect"></a><a class="headerlink" href="#firebird.base.signal.Signal.disconnect" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.disconnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.disconnect"></a><a class="headerlink" href="#firebird.base.signal.Signal.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disconnects the slot from the signal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.emit"></a><a class="headerlink" href="#firebird.base.signal.Signal.emit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.emit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.emit"></a><a class="headerlink" href="#firebird.base.signal.Signal.emit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calls all the connected slots with the provided args and kwargs unless block
 is activated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -361,34 +353,34 @@ is activated.</p>
 <dd><p>Toggle to block / unblock signal transmission</p>
 </dd></dl>
 </dd></dl>
-</section>
-<section id="eventsocket">
-<h3>_EventSocket<a class="headerlink" href="#eventsocket" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal._EventSocket">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">_EventSocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal._EventSocket"></a><a class="headerlink" href="#firebird.base.signal._EventSocket" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">_EventSocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal._EventSocket"></a><a class="headerlink" href="#firebird.base.signal._EventSocket" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Internal EventSocket handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>slot</strong> (<em>Callable</em>) – </p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal._EventSocket.is_set">
-<span class="sig-name descname"><span class="pre">is_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal._EventSocket.is_set"></a><a class="headerlink" href="#firebird.base.signal._EventSocket.is_set" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket.is_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal._EventSocket.is_set"></a><a class="headerlink" href="#firebird.base.signal._EventSocket.is_set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if slot is assigned to eventsocket.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="decorators">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Decorators"></a><section id="decorators">
 <h2>Decorators<a class="headerlink" href="#decorators" title="Permalink to this heading">¶</a></h2>
-<section id="id1">
-<h3>signal<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal.signal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.signal"></a><a class="headerlink" href="#firebird.base.signal.signal" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.signal"></a><a class="headerlink" href="#firebird.base.signal.signal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Decorator that defines signal as read-only property. The decorated function/method
 is used to define the signature required for slots to successfuly register to signal,
@@ -396,12 +388,10 @@ and does not need to have a body as it’s never executed.</p>
 <p>The usage is similar to builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code></a>, except that it does not support custom
 setter and deleter.</p>
 </dd></dl>
-</section>
-<section id="id2">
-<h3>eventsocket<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal.eventsocket">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">eventsocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.eventsocket"></a><a class="headerlink" href="#firebird.base.signal.eventsocket" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">eventsocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#eventsocket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.eventsocket"></a><a class="headerlink" href="#firebird.base.signal.eventsocket" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The <a class="reference internal" href="#firebird.base.signal.eventsocket" title="firebird.base.signal.eventsocket"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eventsocket</span></code></a> is like read/write property that handles connection and call
 delegation to single slot. It basically works like Delphi event.</p>
@@ -427,7 +417,6 @@ defined on property.</p>
 </dd></dl>
 </section>
 </section>
-</section>
 </div>
 </div>
 </div>
@@ -438,7 +427,7 @@ defined on property.</p>
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
 </p>
 </div>
 </footer>

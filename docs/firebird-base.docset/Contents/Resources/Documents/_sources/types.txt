@@ -14,8 +14,6 @@ applications.
 Exceptions
 ==========
 
-Error
------
 .. autoexception:: Error
    :show-inheritance:
    :no-inherited-members:
@@ -50,8 +48,6 @@ To create your own singletons, use `Singleton` as the base class.
       >>> obj1 is obj2
       True
 
-Singleton
----------
 .. autoclass:: Singleton
 
 Sentinels
@@ -65,8 +61,8 @@ used instead to indicate missing or unspecified data, or other specific conditio
 However, the plain `object()` sentinel has not very useful `str` and `repr` values.
 The `Sentinel` class provides named sentinels, with meaningful `str` and `repr`.
 
-Sentinel
 --------
+
 .. autoclass:: Sentinel
 
 Predefined sentinels
@@ -89,7 +85,7 @@ Distinct objects
 
 Some complex data structures or data processing algorithms require unique object
 identification (ie object identity). In Python, an object identity is defined internally
-as a unique instance identity that is not suitable for complex objects whose identity is
+as unique instance identity that is not suitable for complex objects whose identity is
 derived from content.
 
 The `Distinct` abstract base class is intended as a unified solution to these needs.
@@ -97,27 +93,25 @@ The `Distinct` abstract base class is intended as a unified solution to these ne
 .. seealso:: module `firebird.base.collections`
 
 
-Distinct
 --------
+
 .. autoclass:: Distinct
 
-CachedDistinct
 --------------
+
 .. autoclass:: CachedDistinct
 
 Enums
 =====
 
-ByteOrder
----------
 .. autoclass:: ByteOrder
 
-ZMQTransport
 ------------
+
 .. autoclass:: ZMQTransport
 
-ZMQDomain
 ---------
+
 .. autoclass:: ZMQDomain
 
 Custom string types
@@ -140,45 +134,44 @@ One such approach uses custom descendants of builtin `str` type.
       Module `~firebird.base.strconv` could help you to safely translate strings stored
       externally to typed strings.
 
-ZeroMQ address
 --------------
+
 .. autoclass:: ZMQAddress
 
-MIME
-----
+------
+
 .. autoclass:: MIME
 
-PyExpr
 ------
+
 .. autoclass:: PyExpr
 
-PyCode
 ------
+
 .. autoclass:: PyCode
 
-PyCallable
 ----------
+
 .. autoclass:: PyCallable
 
 Meta classes
 ============
 
-SingletonMeta
--------------
 .. autoclass:: SingletonMeta
 
-SentinelMeta
 ------------
+
 .. autoclass:: SentinelMeta
 
-CachedDistinctMeta
 ------------------
+
 .. autoclass:: CachedDistinctMeta
 
-Conjunctive
 -----------
+
 .. autofunction:: Conjunctive
 
-load
-----
+Functions
+=========
+
 .. autofunction:: load

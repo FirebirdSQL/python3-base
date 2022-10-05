@@ -230,8 +230,8 @@ The following program is an example of small but complex enough code that you ca
        logger.addHandler(sh)
        # <<< LOGGING
        # >>> TRACE
-       trace_manager.trace |= TraceFlag.ACTIVE
        trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+       trace_manager.trace_active = True
        # <<< TRACE
        test_trace('TEST-1', Mood.SAD, Mood.PLEASED)
 
@@ -375,68 +375,59 @@ Trace supports configuration based on `~firebird.base.config`.
 Enums & Flags
 =============
 
-TraceFlag
----------
 .. autoclass:: TraceFlag
 
 Functions
 =========
 
-add_trace
----------
 .. autofunction:: add_trace
 
-remove_trace
 ------------
+
 .. autofunction:: remove_trace
 
-trace_object
 ------------
+
 .. autofunction:: trace_object
 
 Trace manager
 =============
 
-TraceManager
-------------
 .. autoclass:: TraceManager
 
 Trace/audit decorator
 =====================
 
-traced
-------
 .. autoclass:: traced
 
 Mixins
 ======
 
-TracedMixin
------------
 .. autoclass:: TracedMixin
 
 Globals
 =======
 
 .. autodata:: trace_manager
-   :annotation:
+   :no-value:
 
-Trace Configuration
-===================
+Trace configuration classes
+===========================
 
-BaseTraceConfig
----------------
 .. autoclass:: BaseTraceConfig
 
-TracedMethodConfig
 ------------------
+
 .. autoclass:: TracedMethodConfig
+   :no-inherited-members:
 
-TracedClassConfig
 -----------------
-.. autoclass:: TracedClassConfig
 
-TraceConfig
+.. autoclass:: TracedClassConfig
+   :no-inherited-members:
+
 -----------
+
 .. autoclass:: TraceConfig
+   :no-inherited-members:
 

@@ -89,7 +89,7 @@ First, you need to define your own configuration.
            self.master_db: DbConfig = DbConfig('master-db')
            self.backup_db: DbConfig = DbConfig('backup-db')
 
-.. note::
+.. important::
 
    Option must be assigned to Config attributes with the same name as option name.
 
@@ -306,13 +306,16 @@ The protobuf message is defined in :file:`/proto/config.proto`.
 
    .. seealso:: `.ConfigOption`, `.ConfigListOption`
 
+Constants
+=========
+
+.. data:: PROTO_CONFIG
+   :annotation: Fully qualified name for `ConfigProto`_ protobuf.
+
 .. tip::
 
    To address `ConfigProto`_ in functions like `~firebird.base.protobuf.create_message()`,
    use `PROTO_CONFIG` constant.
-
-.. data:: PROTO_CONFIG
-   :annotation: Fully qualified name for `ConfigProto`_ protobuf.
 
 
 Application Directory Scheme
@@ -324,104 +327,106 @@ Application Directory Scheme
 
 .. autoclass:: DirectoryScheme
 
+-----
+
 .. autoclass:: WindowsDirectoryScheme
+
+-----
 
 .. autoclass:: LinuxDirectoryScheme
 
+-----
+
 .. autoclass:: MacOSDirectoryScheme
+
+-----
 
 .. autofunction:: get_directory_scheme
 
 Config
 ======
 
-Config
-------
 .. autoclass:: Config
 
 Options
 =======
 
-Option
-------
 .. autoclass:: Option
 
-StrOption
----------
+-----
+
 .. autoclass:: StrOption
 
-IntOption
----------
+-----
+
 .. autoclass:: IntOption
 
-FloatOption
------------
+-----
+
 .. autoclass:: FloatOption
 
-DecimalOption
--------------
+-----
+
 .. autoclass:: DecimalOption
 
-BoolOption
-----------
+-----
+
 .. autoclass:: BoolOption
 
-ZMQAddressOption
-----------------
+-----
+
 .. autoclass:: ZMQAddressOption
 
-EnumOption
-----------
+-----
+
 .. autoclass:: EnumOption
 
-FlagOption
-----------
+-----
+
 .. autoclass:: FlagOption
 
-UUIDOption
-----------
+-----
+
 .. autoclass:: UUIDOption
 
-MIMEOption
-----------
+-----
+
 .. autoclass:: MIMEOption
 
-ListOption
-----------
+-----
+
 .. autoclass:: ListOption
 
-DataclassOption
----------------
+-----
+
 .. autoclass:: DataclassOption
 
-PathOption
-----------
+-----
+
 .. autoclass:: PathOption
 
-PyExprOption
-------------
+-----
+
 .. autoclass:: PyExprOption
 
-PyCodeOption
-------------
+-----
+
 .. autoclass:: PyCodeOption
 
-PyCallableOption
-----------------
+-----
+
 .. autoclass:: PyCallableOption
 
-ConfigOption
-------------
+-----
+
 .. autoclass:: ConfigOption
 
-ConfigListOption
-----------------
+-----
+
 .. autoclass:: ConfigListOption
 
 Functions
 =========
 
-create_config
--------------
 .. autofunction:: create_config
 

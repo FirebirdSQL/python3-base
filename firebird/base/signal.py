@@ -98,7 +98,7 @@ class Signal:
         for slot in self._slots:
             if not slot:
                 continue
-            elif isinstance(slot, partial):
+            if isinstance(slot, partial):
                 slot(*args, **kwargs)
             elif isinstance(slot, WeakKeyDictionary):
                 # For class methods, get the class object and call the method accordingly.
@@ -211,7 +211,7 @@ class _EventSocket:
             else:
                 self._slot = ref(slot)
                 self._weak = True
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs): # pylint: disable=[R1710]
         if self._slot is not None:
             if isinstance(self._weak, ref):
                 if (obj := self._weak()):
@@ -225,7 +225,7 @@ class _EventSocket:
         """
         if isinstance(self._weak, ref):
             return self._weak() is not None
-        elif self._weak:
+        if self._weak:
             return self._slot() is not None
         return self._slot is not None
 
@@ -294,5 +294,3 @@ class eventsocket:
         self._map[obj] = _EventSocket(value)
     def __delete__(self, obj):
         raise AttributeError("can't delete eventsocket")
-
-

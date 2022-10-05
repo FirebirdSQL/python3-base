@@ -43,7 +43,7 @@ The architecture supports multiple usage strategies:
   event from `.ANY` source, or even to `.ANY` event from `.ANY` source.
 
 Example
-=======
+-------
 
 .. code-block:: python
 
@@ -95,20 +95,20 @@ Example
    hook_A: MyHook = MyHook('Hook-A')
    hook_B: MyHook = MyHook('Hook-B')
    hook_C: MyHook = MyHook('Hook-C')
-   
+
    print("Install hooks")
    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
    hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
-   
+
    print("Create event sources, emits CREATE")
    src_A: MyHookable = MyHookable('Source-A')
    src_B: MyHookable = MyHookable('Source-B')
-   
+
    print("Install instance hooks")
    hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
    hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
-   
+
    print("And action!")
    src_A.action()
    src_B.action()
@@ -143,26 +143,25 @@ Output from sample code::
 Functions
 =========
 
-register_class
---------------
 .. autofunction:: register_class
 
-register_name
 -------------
+
 .. autofunction:: register_name
 
-add_hook
 --------
+
 .. autofunction:: add_hook
 
-get_callbacks
 -------------
+
 .. autofunction:: get_callbacks
 
-HookManager
-===========
+Classes
+=======
 .. autoclass:: HookManager
 
 Globals
 =======
 .. autodata:: hook_manager
+   :no-value:

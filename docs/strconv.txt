@@ -98,12 +98,7 @@ Module registers convertor functions for next data types:
 Types for annotations
 =====================
 
-TConvertToStr
--------------
 .. autodata:: TConvertToStr
-
-TConvertFromStr
----------------
 .. autodata:: TConvertFromStr
 
 Globals
@@ -115,45 +110,41 @@ Globals
 Functions
 =========
 
-convert_to_str
---------------
 .. autofunction:: convert_to_str
 
-convert_from_str
 ----------------
+
 .. autofunction:: convert_from_str
 
-register_convertor
 ------------------
+
 .. autofunction:: register_convertor
 
-update_convertor
 ----------------
+
 .. autofunction:: update_convertor
 
-register_class
 --------------
+
 .. autofunction:: register_class
 
-has_convertor
 -------------
+
 .. autofunction:: has_convertor
 
-get_convertor
 -------------
+
 .. autofunction:: get_convertor
 
-any2str
 -------
+
 .. autofunction:: any2str
 
-str2any
 -------
+
 .. autofunction:: str2any
 
 Dataclasses
 ===========
 
-Convertor
----------
 .. autoclass:: Convertor

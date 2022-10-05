@@ -174,21 +174,17 @@ To disconnect the callable from event, simply assign None to the event.
 Classes
 =======
 
-Signal
-------
 .. autoclass:: Signal
 
-_EventSocket
 ------------
+
 .. autoclass:: _EventSocket
 
 Decorators
 ==========
 
-signal
-------
 .. autoclass:: signal
 
-eventsocket
 -----------
+
 .. autoclass:: eventsocket

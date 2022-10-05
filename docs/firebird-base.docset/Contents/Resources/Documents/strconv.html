@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>strconv - Data conversion from/to string — Firebird-base 1.4.1 documentation</title>
+<title>strconv - Data conversion from/to string — Firebird-base 1.4.2 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -13,6 +13,7 @@
 <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
+<link href="_static/fb-favicon.png" rel="shortcut icon"/>
 <link href="genindex.html" rel="index" title="Index"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="config.html" rel="next" title="config - Configuration definitions"/>
@@ -37,7 +38,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.4.1</b></span>
+<span class="navbar-text pull-left"><b>1.4.2</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -60,14 +61,8 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#types-for-annotations">Types for annotations</a><ul>
-<li><a class="reference internal" href="#tconverttostr">TConvertToStr</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.TConvertToStr"><code class="docutils literal notranslate"><span class="pre">TConvertToStr</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#tconvertfromstr">TConvertFromStr</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.TConvertFromStr"><code class="docutils literal notranslate"><span class="pre">TConvertFromStr</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#globals">Globals</a><ul>
@@ -76,46 +71,18 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#convert-to-str">convert_to_str</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.convert_to_str"><code class="docutils literal notranslate"><span class="pre">convert_to_str()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#convert-from-str">convert_from_str</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.convert_from_str"><code class="docutils literal notranslate"><span class="pre">convert_from_str()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#register-convertor">register_convertor</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.register_convertor"><code class="docutils literal notranslate"><span class="pre">register_convertor()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#update-convertor">update_convertor</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.update_convertor"><code class="docutils literal notranslate"><span class="pre">update_convertor()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#register-class">register_class</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.register_class"><code class="docutils literal notranslate"><span class="pre">register_class()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#has-convertor">has_convertor</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.has_convertor"><code class="docutils literal notranslate"><span class="pre">has_convertor()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#get-convertor">get_convertor</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.get_convertor"><code class="docutils literal notranslate"><span class="pre">get_convertor()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#any2str">any2str</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.any2str"><code class="docutils literal notranslate"><span class="pre">any2str()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#str2any">str2any</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.str2any"><code class="docutils literal notranslate"><span class="pre">str2any()</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#dataclasses">Dataclasses</a><ul>
-<li><a class="reference internal" href="#convertor">Convertor</a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.Convertor"><code class="docutils literal notranslate"><span class="pre">Convertor</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.strconv.Convertor.get_key"><code class="docutils literal notranslate"><span class="pre">Convertor.get_key()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.strconv.Convertor.cls"><code class="docutils literal notranslate"><span class="pre">Convertor.cls</span></code></a></li>
@@ -123,8 +90,6 @@
 <li><a class="reference internal" href="#firebird.base.strconv.Convertor.full_name"><code class="docutils literal notranslate"><span class="pre">Convertor.full_name</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.strconv.Convertor.name"><code class="docutils literal notranslate"><span class="pre">Convertor.name</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.strconv.Convertor.to_str"><code class="docutils literal notranslate"><span class="pre">Convertor.to_str</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -149,9 +114,9 @@
 <div class="container">
 <div class="row">
 <div class="body span12 content" role="main">
-<span class="target" id="module-firebird.base.strconv"></span><section id="strconv-data-conversion-from-to-string">
+<span class="target" id="module-firebird.base.strconv"></span><a class="dashAnchor" name="//apple_ref/cpp/Section/strconv - Data conversion from/to string"></a><section id="strconv-data-conversion-from-to-string">
 <a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.base.strconv"></a><h1>strconv - Data conversion from/to string<a class="headerlink" href="#strconv-data-conversion-from-to-string" title="Permalink to this heading">¶</a></h1>
-<section id="overview">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Overview"></a><section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
 <p>While Python types typically support conversion to string via builtin <code class="xref py py-obj docutils literal notranslate"><span class="pre">str()</span></code> function
 (and custom <code class="xref py py-obj docutils literal notranslate"><span class="pre">__str__</span></code> methods), there is no symetric operation that converts string created
@@ -164,7 +129,7 @@ from/to string for any data type.</p>
 extend the range of data types supported by these options by registering convertors
 for required data types.</p>
 </div>
-<section id="architecture">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Architecture"></a><section id="architecture">
 <h3>Architecture<a class="headerlink" href="#architecture" title="Permalink to this heading">¶</a></h3>
 <p>Module maintains a global registry of convertors associated with a data type. These
 convertor functions may support conversion for multiple data types, and must have signatures:</p>
@@ -207,7 +172,7 @@ register a class for name lookup using <a class="reference internal" href="#fire
 uses this class registry to use the actual type instead type name.</p>
 </div>
 </section>
-<section id="registered-data-types">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Registered data types"></a><section id="registered-data-types">
 <h3>Registered data types<a class="headerlink" href="#registered-data-types" title="Permalink to this heading">¶</a></h3>
 <p>Module registers convertor functions for next data types:</p>
 <ul class="simple">
@@ -233,19 +198,14 @@ arguments must be keyword arguments with default values).</p>
 </div>
 </section>
 </section>
-<section id="types-for-annotations">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Types for annotations"></a><section id="types-for-annotations">
 <h2>Types for annotations<a class="headerlink" href="#types-for-annotations" title="Permalink to this heading">¶</a></h2>
-<section id="tconverttostr">
-<h3>TConvertToStr<a class="headerlink" href="#tconverttostr" title="Permalink to this heading">¶</a></h3>
 <dl class="py data">
 <dt class="sig sig-object py" id="firebird.base.strconv.TConvertToStr">
 <span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">TConvertToStr</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.strconv.TConvertToStr"></a><a class="headerlink" href="#firebird.base.strconv.TConvertToStr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function that converts typed value to its string representation.</p>
 <p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
 </dd></dl>
-</section>
-<section id="tconvertfromstr">
-<h3>TConvertFromStr<a class="headerlink" href="#tconvertfromstr" title="Permalink to this heading">¶</a></h3>
 <dl class="py data">
 <dt class="sig sig-object py" id="firebird.base.strconv.TConvertFromStr">
 <span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">TConvertFromStr</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.strconv.TConvertFromStr"></a><a class="headerlink" href="#firebird.base.strconv.TConvertFromStr" title="Permalink to this definition">¶</a></dt>
@@ -253,8 +213,7 @@ arguments must be keyword arguments with default values).</p>
 <p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
 </dd></dl>
 </section>
-</section>
-<section id="globals">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Globals"></a><section id="globals">
 <h2>Globals<a class="headerlink" href="#globals" title="Permalink to this heading">¶</a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="firebird.base.strconv.TRUE_STR">
@@ -267,17 +226,18 @@ arguments must be keyword arguments with default values).</p>
 <dd><p>Valid string literals for False value.</p>
 </dd></dl>
 </section>
-<section id="functions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Functions"></a><section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
-<section id="convert-to-str">
-<h3>convert_to_str<a class="headerlink" href="#convert-to-str" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.convert_to_str">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">convert_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.convert_to_str"></a><a class="headerlink" href="#firebird.base.strconv.convert_to_str" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">convert_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/strconv.html#convert_to_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.convert_to_str"></a><a class="headerlink" href="#firebird.base.strconv.convert_to_str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts value to string using registered convertor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Value to be converted.</p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Value to be converted.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 <p>If there is no convertor for value’s class, uses MRO to locate alternative convertor.</p>
@@ -285,25 +245,29 @@ arguments must be keyword arguments with default values).</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – If there is no convertor for value’s class or any from its bases classes.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="convert-from-str">
-<h3>convert_from_str<a class="headerlink" href="#convert-from-str" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.convert_from_str">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">convert_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.convert_from_str"></a><a class="headerlink" href="#firebird.base.strconv.convert_from_str" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">convert_from_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/strconv.html#convert_from_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.convert_from_str"></a><a class="headerlink" href="#firebird.base.strconv.convert_from_str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts value from string to data type using registered convertor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Type or type name. The name could be simple class name, or full name that includes
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Type or type name. The name could be simple class name, or full name that includes
 the module name.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – String value to be converted</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – String value to be converted</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a></p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -321,41 +285,43 @@ want to avoid this situation, use full names.</p></li>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – If there is no convertor for <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> or any from its bases classes.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a></p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="register-convertor">
-<h3>register_convertor<a class="headerlink" href="#register-convertor" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.register_convertor">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">register_convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_str=&lt;function</span> <span class="pre">any2str&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_str=&lt;function</span> <span class="pre">str2any&gt;</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.register_convertor"></a><a class="headerlink" href="#firebird.base.strconv.register_convertor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">register_convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">cls:</span> <span class="pre">~typing.Type,</span> <span class="pre">*,</span> <span class="pre">to_str:</span> <span class="pre">~typing.Callable[[~typing.Any],</span> <span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">any2str&gt;,</span> <span class="pre">from_str:</span> <span class="pre">~typing.Callable[[~typing.Type,</span> <span class="pre">str],</span> <span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">str2any&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/strconv.html#register_convertor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.register_convertor"></a><a class="headerlink" href="#firebird.base.strconv.register_convertor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers convertor function(s).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>) – Class or class name</p></li>
-<li><p><strong>to_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Function that converts <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> value to <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a></p></li>
-<li><p><strong>from_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Function that converts <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> to value of <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> data type</p></li>
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a>) – Class or class name</p></li>
+<li><p><strong>to_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Function that converts <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> value to <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a></p></li>
+<li><p><strong>from_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em>) – Function that converts <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> to value of <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> data type</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="update-convertor">
-<h3>update_convertor<a class="headerlink" href="#update-convertor" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.update_convertor">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">update_convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_str</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.update_convertor"></a><a class="headerlink" href="#firebird.base.strconv.update_convertor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">update_convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/strconv.html#update_convertor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.update_convertor"></a><a class="headerlink" href="#firebird.base.strconv.update_convertor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update convertor function(s).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Class or class name</p></li>
-<li><p><strong>to_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]) – Function that converts <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> value to <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a></p></li>
-<li><p><strong>from_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – Function that converts <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> to value of <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> data type</p></li>
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Class or class name</p></li>
+<li><p><strong>to_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>]</em>) – Function that converts <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> value to <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a></p></li>
+<li><p><strong>from_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em><em>]</em>) – Function that converts <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> to value of <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> data type</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
@@ -363,12 +329,10 @@ want to avoid this situation, use full names.</p></li>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="register-class">
-<h3>register_class<a class="headerlink" href="#register-class" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.register_class">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">register_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.register_class"></a><a class="headerlink" href="#firebird.base.strconv.register_class" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">register_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/strconv.html#register_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.register_class"></a><a class="headerlink" href="#firebird.base.strconv.register_class" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers class for name lookup.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -378,22 +342,26 @@ want to avoid this situation, use full names.</p></li>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – When class name is already registered.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a>) – </p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="has-convertor">
-<h3>has_convertor<a class="headerlink" href="#has-convertor" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.has_convertor">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">has_convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.has_convertor"></a><a class="headerlink" href="#firebird.base.strconv.has_convertor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">has_convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/strconv.html#has_convertor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.has_convertor"></a><a class="headerlink" href="#firebird.base.strconv.has_convertor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if class has a convertor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Type or type name. The name could be simple class name, or full name that includes
+<dd class="field-odd"><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Type or type name. The name could be simple class name, or full name that includes
 the module name.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -407,23 +375,19 @@ different modules have registered convertors, the first one found is used. If yo
 want to avoid this situation, use full names.</p></li>
 </ol>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
-</section>
-<section id="get-convertor">
-<h3>get_convertor<a class="headerlink" href="#get-convertor" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.get_convertor">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">get_convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.get_convertor"></a><a class="headerlink" href="#firebird.base.strconv.get_convertor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">get_convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#firebird.base.strconv.Convertor" title="firebird.base.strconv.Convertor"><span class="pre">Convertor</span></a></span></span><a class="reference internal" href="_modules/firebird/base/strconv.html#get_convertor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.get_convertor"></a><a class="headerlink" href="#firebird.base.strconv.get_convertor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns Convertor for data type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Type or type name. The name could be simple class name, or full name that includes
+<dd class="field-odd"><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – Type or type name. The name could be simple class name, or full name that includes
 the module name.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#firebird.base.strconv.Convertor" title="firebird.base.strconv.Convertor"><em>Convertor</em></a></p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -441,55 +405,69 @@ want to avoid this situation, use full names.</p></li>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – If there is no convertor for <code class="xref py py-obj docutils literal notranslate"><span class="pre">cls</span></code> or any from its bases classes.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#firebird.base.strconv.Convertor" title="firebird.base.strconv.Convertor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Convertor</span></code></a></p>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.base.strconv.Convertor" title="firebird.base.strconv.Convertor"><em>Convertor</em></a></p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="any2str">
-<h3>any2str<a class="headerlink" href="#any2str" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.any2str">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">any2str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.any2str"></a><a class="headerlink" href="#firebird.base.strconv.any2str" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">any2str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/strconv.html#any2str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.any2str"></a><a class="headerlink" href="#firebird.base.strconv.any2str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts value to string using <code class="xref py py-obj docutils literal notranslate"><span class="pre">str(value)</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="str2any">
-<h3>str2any<a class="headerlink" href="#str2any" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.strconv.str2any">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">str2any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.str2any"></a><a class="headerlink" href="#firebird.base.strconv.str2any" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">str2any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/strconv.html#str2any"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.strconv.str2any"></a><a class="headerlink" href="#firebird.base.strconv.str2any" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts string to data type value using <code class="xref py py-obj docutils literal notranslate"><span class="pre">type(value)</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a>) – </p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 </section>
-</section>
-<section id="dataclasses">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Dataclasses"></a><section id="dataclasses">
 <h2>Dataclasses<a class="headerlink" href="#dataclasses" title="Permalink to this heading">¶</a></h2>
-<section id="convertor">
-<h3>Convertor<a class="headerlink" href="#convertor" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.strconv.Convertor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">Convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_str</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.strconv.Convertor"></a><a class="headerlink" href="#firebird.base.strconv.Convertor" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.strconv.</span></span><span class="sig-name descname"><span class="pre">Convertor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/strconv.html#Convertor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.strconv.Convertor"></a><a class="headerlink" href="#firebird.base.strconv.Convertor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a></p>
 <p>Data convertor registry entry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a>) – </p></li>
+<li><p><strong>to_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>from_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><em>Type</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em>) – </p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.strconv.Convertor.get_key">
-<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.strconv.Convertor.get_key"></a><a class="headerlink" href="#firebird.base.strconv.Convertor.get_key" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><span class="pre">Hashable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/strconv.html#Convertor.get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.strconv.Convertor.get_key"></a><a class="headerlink" href="#firebird.base.strconv.Convertor.get_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns instance key.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hashable</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><em>Hashable</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -505,28 +483,17 @@ want to avoid this situation, use full names.</p></li>
 <dt class="sig sig-object py" id="firebird.base.strconv.Convertor.full_name">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">full_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.strconv.Convertor.full_name"></a><a class="headerlink" href="#firebird.base.strconv.Convertor.full_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type name including source module.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.strconv.Convertor.name">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.strconv.Convertor.name"></a><a class="headerlink" href="#firebird.base.strconv.Convertor.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type name.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.base.strconv.Convertor.to_str">
 <span class="sig-name descname"><span class="pre">to_str</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.strconv.Convertor.to_str"></a><a class="headerlink" href="#firebird.base.strconv.Convertor.to_str" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 </dd></dl>
-</section>
 </section>
 </section>
 </div>
@@ -539,7 +506,7 @@ want to avoid this situation, use full names.</p></li>
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
 </p>
 </div>
 </footer>

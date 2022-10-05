@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>firebird.base.buffer &#8212; Firebird-base 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="shortcut icon" href="../../../_static/fb-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="brand" href="../../../index.html">
+          Firebird-base</a>
+        <span class="navbar-text pull-left"><b>1.4.1</b></span>
+
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            
+                <li><a href="../../../introduction.html">Introduction</a></li>
+                <li><a href="../../../modules.html">Modules</a></li>
+                <li><a href="../../../genindex.html">Index</a></li>
+                <li><a href="../../../changelog.html">Changelog</a></li>
+                <li><a href="../../../license.html">License</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body span12 content" role="main">
+      
+  <h1>Source code for firebird.base.buffer</h1><div class="highlight"><pre>
+<span></span><span class="c1">#coding:utf-8</span>
+<span class="c1">#</span>
+<span class="c1"># PROGRAM/MODULE: firebird-base</span>
+<span class="c1"># FILE:           firebird/base/buffer.py</span>
+<span class="c1"># DESCRIPTION:    Memory buffer manager</span>
+<span class="c1"># CREATED:        14.5.2020</span>
+<span class="c1">#</span>
+<span class="c1"># The contents of this file are subject to the MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Firebird Project (www.firebirdsql.org)</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Contributor(s): Pavel Císař (original code)</span>
+<span class="c1">#                 ______________________________________</span>
+
+<span class="sd">&quot;&quot;&quot;Firebird Base - Memory buffer manager</span>
+
+<span class="sd">This module provides a raw memory buffer manager with convenient methods to read/write</span>
+<span class="sd">data of various data type.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">runtime_checkable</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="n">memset</span><span class="p">,</span> <span class="n">create_string_buffer</span>
+<span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="n">Sentinel</span><span class="p">,</span> <span class="n">UNLIMITED</span><span class="p">,</span> <span class="n">ByteOrder</span>
+
+<div class="viewcode-block" id="BufferFactory"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.BufferFactory">[docs]</a><span class="nd">@runtime_checkable</span>
+<span class="k">class</span> <span class="nc">BufferFactory</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;BufferFactory Protocol definition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BufferFactory.create"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.BufferFactory.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_or_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">],</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This function must create and return a mutable character buffer.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        init_or_size: Must be an integer which specifies the size of the array, or a bytes</span>
+<span class="sd">            object which will be used to initialize the array items.</span>
+<span class="sd">        size: Size of the array.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="BufferFactory.clear"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.BufferFactory.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Fills the buffer with zero.</span>
+
+<span class="sd">    Argument:</span>
+<span class="sd">        buffer: A memory buffer previously created by `BufferFactory.create()` method.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div></div>
+
+<div class="viewcode-block" id="BytesBufferFactory"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.BytesBufferFactory">[docs]</a><span class="k">class</span> <span class="nc">BytesBufferFactory</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Buffer factory for `bytearray` buffers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BytesBufferFactory.create"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.BytesBufferFactory.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_or_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">],</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytearray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This function creates a mutable character buffer. The returned object is a</span>
+<span class="sd">        `bytearray`.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            init_or_size: Must be an integer which specifies the size of the array,</span>
+<span class="sd">                or a bytes object which will be used to initialize the array items.</span>
+<span class="sd">            size: Size of the array.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            Although arguments are the same as for `ctypes.create_string_buffer`,</span>
+<span class="sd">            the behavior is different when new buffer is initialized from bytes:</span>
+
+<span class="sd">            1. If there are more bytes than specified `size`, this function copies only</span>
+<span class="sd">               `size` bytes into new buffer. The `~ctypes.create_string_buffer` raises</span>
+<span class="sd">               an excpetion.</span>
+<span class="sd">            2. Unlike `~ctypes.create_string_buffer` when `size` is NOT specified,</span>
+<span class="sd">               the buffer is NOT made one item larger than its length so that the last</span>
+<span class="sd">               element in the array is a NUL termination character.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init_or_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">init_or_size</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">init_or_size</span><span class="p">)</span> <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">size</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">init_or_size</span><span class="p">),</span> <span class="n">size</span><span class="p">)</span>
+        <span class="n">buffer</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span> <span class="o">=</span> <span class="n">init_or_size</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">buffer</span></div>
+<div class="viewcode-block" id="BytesBufferFactory.clear"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.BytesBufferFactory.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Fills the buffer with zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buffer</span><span class="p">[:]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="CTypesBufferFactory"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.CTypesBufferFactory">[docs]</a><span class="k">class</span> <span class="nc">CTypesBufferFactory</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Buffer factory for `ctypes` array of `~ctypes.c_char` buffers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CTypesBufferFactory.create"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.CTypesBufferFactory.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_or_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">],</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytearray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This function creates a `ctypes` mutable character buffer. The returned object</span>
+<span class="sd">        is an array of `ctypes.c_char`.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            init_or_size: Must be an integer which specifies the size of the array,</span>
+<span class="sd">                or a bytes object which will be used to initialize the array items.</span>
+<span class="sd">            size: Size of the array.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            Although arguments are the same as for `ctypes.create_string_buffer`,</span>
+<span class="sd">            the behavior is different when new buffer is initialized from bytes:</span>
+
+<span class="sd">            1. If there are more bytes than specified `size`, this function copies only</span>
+<span class="sd">               `size` bytes into new buffer. The `~ctypes.create_string_buffer` raises</span>
+<span class="sd">               an excpetion.</span>
+<span class="sd">            2. Unlike `~ctypes.create_string_buffer` when `size` is NOT specified,</span>
+<span class="sd">               the buffer is NOT made one item larger than its length so that the last</span>
+<span class="sd">               element in the array is a NUL termination character.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init_or_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">create_string_buffer</span><span class="p">(</span><span class="n">init_or_size</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">init_or_size</span><span class="p">)</span> <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">size</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">create_string_buffer</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">init_or_size</span><span class="p">),</span> <span class="n">size</span><span class="p">)</span>
+        <span class="n">buffer</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span> <span class="o">=</span> <span class="n">init_or_size</span><span class="p">[:</span><span class="n">limit</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">buffer</span></div>
+<div class="viewcode-block" id="CTypesBufferFactory.clear"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.CTypesBufferFactory.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">init</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Fills the buffer with specified value (default).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">))</span></div></div>
+
+<span class="k">def</span> <span class="nf">safe_ord</span><span class="p">(</span><span class="n">byte</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;If `byte` argument is byte character, returns ord(byte), otherwise returns argument.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">byte</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="nb">ord</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MemoryBuffer"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer">[docs]</a><span class="k">class</span> <span class="nc">MemoryBuffer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Generic memory buffer manager.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="MemoryBuffer.__init__"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">],</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">factory</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">BufferFactory</span><span class="p">]</span><span class="o">=</span><span class="n">BytesBufferFactory</span><span class="p">,</span> <span class="n">eof_marker</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">max_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sentinel</span><span class="p">]</span><span class="o">=</span><span class="n">UNLIMITED</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="n">ByteOrder</span><span class="o">=</span><span class="n">ByteOrder</span><span class="o">.</span><span class="n">LITTLE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            init: Must be an integer which specifies the size of the array, or a `bytes` object</span>
+<span class="sd">                  which will be used to initialize the array items.</span>
+<span class="sd">            size: Size of the array. The argument value is used only when `init` is a `bytes` object.</span>
+<span class="sd">            factory: Factory object used to create/resize the internal memory buffer.</span>
+<span class="sd">            eof_marker: Value that indicates the end of data. Could be None.</span>
+<span class="sd">            max_size: If specified, the buffer couldn&#39;t grow beyond specified number of bytes.</span>
+<span class="sd">            byteorder: The byte order used to read/write numbers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#: Buffer factory instance used by manager [default: `BytesBufferFactory`].</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="p">:</span> <span class="n">BufferFactory</span> <span class="o">=</span> <span class="n">factory</span><span class="p">()</span>
+        <span class="c1">#: The memory buffer. The actual data type of buffer depends on `buffer factory`,</span>
+        <span class="c1">#: but it must provide direct acces to cells, slices and length like `bytearray`.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">:</span> <span class="nb">bytearray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="c1">#: Current position in buffer, i.e. the next read/writen byte would be at this position.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1">#: Value that indicates the end of data. Could be None.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eof_marker</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">eof_marker</span>
+        <span class="c1">#: The buffer couldn&#39;t grow beyond specified number of bytes [default: `.UNLIMITED`].</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sentinel</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_size</span>
+        <span class="c1">#: The byte order used to read/write numbers [default: `.LITTLE`].</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">byteorder</span><span class="p">:</span> <span class="n">ByteOrder</span> <span class="o">=</span> <span class="n">byteorder</span></div>
+    <span class="k">def</span> <span class="nf">_ensure_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">size</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_check_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Insufficient buffer size&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="MemoryBuffer.clear"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Fills the buffer with zeros and resets the position in buffer to zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span></div>
+<div class="viewcode-block" id="MemoryBuffer.resize"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.resize">[docs]</a>    <span class="k">def</span> <span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Resize buffer to specified length.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">UNLIMITED</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot resize buffer past max. size </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_size</span><span class="si">}</span><span class="s2"> bytes&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.is_eof"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.is_eof">[docs]</a>    <span class="k">def</span> <span class="nf">is_eof</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return True when positioned past the end of buffer or on `.eof_marker`</span>
+<span class="sd">        (if defined).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof_marker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">safe_ord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">])</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof_marker</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write bytes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_space</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="n">size</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write_byte"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write_byte">[docs]</a>    <span class="k">def</span> <span class="nf">write_byte</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">byte</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write one byte.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_space</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write_number"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write_number">[docs]</a>    <span class="k">def</span> <span class="nf">write_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write number with specified size (in bytes).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">byteorder</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">))</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write_short"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write_short">[docs]</a>    <span class="k">def</span> <span class="nf">write_short</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write 2 byte number (c_ushort).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_number</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write_int"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write_int">[docs]</a>    <span class="k">def</span> <span class="nf">write_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write 4 byte number (c_uint).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_number</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write_bigint"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write_bigint">[docs]</a>    <span class="k">def</span> <span class="nf">write_bigint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write tagged 8 byte number (c_ulonglong).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_number</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write_string"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write_string">[docs]</a>    <span class="k">def</span> <span class="nf">write_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write zero-terminated string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_byte</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write_pascal_string"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write_pascal_string">[docs]</a>    <span class="k">def</span> <span class="nf">write_pascal_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write tagged Pascal string (2 byte length followed by data).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_byte</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.write_sized_string"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.write_sized_string">[docs]</a>    <span class="k">def</span> <span class="nf">write_sized_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write string (2 byte length followed by data).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_short</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reads specified number of bytes, or all remaining data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_space</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="n">size</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_number"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_number">[docs]</a>    <span class="k">def</span> <span class="nf">read_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read number with specified size in bytes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_space</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">size</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">byteorder</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="n">size</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_byte"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_byte">[docs]</a>    <span class="k">def</span> <span class="nf">read_byte</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read 1 byte number (c_ubyte).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_number</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_short"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_short">[docs]</a>    <span class="k">def</span> <span class="nf">read_short</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read 2 byte number (c_ushort).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_number</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_int"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_int">[docs]</a>    <span class="k">def</span> <span class="nf">read_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read 4 byte number (c_uint).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_number</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_bigint"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_bigint">[docs]</a>    <span class="k">def</span> <span class="nf">read_bigint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read 8 byte number (c_ulonglong).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_number</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_sized_int"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_sized_int">[docs]</a>    <span class="k">def</span> <span class="nf">read_sized_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">signed</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read number cluster (2 byte length followed by data).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_short</span><span class="p">(),</span> <span class="n">signed</span><span class="o">=</span><span class="n">signed</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_string"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_string">[docs]</a>    <span class="k">def</span> <span class="nf">read_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read null-terminated string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer_size</span> <span class="ow">and</span> <span class="n">safe_ord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_pascal_string"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_pascal_string">[docs]</a>    <span class="k">def</span> <span class="nf">read_pascal_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read Pascal string (1 byte length followed by string data).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_byte</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_sized_string"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_sized_string">[docs]</a>    <span class="k">def</span> <span class="nf">read_sized_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read string (2 byte length followed by data).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_short</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span></div>
+<div class="viewcode-block" id="MemoryBuffer.read_bytes"><a class="viewcode-back" href="../../../buffer.html#firebird.base.buffer.MemoryBuffer.read_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">read_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read content of binary cluster (2 bytes data length followed by data).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_short</span><span class="p">())</span></div>
+    <span class="c1"># Properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">buffer_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Current buffer size in bytes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">last_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Index of first non-zero byte when searched from the end of buffer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">safe_ord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">i</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -373,7 +373,7 @@ option_name = bad_value
         self.assertTrue('option_name' in self.proto.options)
         self.assertEqual(str(self.proto), proto_dump)
         # empty proto
-        opt.clear(False)
+        opt.clear(to_default=False)
         self.proto.Clear()
         opt.load_proto(self.proto)
         self.assertIsNone(opt.value)
@@ -387,7 +387,7 @@ option_name = bad_value
             opt.load_proto(self.proto)
         self.assertEqual(cm.exception.args, ('Wrong value type: bytes',))
         self.proto.Clear()
-        opt.clear(False)
+        opt.clear(to_default=False)
         opt.save_proto(self.proto)
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):

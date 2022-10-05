@@ -138,6 +138,7 @@ class BindInfo(Distinct):
     context: str
     logger: FBLoggerAdapter
     def get_key(self) -> Any:
+        "Returns distinct key value = Tuple(topic, agent, context)."
         return (self.topic, self.agent, self.context)
 
 def get_logging_id(obj: Any) -> Any:
@@ -315,4 +316,3 @@ def install_null_logger():
     log = getLogger('null')
     log.propagate = False
     log.disabled = True
-

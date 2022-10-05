@@ -35,7 +35,7 @@
 """
 
 from __future__ import annotations
-from typing import Any, Dict, Hashable, Callable, AnyStr, cast
+from typing import Any, Dict, Hashable, Callable, AnyStr, cast, Type
 from abc import ABC, ABCMeta, abstractmethod
 import sys
 from importlib import import_module
@@ -180,7 +180,7 @@ class Distinct(ABC):
             function. If the key is not suitable argument for `hash`, you must provide your
             own `__hash__` implementation as well!
         """
-    __hash__ = lambda self: hash(self.get_key())
+    __hash__ = lambda self: hash(self.get_key()) # pylint: disable=[C3001]
 
 class CachedDistinctMeta(ABCMeta):
     """Metaclass for CachedDistinct.
@@ -299,7 +299,7 @@ class MIME(str):
     #: Supported MIME types
     MIME_TYPES = ['text', 'image', 'audio', 'video', 'application', 'multipart', 'message']
     def __new__(cls, value: AnyStr):
-        dfm = [x for x in value.split(';')]
+        dfm = list(value.split(';'))
         mime_type: str = dfm.pop(0)
         if (i := mime_type.find('/')) == -1:
             raise ValueError("MIME type specification must be 'type/subtype[;param=value;...]'")
@@ -370,7 +370,7 @@ class PyExpr(str):
             ns.update(namespace)
         code = compile(f"def expr({arguments}):\n    return {self}",
                        "PyExpr", 'exec')
-        eval(code, ns)
+        eval(code, ns) # pylint: disable=[W0123]
         return ns['expr']
     @property
     def expr(self):
@@ -425,7 +425,7 @@ class PyCallable(str):
         if callable_name is None:
             raise ValueError("Python function or class definition not found")
         ns = {}
-        eval(compile(value, "PyCallable", 'exec'), ns)
+        eval(compile(value, "PyCallable", 'exec'), ns) # pylint: disable=[W0123]
         new = str.__new__(cls, value)
         new._callable_ = ns[callable_name]
         new.name = callable_name

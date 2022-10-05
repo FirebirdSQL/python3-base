@@ -2,6 +2,21 @@
 Changelog
 #########
 
+Version 1.4.2
+=============
+
+* Optimizations.
+* Cleanup of pylint warnings.
+* Updated documentation.
+* Fixed unregistered bugs:
+
+  - Signature in `firebird.base.config.IntOption.clear`.
+  - Signature in `firebird.base.trace.TraceManager.add_trace`. Keyword argument `decorator`
+    (with default) could not be used with args/kwargs, so it was removed. New
+    `~firebird.base.trace.TraceManager.decorator` attribute was added to
+    `~firebird.base.trace.TraceManager` that could be used to change trace decorator used
+    for intrumentation.
+
 Version 1.4.1
 =============
 
@@ -32,7 +47,7 @@ Version 1.3.0
 
 * `~firebird.base.config` module:
 
-  - Layout produced by `.get_config()` was changed.
+  - Layout produced by `~firebird.base.config.get_config()` was changed.
   - `.Config` has new constructor keyword-only argument `description`.
   - Fix: uregistered bug in config.ListOption - value and default was the same instance
 

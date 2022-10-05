@@ -40,7 +40,7 @@ from dataclasses import dataclass
 from pkg_resources import iter_entry_points
 from google.protobuf.message import Message as ProtoMessage
 from google.protobuf.descriptor import EnumDescriptor
-from google.protobuf.struct_pb2 import Struct as StructProto
+from google.protobuf.struct_pb2 import Struct as StructProto # pylint: disable=[E0611]
 from google.protobuf import json_format, struct_pb2, any_pb2, duration_pb2, empty_pb2, \
      timestamp_pb2, field_mask_pb2
 from .types import Distinct

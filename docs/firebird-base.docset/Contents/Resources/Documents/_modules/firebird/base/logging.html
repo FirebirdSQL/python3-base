@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>firebird.base.logging &#8212; Firebird-base 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="shortcut icon" href="../../../_static/fb-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="brand" href="../../../index.html">
+          Firebird-base</a>
+        <span class="navbar-text pull-left"><b>1.4.1</b></span>
+
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            
+                <li><a href="../../../introduction.html">Introduction</a></li>
+                <li><a href="../../../modules.html">Modules</a></li>
+                <li><a href="../../../genindex.html">Index</a></li>
+                <li><a href="../../../changelog.html">Changelog</a></li>
+                <li><a href="../../../license.html">License</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body span12 content" role="main">
+      
+  <h1>Source code for firebird.base.logging</h1><div class="highlight"><pre>
+<span></span><span class="c1">#coding:utf-8</span>
+<span class="c1">#</span>
+<span class="c1"># PROGRAM/MODULE: firebird-base</span>
+<span class="c1"># FILE:           firebird/base/logging.py</span>
+<span class="c1"># DESCRIPTION:    Context-based logging</span>
+<span class="c1"># CREATED:        14.5.2020</span>
+<span class="c1">#</span>
+<span class="c1"># The contents of this file are subject to the MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Firebird Project (www.firebirdsql.org)</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Contributor(s): Pavel Císař (original code)</span>
+<span class="c1">#                 ______________________________________</span>
+
+<span class="sd">&quot;&quot;&quot;firebird-base - Context-based logging</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Hashable</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">Flag</span><span class="p">,</span> <span class="n">auto</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">LoggerAdapter</span><span class="p">,</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">lastResort</span><span class="p">,</span> <span class="n">Formatter</span>
+<span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="n">UNDEFINED</span><span class="p">,</span> <span class="n">DEFAULT</span><span class="p">,</span> <span class="n">ANY</span><span class="p">,</span> <span class="n">ALL</span><span class="p">,</span> <span class="n">Distinct</span><span class="p">,</span> <span class="n">CachedDistinct</span><span class="p">,</span> <span class="n">Sentinel</span>
+<span class="kn">from</span> <span class="nn">.collections</span> <span class="kn">import</span> <span class="n">Registry</span>
+
+<div class="viewcode-block" id="LogLevel"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.LogLevel">[docs]</a><span class="k">class</span> <span class="nc">LogLevel</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shadow enumeration for logging levels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NOTSET</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">INFO</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">WARNING</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">ERROR</span> <span class="o">=</span> <span class="mi">40</span>
+    <span class="n">CRITICAL</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">FATAL</span> <span class="o">=</span> <span class="n">CRITICAL</span>
+    <span class="n">WARN</span> <span class="o">=</span> <span class="n">WARNING</span></div>
+
+<div class="viewcode-block" id="BindFlag"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.BindFlag">[docs]</a><span class="k">class</span> <span class="nc">BindFlag</span><span class="p">(</span><span class="n">Flag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Internal flags used by `LoggingManager`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DIRECT</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">ANY_AGENT</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">ANY_CTX</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">ANY_ANY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="FBLoggerAdapter"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.FBLoggerAdapter">[docs]</a><span class="k">class</span> <span class="nc">FBLoggerAdapter</span><span class="p">(</span><span class="n">LoggerAdapter</span><span class="p">,</span> <span class="n">CachedDistinct</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;`~logging.LoggerAdapter` that injects information about context, agent and topic</span>
+<span class="sd">    into `extra` and with **f-string** log message support.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="FBLoggerAdapter.__init__"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.FBLoggerAdapter.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="n">UNDEFINED</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="n">UNDEFINED</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            logger: Adapted Logger instance.</span>
+<span class="sd">            agent: Agent for logger</span>
+<span class="sd">            context: Context for logger</span>
+<span class="sd">            topic: Topic of recorded information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#: Adapted Logger instance.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="c1">#: Agent for logger.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">agent</span>
+        <span class="c1">#: Context for logger.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">context</span>
+        <span class="c1">#: Topic for logger.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topic</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">topic</span></div>
+<div class="viewcode-block" id="FBLoggerAdapter.extract_key"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.FBLoggerAdapter.extract_key">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">extract_key</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns instance key extracted from constructor arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
+<div class="viewcode-block" id="FBLoggerAdapter.get_key"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.FBLoggerAdapter.get_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;Returns instance key.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span></div>
+<div class="viewcode-block" id="FBLoggerAdapter.process"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.FBLoggerAdapter.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Process the logging message and keyword arguments passed into</span>
+<span class="sd">        a logging call to insert contextual information. You can either</span>
+<span class="sd">        manipulate the message itself, the keyword args or both. Return</span>
+<span class="sd">        the message and kwargs modified (or not) to suit your needs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">msg</span><span class="p">,</span> <span class="n">kwargs</span></div>
+<div class="viewcode-block" id="FBLoggerAdapter.log"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.FBLoggerAdapter.log">[docs]</a>    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delegate a log call to the underlying logger after processing.</span>
+
+<span class="sd">        Interpolates the message as **f-string** using either `kwargs` or dict passed as</span>
+<span class="sd">        only one positional argument. If sole positional argument is not dictionary or</span>
+<span class="sd">        `args` has more than one item, adds `args` into namespace for interpolation.</span>
+
+<span class="sd">        Moves &#39;context&#39;, &#39;agent&#39; and &#39;topic&#39; keyword arguments into `extra`.</span>
+
+<span class="sd">        Strips out all keyword arguments not expected by `logging.Logger`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">level</span><span class="p">):</span>
+            <span class="n">msg</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">args</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">ns</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ns</span> <span class="o">=</span> <span class="n">kwargs</span>
+                <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+                    <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;f&quot;&quot;&quot;</span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">ns</span><span class="p">)</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">()</span>
+            <span class="k">if</span> <span class="s1">&#39;stacklevel&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;stacklevel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;extra&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">topic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">topic</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="p">,</span>
+                                                  <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                                  <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;exc_info&#39;</span><span class="p">,</span> <span class="s1">&#39;stack_info&#39;</span><span class="p">,</span>
+                                                           <span class="s1">&#39;stacklevel&#39;</span><span class="p">,</span> <span class="s1">&#39;extra&#39;</span><span class="p">]})</span></div></div>
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">BindInfo</span><span class="p">(</span><span class="n">Distinct</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Information about Logger binding.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">topic</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">agent</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">context</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">logger</span><span class="p">:</span> <span class="n">FBLoggerAdapter</span>
+    <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="s2">&quot;Returns distinct key value = Tuple(topic, agent, context).&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">topic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+<div class="viewcode-block" id="get_logging_id"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.get_logging_id">[docs]</a><span class="k">def</span> <span class="nf">get_logging_id</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns logging ID for object.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        obj: Any object</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        1. `logging_id` attribute if `obj` does have it, or..</span>
+<span class="sd">        2. `__qualname__` attribute if `obj` does have it, or..</span>
+<span class="sd">        3. `str(obj)`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;logging_id&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;__qualname__&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="LoggingIdMixin"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.LoggingIdMixin">[docs]</a><span class="k">class</span> <span class="nc">LoggingIdMixin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Mixin class that adds `logging_id` property and `__str__` that returns `logging_id`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging_id</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">logging_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns `_logging_id_` attribute if defined, else returns qualified class name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_logging_id_&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LoggingManager"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.LoggingManager">[docs]</a><span class="k">class</span> <span class="nc">LoggingManager</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Logger manager.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="p">:</span> <span class="n">Registry</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">:</span> <span class="n">BindFlag</span> <span class="o">=</span> <span class="n">BindFlag</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_update_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">agent</span> <span class="ow">is</span> <span class="n">ANY</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="o">|=</span> <span class="n">BindFlag</span><span class="o">.</span><span class="n">ANY_AGENT</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="n">ANY</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="o">|=</span> <span class="n">BindFlag</span><span class="o">.</span><span class="n">ANY_CTX</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">agent</span> <span class="ow">is</span> <span class="n">ANY</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">context</span> <span class="ow">is</span> <span class="n">ANY</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="o">|=</span> <span class="n">BindFlag</span><span class="o">.</span><span class="n">ANY_ANY</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ANY</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ANY</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="o">|=</span> <span class="n">BindFlag</span><span class="o">.</span><span class="n">DIRECT</span>
+    <span class="k">def</span> <span class="nf">_update_topics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">topic</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<div class="viewcode-block" id="LoggingManager.bind_logger"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.LoggingManager.bind_logger">[docs]</a>    <span class="k">def</span> <span class="nf">bind_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Logger</span><span class="p">],</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Bind agent and context to specific logger.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            agent: Agent identification</span>
+<span class="sd">            context: Context identification</span>
+<span class="sd">            logger: Loger (instance or name)</span>
+<span class="sd">            topic: Topic of recorded information</span>
+
+<span class="sd">        The identification of agent and context could be:</span>
+
+<span class="sd">            1. String</span>
+<span class="sd">            2. Object instance. Uses `get_logging_id()` to retrieve its logging ID.</span>
+<span class="sd">            3. Sentinel. The ANY sentinel matches any particular agent or context. You can</span>
+<span class="sd">               use sentinel `.UNDEFINED` to register a logger for cases when agent or</span>
+<span class="sd">               context are not specified in logger lookup.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">           You SHOULD NOT use sentinel `.ALL` for `agent` or `context` identification! This</span>
+<span class="sd">           sentinel is used by `.unbind()`, so bindings that use ALL could not be removed</span>
+<span class="sd">           by `.unbind()`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sentinel</span><span class="p">)):</span>
+            <span class="n">agent</span> <span class="o">=</span> <span class="n">get_logging_id</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sentinel</span><span class="p">)):</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">get_logging_id</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ANY</span> <span class="ow">and</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ANY</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">FBLoggerAdapter</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">agent</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_bindings</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_topics</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">BindInfo</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">agent</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">logger</span><span class="p">))</span></div>
+<div class="viewcode-block" id="LoggingManager.unbind"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.LoggingManager.unbind">[docs]</a>    <span class="k">def</span> <span class="nf">unbind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Drops logger bindings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sentinel</span><span class="p">)):</span>
+            <span class="n">agent</span> <span class="o">=</span> <span class="n">get_logging_id</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sentinel</span><span class="p">)):</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">get_logging_id</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">topic</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">:</span>
+            <span class="n">rm</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span>
+                  <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">topic</span> <span class="o">==</span> <span class="n">topic</span> <span class="ow">and</span> <span class="p">((</span><span class="n">i</span><span class="o">.</span><span class="n">agent</span> <span class="o">==</span> <span class="n">agent</span><span class="p">)</span> <span class="ow">or</span> <span class="n">agent</span> <span class="ow">is</span> <span class="n">ALL</span><span class="p">)</span>
+                  <span class="ow">and</span> <span class="p">((</span><span class="n">i</span><span class="o">.</span><span class="n">context</span> <span class="o">==</span> <span class="n">context</span><span class="p">)</span> <span class="ow">or</span> <span class="n">context</span> <span class="ow">is</span> <span class="n">ALL</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">rm</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="c1"># recalculate optimizations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="o">=</span> <span class="n">BindFlag</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_bindings</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">agent</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_topics</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">topic</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+<div class="viewcode-block" id="LoggingManager.clear"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.LoggingManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Remove all logger bindings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="o">=</span> <span class="n">BindFlag</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+<div class="viewcode-block" id="LoggingManager.get_logger"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.LoggingManager.get_logger">[docs]</a>    <span class="k">def</span> <span class="nf">get_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="n">UNDEFINED</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">,</span> <span class="n">topic</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FBLoggerAdapter</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a logger for the specified agent and context combination.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            agent: Agent identification.</span>
+<span class="sd">            context: Context identification.</span>
+<span class="sd">            topic: Topic of recorded information.</span>
+
+<span class="sd">        The identification of agent and context could be:</span>
+
+<span class="sd">            1. String</span>
+<span class="sd">            2. Object instance. Uses `get_logging_id()` to retrieve its logging ID.</span>
+<span class="sd">            3. Sentinel `.UNDEFINED`</span>
+<span class="sd">            4. When `context` is sentinel `.DEFAULT`, uses `agent` attribute `log_context`</span>
+<span class="sd">               (if defined) or sentinel `.UNDEFINED` otherwise.</span>
+
+<span class="sd">        The search for a suitable topic logger proceeds as follows:</span>
+
+<span class="sd">            1. Return logger registered for specified agent and context, or...</span>
+<span class="sd">            2. Return logger registered for ANY agent and specified context, or...</span>
+<span class="sd">            3. Return logger registered for specified agent and ANY context, or...</span>
+<span class="sd">            4. Return logger registered for ANY agent and ANY context, or...</span>
+<span class="sd">            5. Return the root logger.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="n">DEFAULT</span><span class="p">:</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="s1">&#39;log_context&#39;</span><span class="p">,</span> <span class="n">UNDEFINED</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">agent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">UNDEFINED</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">agent</span> <span class="o">=</span> <span class="n">get_logging_id</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">UNDEFINED</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">get_logging_id</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">BindInfo</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">topic</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">BindFlag</span><span class="o">.</span><span class="n">DIRECT</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">and</span> \
+               <span class="p">(</span><span class="n">result</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">topic</span><span class="p">,</span> <span class="n">agent</span><span class="p">,</span> <span class="n">context</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">logger</span>
+            <span class="k">elif</span> <span class="n">BindFlag</span><span class="o">.</span><span class="n">ANY_AGENT</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">and</span> \
+                 <span class="p">(</span><span class="n">result</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">topic</span><span class="p">,</span> <span class="n">ANY</span><span class="p">,</span> <span class="n">context</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">logger</span>
+            <span class="k">elif</span> <span class="n">BindFlag</span><span class="o">.</span><span class="n">ANY_CTX</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">and</span> \
+                 <span class="p">(</span><span class="n">result</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">topic</span><span class="p">,</span> <span class="n">agent</span><span class="p">,</span> <span class="n">ANY</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">logger</span>
+            <span class="k">elif</span> <span class="n">BindFlag</span><span class="o">.</span><span class="n">ANY_ANY</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bindings</span> <span class="ow">and</span> \
+                 <span class="p">(</span><span class="n">result</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggers</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">topic</span><span class="p">,</span> <span class="n">ANY</span><span class="p">,</span> <span class="n">ANY</span><span class="p">)))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">logger</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">FBLoggerAdapter</span><span class="p">)</span> \
+               <span class="k">else</span> <span class="n">FBLoggerAdapter</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">agent</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">topic</span><span class="p">)</span></div></div>
+
+<span class="c1">#: Logging Manager</span>
+<span class="n">logging_manager</span><span class="p">:</span> <span class="n">LoggingManager</span> <span class="o">=</span> <span class="n">LoggingManager</span><span class="p">()</span>
+
+<span class="c1">#: shortcut for `logging_manager.bind_logger()`</span>
+<span class="n">bind_logger</span> <span class="o">=</span> <span class="n">logging_manager</span><span class="o">.</span><span class="n">bind_logger</span>
+<span class="c1">#: shortcut for `logging_manager.get_logger()`</span>
+<span class="n">get_logger</span> <span class="o">=</span> <span class="n">logging_manager</span><span class="o">.</span><span class="n">get_logger</span>
+
+<span class="c1"># Install simple formatter for lastResort handler</span>
+<span class="k">if</span> <span class="n">lastResort</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lastResort</span><span class="o">.</span><span class="n">formatter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">lastResort</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(levelname)s</span><span class="s1">: </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">))</span>
+
+<div class="viewcode-block" id="install_null_logger"><a class="viewcode-back" href="../../../logging.html#firebird.base.logging.install_null_logger">[docs]</a><span class="k">def</span> <span class="nf">install_null_logger</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Installs &#39;null&#39; logger.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;null&#39;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="kc">True</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

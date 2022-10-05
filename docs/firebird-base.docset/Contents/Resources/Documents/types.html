@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>types - Common data types — Firebird-base 1.4.1 documentation</title>
+<title>types - Common data types — Firebird-base 1.4.2 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -13,6 +13,7 @@
 <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
+<link href="_static/fb-favicon.png" rel="shortcut icon"/>
 <link href="genindex.html" rel="index" title="Index"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="collections.html" rel="next" title="collections - Various collection types"/>
@@ -37,7 +38,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.4.1</b></span>
+<span class="navbar-text pull-left"><b>1.4.2</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -56,29 +57,20 @@
 <li><a class="reference internal" href="#">types - Common data types</a><ul>
 <li><a class="reference internal" href="#overview">Overview</a></li>
 <li><a class="reference internal" href="#exceptions">Exceptions</a><ul>
-<li><a class="reference internal" href="#error">Error</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.Error"><code class="docutils literal notranslate"><span class="pre">Error</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#singletons">Singletons</a><ul>
-<li><a class="reference internal" href="#singleton">Singleton</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.Singleton"><code class="docutils literal notranslate"><span class="pre">Singleton</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#sentinels">Sentinels</a><ul>
-<li><a class="reference internal" href="#sentinel">Sentinel</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.Sentinel"><code class="docutils literal notranslate"><span class="pre">Sentinel</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.Sentinel.__init__"><code class="docutils literal notranslate"><span class="pre">Sentinel.__init__()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.Sentinel.__repr__"><code class="docutils literal notranslate"><span class="pre">Sentinel.__repr__()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.Sentinel.__str__"><code class="docutils literal notranslate"><span class="pre">Sentinel.__str__()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.Sentinel.instances"><code class="docutils literal notranslate"><span class="pre">Sentinel.instances</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.Sentinel.name"><code class="docutils literal notranslate"><span class="pre">Sentinel.name</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#predefined-sentinels">Predefined sentinels</a><ul>
@@ -98,33 +90,23 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#distinct-objects">Distinct objects</a><ul>
-<li><a class="reference internal" href="#distinct">Distinct</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.Distinct"><code class="docutils literal notranslate"><span class="pre">Distinct</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.Distinct.get_key"><code class="docutils literal notranslate"><span class="pre">Distinct.get_key()</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#cacheddistinct">CachedDistinct</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.CachedDistinct"><code class="docutils literal notranslate"><span class="pre">CachedDistinct</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.CachedDistinct.extract_key"><code class="docutils literal notranslate"><span class="pre">CachedDistinct.extract_key()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#enums">Enums</a><ul>
-<li><a class="reference internal" href="#byteorder">ByteOrder</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.ByteOrder"><code class="docutils literal notranslate"><span class="pre">ByteOrder</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.ByteOrder.BIG"><code class="docutils literal notranslate"><span class="pre">ByteOrder.BIG</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.ByteOrder.LITTLE"><code class="docutils literal notranslate"><span class="pre">ByteOrder.LITTLE</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.ByteOrder.NETWORK"><code class="docutils literal notranslate"><span class="pre">ByteOrder.NETWORK</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#zmqtransport">ZMQTransport</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.ZMQTransport"><code class="docutils literal notranslate"><span class="pre">ZMQTransport</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.ZMQTransport.EPGM"><code class="docutils literal notranslate"><span class="pre">ZMQTransport.EPGM</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.ZMQTransport.INPROC"><code class="docutils literal notranslate"><span class="pre">ZMQTransport.INPROC</span></code></a></li>
@@ -135,9 +117,6 @@
 <li><a class="reference internal" href="#firebird.base.types.ZMQTransport.VMCI"><code class="docutils literal notranslate"><span class="pre">ZMQTransport.VMCI</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#zmqdomain">ZMQDomain</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.ZMQDomain"><code class="docutils literal notranslate"><span class="pre">ZMQDomain</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.ZMQDomain.LOCAL"><code class="docutils literal notranslate"><span class="pre">ZMQDomain.LOCAL</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.ZMQDomain.NETWORK"><code class="docutils literal notranslate"><span class="pre">ZMQDomain.NETWORK</span></code></a></li>
@@ -147,19 +126,13 @@
 </li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#custom-string-types">Custom string types</a><ul>
-<li><a class="reference internal" href="#zeromq-address">ZeroMQ address</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.ZMQAddress"><code class="docutils literal notranslate"><span class="pre">ZMQAddress</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.ZMQAddress.address"><code class="docutils literal notranslate"><span class="pre">ZMQAddress.address</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.ZMQAddress.domain"><code class="docutils literal notranslate"><span class="pre">ZMQAddress.domain</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.ZMQAddress.protocol"><code class="docutils literal notranslate"><span class="pre">ZMQAddress.protocol</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#mime">MIME</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.MIME"><code class="docutils literal notranslate"><span class="pre">MIME</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.MIME.MIME_TYPES"><code class="docutils literal notranslate"><span class="pre">MIME.MIME_TYPES</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.MIME.mime_type"><code class="docutils literal notranslate"><span class="pre">MIME.mime_type</span></code></a></li>
@@ -168,53 +141,30 @@
 <li><a class="reference internal" href="#firebird.base.types.MIME.type"><code class="docutils literal notranslate"><span class="pre">MIME.type</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pyexpr">PyExpr</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.PyExpr"><code class="docutils literal notranslate"><span class="pre">PyExpr</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.PyExpr.get_callable"><code class="docutils literal notranslate"><span class="pre">PyExpr.get_callable()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.types.PyExpr.expr"><code class="docutils literal notranslate"><span class="pre">PyExpr.expr</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pycode">PyCode</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.PyCode"><code class="docutils literal notranslate"><span class="pre">PyCode</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.PyCode.code"><code class="docutils literal notranslate"><span class="pre">PyCode.code</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pycallable">PyCallable</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.PyCallable"><code class="docutils literal notranslate"><span class="pre">PyCallable</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.types.PyCallable.name"><code class="docutils literal notranslate"><span class="pre">PyCallable.name</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#meta-classes">Meta classes</a><ul>
-<li><a class="reference internal" href="#singletonmeta">SingletonMeta</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.SingletonMeta"><code class="docutils literal notranslate"><span class="pre">SingletonMeta</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#sentinelmeta">SentinelMeta</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.SentinelMeta"><code class="docutils literal notranslate"><span class="pre">SentinelMeta</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#cacheddistinctmeta">CachedDistinctMeta</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.CachedDistinctMeta"><code class="docutils literal notranslate"><span class="pre">CachedDistinctMeta</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#conjunctive">Conjunctive</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.Conjunctive"><code class="docutils literal notranslate"><span class="pre">Conjunctive()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#load">load</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
 <li><a class="reference internal" href="#firebird.base.types.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -237,20 +187,18 @@
 <div class="container">
 <div class="row">
 <div class="body span12 content" role="main">
-<span class="target" id="module-firebird.base.types"></span><section id="types-common-data-types">
+<span class="target" id="module-firebird.base.types"></span><a class="dashAnchor" name="//apple_ref/cpp/Section/types - Common data types"></a><section id="types-common-data-types">
 <a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.base.types"></a><h1>types - Common data types<a class="headerlink" href="#types-common-data-types" title="Permalink to this heading">¶</a></h1>
-<section id="overview">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Overview"></a><section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
 <p>This module provides collection of classes that are often used by other library modules or
 applications.</p>
 </section>
-<section id="exceptions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Exceptions"></a><section id="exceptions">
 <h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading">¶</a></h2>
-<section id="error">
-<h3>Error<a class="headerlink" href="#error" title="Permalink to this heading">¶</a></h3>
 <dl class="py exception">
 <dt class="sig sig-object py" id="firebird.base.types.Error">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.base.types.Error"></a><a class="headerlink" href="#firebird.base.types.Error" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.base.types.Error"></a><a class="headerlink" href="#firebird.base.types.Error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Exception that is intended to be used as a base class of all <strong>application-related</strong>
 errors. The important difference from <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></a> class is that <a class="reference internal" href="#firebird.base.types.Error" title="firebird.base.types.Error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Error</span></code></a> accepts keyword
@@ -279,8 +227,7 @@ set, have <a class="reference external" href="https://docs.python.org/3/library/
 </div>
 </dd></dl>
 </section>
-</section>
-<section id="singletons">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Singletons"></a><section id="singletons">
 <h2>Singletons<a class="headerlink" href="#singletons" title="Permalink to this heading">¶</a></h2>
 <p>Singleton is a pattern that restricts the instantiation of a class to one “single” instance.
 This is useful when exactly one object is needed to coordinate actions across the system.</p>
@@ -311,11 +258,9 @@ in their implementation.</p></li>
 </pre></div>
 </div>
 </div>
-<section id="singleton">
-<h3>Singleton<a class="headerlink" href="#singleton" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.Singleton">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Singleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.Singleton"></a><a class="headerlink" href="#firebird.base.types.Singleton" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Singleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Singleton"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.Singleton"></a><a class="headerlink" href="#firebird.base.types.Singleton" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class for singletons.</p>
 <div class="admonition important">
@@ -326,8 +271,7 @@ an instance stored in cache without calling the constructor.</p>
 </div>
 </dd></dl>
 </section>
-</section>
-<section id="sentinels">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Sentinels"></a><section id="sentinels">
 <h2>Sentinels<a class="headerlink" href="#sentinels" title="Permalink to this heading">¶</a></h2>
 <p>The Sentinel Object pattern is a standard Pythonic approach that’s used both in the
 Standard Library and beyond. The pattern most often uses Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> object,
@@ -335,11 +279,10 @@ but in situations where None might be a useful value, a unique sentinel <code cl
 used instead to indicate missing or unspecified data, or other specific condition.</p>
 <p>However, the plain <code class="xref py py-obj docutils literal notranslate"><span class="pre">object()</span></code> sentinel has not very useful <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/functions.html#repr" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">repr</span></code></a> values.
 The <a class="reference internal" href="#firebird.base.types.Sentinel" title="firebird.base.types.Sentinel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sentinel</span></code></a> class provides named sentinels, with meaningful <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/functions.html#repr" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">repr</span></code></a>.</p>
-<section id="sentinel">
-<h3>Sentinel<a class="headerlink" href="#sentinel" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.Sentinel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Sentinel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.Sentinel"></a><a class="headerlink" href="#firebird.base.types.Sentinel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Sentinel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Sentinel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.Sentinel"></a><a class="headerlink" href="#firebird.base.types.Sentinel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Simple sentinel object.</p>
 <div class="admonition important">
@@ -349,21 +292,21 @@ the same name are singletons.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.types.Sentinel.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Sentinel.__init__"></a><a class="headerlink" href="#firebird.base.types.Sentinel.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Sentinel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Sentinel.__init__"></a><a class="headerlink" href="#firebird.base.types.Sentinel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Sentinel name.</p>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Sentinel name.</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.types.Sentinel.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Sentinel.__repr__"></a><a class="headerlink" href="#firebird.base.types.Sentinel.__repr__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Sentinel.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Sentinel.__repr__"></a><a class="headerlink" href="#firebird.base.types.Sentinel.__repr__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns Sentinel(‘name’).</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.types.Sentinel.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Sentinel.__str__"></a><a class="headerlink" href="#firebird.base.types.Sentinel.__str__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Sentinel.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Sentinel.__str__"></a><a class="headerlink" href="#firebird.base.types.Sentinel.__str__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns name.</p>
 </dd></dl>
 <dl class="py attribute">
@@ -377,8 +320,7 @@ the same name are singletons.</p>
 <dd><p>Sentinel name.</p>
 </dd></dl>
 </dd></dl>
-</section>
-<section id="predefined-sentinels">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Predefined sentinels"></a><section id="predefined-sentinels">
 <h3>Predefined sentinels<a class="headerlink" href="#predefined-sentinels" title="Permalink to this heading">¶</a></h3>
 <dl class="py data">
 <dt class="sig sig-object py" id="firebird.base.types.DEFAULT">
@@ -437,27 +379,26 @@ the same name are singletons.</p>
 </dd></dl>
 </section>
 </section>
-<section id="distinct-objects">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Distinct objects"></a><section id="distinct-objects">
 <h2>Distinct objects<a class="headerlink" href="#distinct-objects" title="Permalink to this heading">¶</a></h2>
 <p>Some complex data structures or data processing algorithms require unique object
 identification (ie object identity). In Python, an object identity is defined internally
-as a unique instance identity that is not suitable for complex objects whose identity is
+as unique instance identity that is not suitable for complex objects whose identity is
 derived from content.</p>
 <p>The <a class="reference internal" href="#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> abstract base class is intended as a unified solution to these needs.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>module <a class="reference internal" href="collections.html#module-firebird.base.collections" title="firebird.base.collections: Various collection types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.base.collections</span></code></a></p>
 </div>
-<section id="distinct">
-<h3>Distinct<a class="headerlink" href="#distinct" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.Distinct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Distinct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.Distinct"></a><a class="headerlink" href="#firebird.base.types.Distinct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Distinct</span></span><a class="reference internal" href="_modules/firebird/base/types.html#Distinct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.Distinct"></a><a class="headerlink" href="#firebird.base.types.Distinct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Abstract base class for classes (incl. dataclasses) with distinct instances.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.types.Distinct.get_key">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Distinct.get_key"></a><a class="headerlink" href="#firebird.base.types.Distinct.get_key" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><span class="pre">Hashable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/types.html#Distinct.get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Distinct.get_key"></a><a class="headerlink" href="#firebird.base.types.Distinct.get_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns instance key.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -467,23 +408,21 @@ own <code class="xref py py-obj docutils literal notranslate"><span class="pre">
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hashable</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><em>Hashable</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 </dd></dl>
-</section>
-<section id="cacheddistinct">
-<h3>CachedDistinct<a class="headerlink" href="#cacheddistinct" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.CachedDistinct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">CachedDistinct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.CachedDistinct"></a><a class="headerlink" href="#firebird.base.types.CachedDistinct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">CachedDistinct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#CachedDistinct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.CachedDistinct"></a><a class="headerlink" href="#firebird.base.types.CachedDistinct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a></p>
 <p>Abstract <a class="reference internal" href="#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct</span></code></a> descendant that caches instances.</p>
 <p>All created instances are cached in <a class="reference external" href="https://docs.python.org/3/library/weakref.html#weakref.WeakValueDictionary" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WeakValueDictionary</span></code></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.types.CachedDistinct.extract_key">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.CachedDistinct.extract_key"></a><a class="headerlink" href="#firebird.base.types.CachedDistinct.extract_key" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><span class="pre">Hashable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/types.html#CachedDistinct.extract_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.CachedDistinct.extract_key"></a><a class="headerlink" href="#firebird.base.types.CachedDistinct.extract_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns key from arguments passed to <code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__()</span></code>.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -492,20 +431,17 @@ returned by instance <a class="reference internal" href="#firebird.base.types.Di
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hashable</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><em>Hashable</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="enums">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Enums"></a><section id="enums">
 <h2>Enums<a class="headerlink" href="#enums" title="Permalink to this heading">¶</a></h2>
-<section id="byteorder">
-<h3>ByteOrder<a class="headerlink" href="#byteorder" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.ByteOrder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">ByteOrder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.ByteOrder"></a><a class="headerlink" href="#firebird.base.types.ByteOrder" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">ByteOrder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#ByteOrder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.ByteOrder"></a><a class="headerlink" href="#firebird.base.types.ByteOrder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Byte order for storing numbers in binary <a class="reference internal" href="buffer.html#firebird.base.buffer.MemoryBuffer" title="firebird.base.buffer.MemoryBuffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MemoryBuffer</span></code></a>.</p>
 <dl class="py attribute">
@@ -521,12 +457,10 @@ returned by instance <a class="reference internal" href="#firebird.base.types.Di
 <span class="sig-name descname"><span class="pre">NETWORK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'big'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.types.ByteOrder.NETWORK"></a><a class="headerlink" href="#firebird.base.types.ByteOrder.NETWORK" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 </dd></dl>
-</section>
-<section id="zmqtransport">
-<h3>ZMQTransport<a class="headerlink" href="#zmqtransport" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.ZMQTransport">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">ZMQTransport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.ZMQTransport"></a><a class="headerlink" href="#firebird.base.types.ZMQTransport" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">ZMQTransport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#ZMQTransport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.ZMQTransport"></a><a class="headerlink" href="#firebird.base.types.ZMQTransport" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a></p>
 <p>ZeroMQ transport protocol.</p>
 <dl class="py attribute">
@@ -558,12 +492,10 @@ returned by instance <a class="reference internal" href="#firebird.base.types.Di
 <span class="sig-name descname"><span class="pre">VMCI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.types.ZMQTransport.VMCI"></a><a class="headerlink" href="#firebird.base.types.ZMQTransport.VMCI" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 </dd></dl>
-</section>
-<section id="zmqdomain">
-<h3>ZMQDomain<a class="headerlink" href="#zmqdomain" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.ZMQDomain">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">ZMQDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.ZMQDomain"></a><a class="headerlink" href="#firebird.base.types.ZMQDomain" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">ZMQDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#ZMQDomain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.ZMQDomain"></a><a class="headerlink" href="#firebird.base.types.ZMQDomain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a></p>
 <p>ZeroMQ address domain.</p>
 <dl class="py attribute">
@@ -584,8 +516,7 @@ returned by instance <a class="reference internal" href="#firebird.base.types.Di
 <dd></dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="custom-string-types">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Custom string types"></a><section id="custom-string-types">
 <h2>Custom string types<a class="headerlink" href="#custom-string-types" title="Permalink to this heading">¶</a></h2>
 <p>Some string values have unified structure and carry specific information (like network
 address or database connection string). Typical repeating operation with these values
@@ -603,11 +534,10 @@ string type.</p>
 externally to typed strings.</p>
 </div>
 </div>
-<section id="zeromq-address">
-<h3>ZeroMQ address<a class="headerlink" href="#zeromq-address" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.ZMQAddress">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">ZMQAddress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnyStr</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.ZMQAddress"></a><a class="headerlink" href="#firebird.base.types.ZMQAddress" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">ZMQAddress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnyStr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#ZMQAddress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.ZMQAddress"></a><a class="headerlink" href="#firebird.base.types.ZMQAddress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 <p>ZeroMQ endpoint address.</p>
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is valid ZMQ endpoint address, has
@@ -616,48 +546,39 @@ additional R/O properties and meaningful <code class="xref py py-obj docutils li
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – When string value passed to constructor is not a valid ZMQ endpoint address.</p>
 </dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>value</strong> (<em>AnyStr</em>) – </p>
+</dd>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.ZMQAddress.address">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.ZMQAddress.address"></a><a class="headerlink" href="#firebird.base.types.ZMQAddress.address" title="Permalink to this definition">¶</a></dt>
 <dd><p>Endpoint address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.ZMQAddress.domain">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">domain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.base.types.ZMQDomain" title="firebird.base.types.ZMQDomain"><span class="pre">ZMQDomain</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.ZMQAddress.domain"></a><a class="headerlink" href="#firebird.base.types.ZMQAddress.domain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Endpoint address domain.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.base.types.ZMQDomain" title="firebird.base.types.ZMQDomain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZMQDomain</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.ZMQAddress.protocol">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.base.types.ZMQTransport" title="firebird.base.types.ZMQTransport"><span class="pre">ZMQTransport</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.ZMQAddress.protocol"></a><a class="headerlink" href="#firebird.base.types.ZMQAddress.protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transport protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.base.types.ZMQTransport" title="firebird.base.types.ZMQTransport"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZMQTransport</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 </dd></dl>
-</section>
-<section id="mime">
-<h3>MIME<a class="headerlink" href="#mime" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.MIME">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">MIME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnyStr</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.MIME"></a><a class="headerlink" href="#firebird.base.types.MIME" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">MIME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnyStr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#MIME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.MIME"></a><a class="headerlink" href="#firebird.base.types.MIME" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 <p>MIME type specification.</p>
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is valid MIME type specification, has
 additional R/O properties and meaningful <code class="xref py py-obj docutils literal notranslate"><span class="pre">repr()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>AnyStr</em>) – </p>
+</dd>
+</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.base.types.MIME.MIME_TYPES">
 <span class="sig-name descname"><span class="pre">MIME_TYPES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['text',</span> <span class="pre">'image',</span> <span class="pre">'audio',</span> <span class="pre">'video',</span> <span class="pre">'application',</span> <span class="pre">'multipart',</span> <span class="pre">'message']</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.types.MIME.MIME_TYPES"></a><a class="headerlink" href="#firebird.base.types.MIME.MIME_TYPES" title="Permalink to this definition">¶</a></dt>
@@ -671,48 +592,28 @@ additional R/O properties and meaningful <code class="xref py py-obj docutils li
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>MIME type specification</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
 </dl>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.MIME.params">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.MIME.params"></a><a class="headerlink" href="#firebird.base.types.MIME.params" title="Permalink to this definition">¶</a></dt>
 <dd><p>MIME parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.MIME.subtype">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.MIME.subtype"></a><a class="headerlink" href="#firebird.base.types.MIME.subtype" title="Permalink to this definition">¶</a></dt>
 <dd><p>MIME subtype.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.MIME.type">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.MIME.type"></a><a class="headerlink" href="#firebird.base.types.MIME.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>MIME type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 </dd></dl>
-</section>
-<section id="pyexpr">
-<h3>PyExpr<a class="headerlink" href="#pyexpr" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.PyExpr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">PyExpr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.PyExpr"></a><a class="headerlink" href="#firebird.base.types.PyExpr" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">PyExpr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#PyExpr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.PyExpr"></a><a class="headerlink" href="#firebird.base.types.PyExpr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 <p>Source code for Python expression.</p>
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is a valid Python expression, and provides
@@ -721,20 +622,23 @@ direct access to compiled code.</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SyntaxError" title="(in Python v3.10)"><strong>SyntaxError</strong></a> – When string value is not a valid Python expression.</p>
 </dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
+</dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.types.PyExpr.get_callable">
-<span class="sig-name descname"><span class="pre">get_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.PyExpr.get_callable"></a><a class="headerlink" href="#firebird.base.types.PyExpr.get_callable" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/types.html#PyExpr.get_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.PyExpr.get_callable"></a><a class="headerlink" href="#firebird.base.types.PyExpr.get_callable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns expression as callable function ready for execution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>arguments</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – String with arguments (names separated by coma) for returned function.</p></li>
-<li><p><strong>namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]]) – Dictionary with namespace elements available for expression.</p></li>
+<li><p><strong>arguments</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – String with arguments (names separated by coma) for returned function.</p></li>
+<li><p><strong>namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a><em>]</em><em>]</em>) – Dictionary with namespace elements available for expression.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -744,12 +648,10 @@ direct access to compiled code.</p>
 <dd><p>Expression code ready to be appased to <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></a>.</p>
 </dd></dl>
 </dd></dl>
-</section>
-<section id="pycode">
-<h3>PyCode<a class="headerlink" href="#pycode" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.PyCode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">PyCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.PyCode"></a><a class="headerlink" href="#firebird.base.types.PyCode" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">PyCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#PyCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.PyCode"></a><a class="headerlink" href="#firebird.base.types.PyCode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 <p>Python source code.</p>
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is a valid Python code block, and provides
@@ -758,6 +660,9 @@ direct access to compiled code.</p>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SyntaxError" title="(in Python v3.10)"><strong>SyntaxError</strong></a> – When string value is not a valid Python code block.</p>
 </dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
+</dd>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.PyCode.code">
@@ -765,12 +670,10 @@ direct access to compiled code.</p>
 <dd><p>Python code ready to be appased to <a class="reference external" href="https://docs.python.org/3/library/functions.html#exec" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exec</span></code></a>.</p>
 </dd></dl>
 </dd></dl>
-</section>
-<section id="pycallable">
-<h3>PyCallable<a class="headerlink" href="#pycallable" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.PyCallable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">PyCallable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.PyCallable"></a><a class="headerlink" href="#firebird.base.types.PyCallable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">PyCallable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#PyCallable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.PyCallable"></a><a class="headerlink" href="#firebird.base.types.PyCallable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 <p>Source code for Python callable.</p>
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is a valid Python callable (function of class
@@ -782,6 +685,9 @@ definition), and acts like a callable (i.e. you can directly call the PyCallable
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SyntaxError" title="(in Python v3.10)"><strong>SyntaxError</strong></a> – When string value is not a valid Python callable.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
+</dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.base.types.PyCallable.name">
@@ -790,72 +696,60 @@ definition), and acts like a callable (i.e. you can directly call the PyCallable
 </dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="meta-classes">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Meta classes"></a><section id="meta-classes">
 <h2>Meta classes<a class="headerlink" href="#meta-classes" title="Permalink to this heading">¶</a></h2>
-<section id="singletonmeta">
-<h3>SingletonMeta<a class="headerlink" href="#singletonmeta" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.SingletonMeta">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">SingletonMeta</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.SingletonMeta"></a><a class="headerlink" href="#firebird.base.types.SingletonMeta" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">SingletonMeta</span></span><a class="reference internal" href="_modules/firebird/base/types.html#SingletonMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.SingletonMeta"></a><a class="headerlink" href="#firebird.base.types.SingletonMeta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a></p>
 <p>Metaclass for <a class="reference internal" href="#firebird.base.types.Singleton" title="firebird.base.types.Singleton"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Singleton</span></code></a> classes.</p>
 <p>Manages internal cache of class instances. If instance for a class is in cache, it’s
 returned without calling the constructor, otherwise the instance is created normally
 and stored in cache for later use.</p>
 </dd></dl>
-</section>
-<section id="sentinelmeta">
-<h3>SentinelMeta<a class="headerlink" href="#sentinelmeta" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.SentinelMeta">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">SentinelMeta</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.SentinelMeta"></a><a class="headerlink" href="#firebird.base.types.SentinelMeta" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">SentinelMeta</span></span><a class="reference internal" href="_modules/firebird/base/types.html#SentinelMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.SentinelMeta"></a><a class="headerlink" href="#firebird.base.types.SentinelMeta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a></p>
 <p>Metaclass for <a class="reference internal" href="#firebird.base.types.Sentinel" title="firebird.base.types.Sentinel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sentinel</span></code></a>.</p>
 </dd></dl>
-</section>
-<section id="cacheddistinctmeta">
-<h3>CachedDistinctMeta<a class="headerlink" href="#cacheddistinctmeta" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.types.CachedDistinctMeta">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">CachedDistinctMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.CachedDistinctMeta"></a><a class="headerlink" href="#firebird.base.types.CachedDistinctMeta" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">CachedDistinctMeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#CachedDistinctMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.types.CachedDistinctMeta"></a><a class="headerlink" href="#firebird.base.types.CachedDistinctMeta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABCMeta" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABCMeta</span></code></a></p>
 <p>Metaclass for CachedDistinct.</p>
 </dd></dl>
-</section>
-<section id="conjunctive">
-<h3>Conjunctive<a class="headerlink" href="#conjunctive" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.types.Conjunctive">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Conjunctive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.types.Conjunctive"></a><a class="headerlink" href="#firebird.base.types.Conjunctive" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Conjunctive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Conjunctive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.types.Conjunctive"></a><a class="headerlink" href="#firebird.base.types.Conjunctive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a metaclass that is conjunctive descendant of all metaclasses used by parent
 classes.</p>
-<div class="admonition-example admonition">
-<p class="admonition-title">Example</p>
+<p class="rubric">Example</p>
 <p>class A(type): pass</p>
 <p>class B(type): pass</p>
 <p>class AA(metaclass=A):pass</p>
 <p>class BB(metaclass=B):pass</p>
 <p>class CC(AA, BB, metaclass=Conjunctive): pass</p>
-</div>
 </dd></dl>
 </section>
-<section id="load">
-<h3>load<a class="headerlink" href="#load" title="Permalink to this heading">¶</a></h3>
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Functions"></a><section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.types.load">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.types.load"></a><a class="headerlink" href="#firebird.base.types.load" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/types.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.types.load"></a><a class="headerlink" href="#firebird.base.types.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return object from module. Module is imported if necessary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>spec</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Object specification in format <code class="xref py py-obj docutils literal notranslate"><span class="pre">module[.submodule...]:object_name[.object_name...]</span></code></p>
+<dd class="field-odd"><p><strong>spec</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Object specification in format <code class="xref py py-obj docutils literal notranslate"><span class="pre">module[.submodule...]:object_name[.object_name...]</span></code></p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a></p>
 </dd>
 </dl>
 </dd></dl>
-</section>
 </section>
 </section>
 </div>
@@ -868,7 +762,7 @@ classes.</p>
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
 </p>
 </div>
 </footer>

@@ -23,7 +23,7 @@ Topic covered by `firebird-base` package:
 
 .. note:: Requires Python 3.8+
 
-.. tip:: You can download docset fro Dash_ (MacOS) or Zeal_ (Windows / Linux) documentation
+.. tip:: You can download docset for Dash_ (MacOS) or Zeal_ (Windows / Linux) documentation
    readers from releases_ at github.
 
 .. toctree::

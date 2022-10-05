@@ -116,8 +116,7 @@ def register_class(cls: Type) -> None:
 
 def _get_convertor(cls: Union[Type, str]) -> Convertor:
     if isinstance(cls, str):
-        if cls in _classes:
-            cls = _classes[cls]
+        cls = _classes.get(cls, cls)
     if isinstance(cls, str):
         conv = list(_convertors.filter(f"item.{'full_name' if '.' in cls else 'name'} == '{cls}'"))
         conv = conv.pop(0) if conv else None
@@ -225,11 +224,12 @@ def get_convertor(cls: Union[Type, str]) -> Convertor:
         raise TypeError(f"Type '{cls.__name__ if isinstance(cls, type) else cls}' has no Convertor")
     return conv
 
-def register():
+def _register():
+    """Internal function for registration of builtin converters."""
 
     def bool2str(value: bool) -> str:
         return TRUE_STR[0] if value else FALSE_STR[0]
-    def str2bool(type_: Type, value: str) -> bool:
+    def str2bool(type_: Type, value: str) -> bool:  # pylint: disable=[W0613]
         if (v := value.lower()) in TRUE_STR:
             return True
         if v not in FALSE_STR:
@@ -238,8 +238,8 @@ def register():
     def str2decimal(type_: Type, value: str) -> Decimal:
         try:
             return type_(value)
-        except DecimalException:
-            raise ValueError(f"could not convert string to {type_.__name__}: '{value}'")
+        except DecimalException as exc:
+            raise ValueError(f"could not convert string to {type_.__name__}: '{value}'") from exc
     def enum2str(value: Enum) -> str:
         "Converts any Enum/Flag value to string"
         return value.name
@@ -261,5 +261,5 @@ def register():
     register_convertor(IntEnum, to_str=enum2str, from_str=str2enum)
     register_convertor(IntFlag, to_str=enum2str, from_str=str2enum)
 
-register()
-del register
+_register()
+del _register

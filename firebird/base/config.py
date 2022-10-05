@@ -56,15 +56,15 @@ from decimal import Decimal, DecimalException
 from configparser import ConfigParser, DEFAULTSECT
 from inspect import signature, Signature, Parameter
 from enum import Enum, Flag, _decompose
-from pathlib import Path
 import os
 from .config_pb2 import ConfigProto
-from .types import Error, UNDEFINED, MIME, ZMQAddress, PyExpr, PyCode, PyCallable
+from .types import Error, MIME, ZMQAddress, PyExpr, PyCode, PyCallable
 from .strconv import get_convertor, convert_to_str, Convertor
 
 PROTO_CONFIG = 'firebird.base.ConfigProto'
 
 def unindent_verticals(value: str) -> str:
+    """Removes trailing '|' character from each line in multiline string."""
     lines = []
     indent = None
     for line in value.split('\n'):
@@ -91,7 +91,7 @@ class DirectoryScheme:
     Default scheme uses HOME directory as root for other directories. The HOME is
     determined as follows:
 
-    1. If environment variable "<app_name>_HOME" exists, its value is used as HOME directory.
+    1. If environment variable `<app_name>_HOME` exists, its value is used as HOME directory.
     2. HOME directory is set to current working directory.
 
     Note:
@@ -129,14 +129,14 @@ class DirectoryScheme:
         return os.getenv(f'{self.name.upper()}_HOME') is not None
     @property
     def home(self) -> Path:
-        """HOME directory. Initial value is path set by "<app_name>_HOME" environment
+        """HOME directory. Initial value is path set by `<app_name>_HOME` environment
         variable, or to current working directory when variable is not defined.
 
         Important:
             When new value is assigned, the general directories (i.e. all except user-specific
             and TMP) are redefined as subdirectories of new home path ONLY when HOME was
-            initially defined using "<app_name>_HOME" environment variable, or instance
-            was created with `force_home`=True.
+            initially defined using `<app_name>_HOME` environment variable, or instance
+            was created with `force_home` = True.
 
             However, all paths could be still changed individually to any value.
         """
@@ -617,7 +617,7 @@ class Config:
         if not config.has_section(section):
             if self._optional:
                 return
-            elif section != DEFAULTSECT:
+            if section != DEFAULTSECT:
                 raise Error(f"Configuration error: section '{section}' not found!")
         try:
             for option in self.options:
@@ -785,7 +785,7 @@ class IntOption(Option[int]):
         self._value: int = None
         self.__signed: bool = signed
         super().__init__(name, int, description, required, default)
-    def clear(self, to_default: bool=True) -> None:
+    def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
         Arguments:
@@ -983,7 +983,7 @@ class DecimalOption(Option[Decimal]):
         try:
             self._value = Decimal(value)
         except DecimalException as exc:
-            raise ValueError(str(exc))
+            raise ValueError(str(exc)) from exc
     def get_as_str(self) -> str:
         """Returns value as string.
         """
@@ -1676,7 +1676,7 @@ class ListOption(Option[List]):
             ValueError: When the argument is not a valid option value.
         """
         self._check_value(value)
-        self._value = None if value is None else [i for i in value]
+        self._value = None if value is None else list(value)
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
@@ -1907,6 +1907,7 @@ class PyCallableOption(Option[PyCallable]):
         with any number of subsequent whitespace characters that are between `|` and first
         non-whitespace character on first line starting with `|`.
     """
+    # pylint: disable=[W0621]
     def __init__(self, name: str, description: str, signature: Union[Signature, Callable], * ,
                  required: bool=False, default: PyCallable=None):
         """
@@ -2047,7 +2048,7 @@ class ConfigOption(Option[str]):
         self._value: Config = config
         super().__init__(name, str, description, required, default)
     def _get_value_description(self) -> str:
-        return f"configuration section name\n"
+        return "configuration section name\n"
     def validate(self) -> None:
         """Validates option state.
 
@@ -2181,7 +2182,7 @@ class ConfigListOption(Option[List]):
         self.separator: Optional[str] = separator
         super().__init__(name, list, description, required, [])
     def _get_value_description(self) -> str:
-        return f"list of configuration section names\n"
+        return "list of configuration section names\n"
     def _check_value(self, value: List) -> None:
         super()._check_value(value)
         if value is not None:
@@ -2251,7 +2252,7 @@ class ConfigListOption(Option[List]):
         if value is None:
             self.clear()
         else:
-            self._value = [i for i in value]
+            self._value = list(value)
     def load_proto(self, proto: ConfigProto) -> None:
         """Deserialize value from `.ConfigProto` message.
 
@@ -2372,8 +2373,8 @@ class DataclassOption(Option[Any]):
             for item in (i for i in value.split(separator) if i.strip()):
                 try:
                     field_name, field_value = item.split(':', 1)
-                except Exception:
-                    raise ValueError(f"Illegal value '{value}' for option '{self.name}'")
+                except Exception as exc:
+                    raise ValueError(f"Illegal value '{value}' for option '{self.name}'") from exc
                 field_name = field_name.strip()
                 ftype = self._fields.get(field_name)
                 if ftype is None:
@@ -2382,8 +2383,8 @@ class DataclassOption(Option[Any]):
                 new[field_name] = convertor.from_str(ftype, field_value.strip())
                 try:
                     new_val = self.dataclass(**new)
-                except Exception:
-                    raise ValueError(f"Illegal value '{value}' for option '{self.name}'")
+                except Exception as exc:
+                    raise ValueError(f"Illegal value '{value}' for option '{self.name}'") from exc
             self._value = new_val
     def get_as_str(self) -> str:
         """Returns value as string.

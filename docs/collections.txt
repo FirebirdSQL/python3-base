@@ -41,23 +41,19 @@ Types for type hints & annotations
 Collections
 ===========
 
-BaseObjectCollection
---------------------
 .. autoclass:: BaseObjectCollection
 
-DataList
 --------
+
 .. autoclass:: DataList
 
-Registry
 --------
+
 .. autoclass:: Registry
 
 Functions
 =========
 
-make_lambda
------------
 .. autofunction:: make_lambda
 
 

@@ -22,7 +22,7 @@ The logging context is defined as combination of `topic`, `agent` and `context` 
 
 The `agent` is typically an unit of code that works in specific execution contexts. For
 example a code that process client request in web application (where request is the context),
-or executes SQL command executed (the context could be a database connection, or transaction).
+or executes SQL command (the context could be a database connection, or transaction).
 The `topic` is optional. It could be any string value that can be used as secondary context.
 
 Agent and Context identification
@@ -44,7 +44,7 @@ any context, or any agent operating in specific context etc.
 To log `agent` activities, use a logger returned by `.get_logger()` function/method.
 
 Example
-=======
+-------
 
 The following program is an example of small but complex enough code that you can use to experiment with contextual logging options. Parts relevant to logging are highlighted in the code by embedded comments. The program is very simple simulation of virtual "human" agents that can change their mood during mutual interaction.
 
@@ -203,25 +203,25 @@ The following program is an example of small but complex enough code that you ca
 
    def meeting(name: str, persons: List[Person]):
        "Simulation of virtual agents meeting"
-     
+
        for person in persons:
            person.log_context = name
-    
+
        start = monotonic()
        print("Meeting started...")
        print(f"Attendees: {', '.join(f'{x.name} [{x.mood.name}]' for x in persons)}")
-    
+
        for person in persons:
            for other in persons:
                if other is not person:
                    person.meet(other)
-    
+
        for person in persons:
            person.chat()
-    
+
        for person in persons:
            person.bye()
-    
+
        e = str(Decimal(monotonic() - start))
        print(f"Meeting closed in {e[:e.find('.')+6]} sec.")
        print(f"Outcome: {', '.join(f'{x.name} [{x.mood.name}]' for x in persons)}")
@@ -245,7 +245,7 @@ The following program is an example of small but complex enough code that you ca
 
 **Output from sample code**::
 
-   > python test-logging.py 
+   > python test-logging.py
    Meeting started...
    Attendees: Alex [SAD], David [PLEASED]
    [Alex] Hi David
@@ -283,54 +283,45 @@ The following program is an example of small but complex enough code that you ca
 Enums & Flags
 =============
 
-LogLevel
---------
 .. autoclass:: LogLevel
 
-BindFlag
 --------
+
 .. autoclass:: BindFlag
 
 Functions
 =========
 
-bind_logger
------------
 .. autofunction:: bind_logger
 
-get_logger
 ----------
+
 .. autofunction:: get_logger
 
-get_logging_id
 --------------
+
 .. autofunction:: get_logging_id
 
-install_null_logger
 -------------------
+
 .. autofunction:: install_null_logger
 
 Logger adapter
 ==============
 
-FBLoggerAdapter
----------------
 .. autoclass:: FBLoggerAdapter
 
 Logging manager
 ===============
 
-LoggingManager
---------------
 .. autoclass:: LoggingManager
 
 Mixins
 ======
 
-LoggingIdMixin
---------------
 .. autoclass:: LoggingIdMixin
 
 Globals
 =======
 .. autodata:: logging_manager
+   :no-value:

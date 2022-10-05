@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>logging - Context-based logging — Firebird-base 1.4.1 documentation</title>
+<title>logging - Context-based logging — Firebird-base 1.4.2 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -13,6 +13,7 @@
 <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
+<link href="_static/fb-favicon.png" rel="shortcut icon"/>
 <link href="genindex.html" rel="index" title="Index"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="trace.html" rel="next" title="trace - Trace/audit for class instances"/>
@@ -37,7 +38,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.4.1</b></span>
+<span class="navbar-text pull-left"><b>1.4.2</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -58,11 +59,10 @@
 <li><a class="reference internal" href="#the-logging-context">The logging context</a></li>
 <li><a class="reference internal" href="#agent-and-context-identification">Agent and Context identification</a></li>
 <li><a class="reference internal" href="#the-loggingmanager">The LoggingManager</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#enums-flags">Enums &amp; Flags</a><ul>
-<li><a class="reference internal" href="#loglevel">LogLevel</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.LogLevel"><code class="docutils literal notranslate"><span class="pre">LogLevel</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.LogLevel.CRITICAL"><code class="docutils literal notranslate"><span class="pre">LogLevel.CRITICAL</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.logging.LogLevel.DEBUG"><code class="docutils literal notranslate"><span class="pre">LogLevel.DEBUG</span></code></a></li>
@@ -74,9 +74,6 @@
 <li><a class="reference internal" href="#firebird.base.logging.LogLevel.WARNING"><code class="docutils literal notranslate"><span class="pre">LogLevel.WARNING</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#bindflag">BindFlag</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.BindFlag"><code class="docutils literal notranslate"><span class="pre">BindFlag</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.BindFlag.ANY_AGENT"><code class="docutils literal notranslate"><span class="pre">BindFlag.ANY_AGENT</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.logging.BindFlag.ANY_ANY"><code class="docutils literal notranslate"><span class="pre">BindFlag.ANY_ANY</span></code></a></li>
@@ -86,29 +83,14 @@
 </li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#bind-logger">bind_logger</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.bind_logger"><code class="docutils literal notranslate"><span class="pre">bind_logger()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#get-logger">get_logger</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.get_logger"><code class="docutils literal notranslate"><span class="pre">get_logger()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#get-logging-id">get_logging_id</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.get_logging_id"><code class="docutils literal notranslate"><span class="pre">get_logging_id()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#install-null-logger">install_null_logger</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.install_null_logger"><code class="docutils literal notranslate"><span class="pre">install_null_logger()</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#logger-adapter">Logger adapter</a><ul>
-<li><a class="reference internal" href="#fbloggeradapter">FBLoggerAdapter</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter"><code class="docutils literal notranslate"><span class="pre">FBLoggerAdapter</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter.__init__"><code class="docutils literal notranslate"><span class="pre">FBLoggerAdapter.__init__()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter.extract_key"><code class="docutils literal notranslate"><span class="pre">FBLoggerAdapter.extract_key()</span></code></a></li>
@@ -123,10 +105,7 @@
 </li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#logging-manager">Logging manager</a><ul>
-<li><a class="reference internal" href="#loggingmanager">LoggingManager</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.LoggingManager"><code class="docutils literal notranslate"><span class="pre">LoggingManager</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.LoggingManager.bind_logger"><code class="docutils literal notranslate"><span class="pre">LoggingManager.bind_logger()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.logging.LoggingManager.clear"><code class="docutils literal notranslate"><span class="pre">LoggingManager.clear()</span></code></a></li>
@@ -136,14 +115,9 @@
 </li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#mixins">Mixins</a><ul>
-<li><a class="reference internal" href="#loggingidmixin">LoggingIdMixin</a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.LoggingIdMixin"><code class="docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.base.logging.LoggingIdMixin.logging_id"><code class="docutils literal notranslate"><span class="pre">LoggingIdMixin.logging_id</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -172,9 +146,9 @@
 <div class="container">
 <div class="row">
 <div class="body span12 content" role="main">
-<span class="target" id="module-firebird.base.logging"></span><section id="logging-context-based-logging">
+<span class="target" id="module-firebird.base.logging"></span><a class="dashAnchor" name="//apple_ref/cpp/Section/logging - Context-based logging"></a><section id="logging-context-based-logging">
 <a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.base.logging"></a><h1>logging - Context-based logging<a class="headerlink" href="#logging-context-based-logging" title="Permalink to this heading">¶</a></h1>
-<section id="overview">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Overview"></a><section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
 <p>This module provides context-based logging system built on top of standard <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logging</span></code></a> module.</p>
 <p>The context-based logging:</p>
@@ -183,22 +157,22 @@
 <li><p>Adds support for f-string message format.</p></li>
 <li><p>Allows assignment of loggers to specific contexts.</p></li>
 </ol>
-<section id="the-logging-context">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/The logging context"></a><section id="the-logging-context">
 <h3>The logging context<a class="headerlink" href="#the-logging-context" title="Permalink to this heading">¶</a></h3>
 <p>The logging context is defined as combination of <code class="xref py py-obj docutils literal notranslate"><span class="pre">topic</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">agent</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">context</span></code> string values.</p>
 <p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">agent</span></code> is typically an unit of code that works in specific execution contexts. For
 example a code that process client request in web application (where request is the context),
-or executes SQL command executed (the context could be a database connection, or transaction).
+or executes SQL command (the context could be a database connection, or transaction).
 The <code class="xref py py-obj docutils literal notranslate"><span class="pre">topic</span></code> is optional. It could be any string value that can be used as secondary context.</p>
 </section>
-<section id="agent-and-context-identification">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Agent and Context identification"></a><section id="agent-and-context-identification">
 <h3>Agent and Context identification<a class="headerlink" href="#agent-and-context-identification" title="Permalink to this heading">¶</a></h3>
 <p>Agents and contexts could be identified by string value, or by any object (i.e. you can use
 the object that implement the agent or context). If object is used, the ID could be
 provided as <code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_id</span></code> attribute, <a class="reference external" href="https://docs.python.org/3/reference/import.html#name__" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__name__</span></code></a> attribute or by <code class="xref py py-obj docutils literal notranslate"><span class="pre">__str__()</span></code> return value.</p>
 <p>A <a class="reference internal" href="#firebird.base.logging.LoggingIdMixin" title="firebird.base.logging.LoggingIdMixin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a> class could be used to add <code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_id</span></code> support to any class.</p>
 </section>
-<section id="the-loggingmanager">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/The LoggingManager"></a><section id="the-loggingmanager">
 <h3>The LoggingManager<a class="headerlink" href="#the-loggingmanager" title="Permalink to this heading">¶</a></h3>
 <p>The <a class="reference internal" href="#firebird.base.logging.LoggingManager" title="firebird.base.logging.LoggingManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingManager</span></code></a> class maintains a set of bindings between <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Logger</span></code></a> objects and
 combination of <code class="xref py py-obj docutils literal notranslate"><span class="pre">agent</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">context</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">topic</span></code> specifications. It’s possible to bind loggers
@@ -207,9 +181,8 @@ is possible to assign specific <a class="reference external" href="https://docs.
 any context, or any agent operating in specific context etc.</p>
 <p>To log <code class="xref py py-obj docutils literal notranslate"><span class="pre">agent</span></code> activities, use a logger returned by <a class="reference internal" href="#firebird.base.logging.get_logger" title="firebird.base.logging.get_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_logger()</span></code></a> function/method.</p>
 </section>
-</section>
-<section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h2>
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Example"></a><section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h3>
 <p>The following program is an example of small but complex enough code that you can use to experiment with contextual logging options. Parts relevant to logging are highlighted in the code by embedded comments. The program is very simple simulation of virtual “human” agents that can change their mood during mutual interaction.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># test-logging.py</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
@@ -444,13 +417,12 @@ Outcome: Alex [SAD], David [SAD]
 </pre></div>
 </div>
 </section>
-<section id="enums-flags">
+</section>
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Enums &amp; Flags"></a><section id="enums-flags">
 <h2>Enums &amp; Flags<a class="headerlink" href="#enums-flags" title="Permalink to this heading">¶</a></h2>
-<section id="loglevel">
-<h3>LogLevel<a class="headerlink" href="#loglevel" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.logging.LogLevel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">LogLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.LogLevel"></a><a class="headerlink" href="#firebird.base.logging.LogLevel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">LogLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/logging.html#LogLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.LogLevel"></a><a class="headerlink" href="#firebird.base.logging.LogLevel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a></p>
 <p>Shadow enumeration for logging levels.</p>
 <dl class="py attribute">
@@ -486,12 +458,10 @@ Outcome: Alex [SAD], David [SAD]
 <span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.logging.LogLevel.WARNING"></a><a class="headerlink" href="#firebird.base.logging.LogLevel.WARNING" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 </dd></dl>
-</section>
-<section id="bindflag">
-<h3>BindFlag<a class="headerlink" href="#bindflag" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.logging.BindFlag">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">BindFlag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.BindFlag"></a><a class="headerlink" href="#firebird.base.logging.BindFlag" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">BindFlag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/logging.html#BindFlag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.BindFlag"></a><a class="headerlink" href="#firebird.base.logging.BindFlag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Flag" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Flag</span></code></a></p>
 <p>Internal flags used by <a class="reference internal" href="#firebird.base.logging.LoggingManager" title="firebird.base.logging.LoggingManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingManager</span></code></a>.</p>
 <dl class="py attribute">
@@ -512,115 +482,118 @@ Outcome: Alex [SAD], David [SAD]
 <dd></dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="functions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Functions"></a><section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
-<section id="bind-logger">
-<h3>bind_logger<a class="headerlink" href="#bind-logger" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.logging.bind_logger">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.bind_logger"></a><a class="headerlink" href="#firebird.base.logging.bind_logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><span class="pre">Logger</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.bind_logger"></a><a class="headerlink" href="#firebird.base.logging.bind_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_manager.bind_logger()</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
+<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><em>Logger</em></a><em>]</em>) – </p></li>
+<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="get-logger">
-<h3>get_logger<a class="headerlink" href="#get-logger" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.logging.get_logger">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.get_logger"></a><a class="headerlink" href="#firebird.base.logging.get_logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><span class="pre">FBLoggerAdapter</span></a></span></span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.get_logger"></a><a class="headerlink" href="#firebird.base.logging.get_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_manager.get_logger()</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FBLoggerAdapter</span></code></a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
+<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
+<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><em>FBLoggerAdapter</em></a></p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="get-logging-id">
-<h3>get_logging_id<a class="headerlink" href="#get-logging-id" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.logging.get_logging_id">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">get_logging_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.get_logging_id"></a><a class="headerlink" href="#firebird.base.logging.get_logging_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">get_logging_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#get_logging_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.get_logging_id"></a><a class="headerlink" href="#firebird.base.logging.get_logging_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns logging ID for object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Any object</p>
+<dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Any object</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><ol class="arabic simple">
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ol class="arabic simple">
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_id</span></code> attribute if <code class="xref py py-obj docutils literal notranslate"><span class="pre">obj</span></code> does have it, or..</p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__qualname__</span></code> attribute if <code class="xref py py-obj docutils literal notranslate"><span class="pre">obj</span></code> does have it, or..</p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">str(obj)</span></code></p></li>
 </ol>
 </p>
 </dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a></p>
+</dd>
 </dl>
 </dd></dl>
-</section>
-<section id="install-null-logger">
-<h3>install_null_logger<a class="headerlink" href="#install-null-logger" title="Permalink to this heading">¶</a></h3>
+<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.logging.install_null_logger">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">install_null_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.install_null_logger"></a><a class="headerlink" href="#firebird.base.logging.install_null_logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">install_null_logger</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/logging.html#install_null_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.install_null_logger"></a><a class="headerlink" href="#firebird.base.logging.install_null_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Installs ‘null’ logger.</p>
 </dd></dl>
 </section>
-</section>
-<section id="logger-adapter">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Logger adapter"></a><section id="logger-adapter">
 <h2>Logger adapter<a class="headerlink" href="#logger-adapter" title="Permalink to this heading">¶</a></h2>
-<section id="fbloggeradapter">
-<h3>FBLoggerAdapter<a class="headerlink" href="#fbloggeradapter" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.logging.FBLoggerAdapter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">FBLoggerAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.FBLoggerAdapter"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">FBLoggerAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.FBLoggerAdapter"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.LoggerAdapter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoggerAdapter</span></code></a>, <a class="reference internal" href="types.html#firebird.base.types.CachedDistinct" title="firebird.base.types.CachedDistinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">CachedDistinct</span></code></a></p>
 <p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.LoggerAdapter" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggerAdapter</span></code></a> that injects information about context, agent and topic
 into <code class="xref py py-obj docutils literal notranslate"><span class="pre">extra</span></code> and with <strong>f-string</strong> log message support.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.FBLoggerAdapter.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.__init__"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><span class="pre">Logger</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.__init__"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a>) – Adapted Logger instance.</p></li>
-<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Agent for logger</p></li>
-<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Context for logger</p></li>
-<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Topic of recorded information.</p></li>
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><em>Logger</em></a>) – Adapted Logger instance.</p></li>
+<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Agent for logger</p></li>
+<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Context for logger</p></li>
+<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Topic of recorded information.</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.FBLoggerAdapter.extract_key">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.extract_key"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.extract_key" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><span class="pre">Hashable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter.extract_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.extract_key"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.extract_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns instance key extracted from constructor arguments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hashable</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><em>Hashable</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.FBLoggerAdapter.get_key">
-<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.get_key"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.get_key" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><span class="pre">Hashable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter.get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.get_key"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.get_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns instance key.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hashable</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.10)"><em>Hashable</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.FBLoggerAdapter.log">
-<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.log"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.log" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.log"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delegate a log call to the underlying logger after processing.</p>
 <p>Interpolates the message as <strong>f-string</strong> using either <code class="xref py py-obj docutils literal notranslate"><span class="pre">kwargs</span></code> or dict passed as
 only one positional argument. If sole positional argument is not dictionary or
@@ -630,14 +603,14 @@ only one positional argument. If sole positional argument is not dictionary or
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.FBLoggerAdapter.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.process"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.process" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.process"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the logging message and keyword arguments passed into
 a logging call to insert contextual information. You can either
 manipulate the message itself, the keyword args or both. Return
 the message and kwargs modified (or not) to suit your needs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -663,28 +636,28 @@ the message and kwargs modified (or not) to suit your needs.</p>
 </dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="logging-manager">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Logging manager"></a><section id="logging-manager">
 <h2>Logging manager<a class="headerlink" href="#logging-manager" title="Permalink to this heading">¶</a></h2>
-<section id="loggingmanager">
-<h3>LoggingManager<a class="headerlink" href="#loggingmanager" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.logging.LoggingManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">LoggingManager</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.LoggingManager"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">LoggingManager</span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.LoggingManager"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Logger manager.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.LoggingManager.bind_logger">
-<span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.bind_logger"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.bind_logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><span class="pre">Logger</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.bind_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.bind_logger"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.bind_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bind agent and context to specific logger.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Agent identification</p></li>
-<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Context identification</p></li>
-<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a>]) – Loger (instance or name)</p></li>
-<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Topic of recorded information</p></li>
+<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Agent identification</p></li>
+<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Context identification</p></li>
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><em>Logger</em></a><em>]</em>) – Loger (instance or name)</p></li>
+<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Topic of recorded information</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 <p>The identification of agent and context could be:</p>
@@ -703,33 +676,31 @@ context are not specified in logger lookup.</p></li>
 sentinel is used by <a class="reference internal" href="#firebird.base.logging.LoggingManager.unbind" title="firebird.base.logging.LoggingManager.unbind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unbind()</span></code></a>, so bindings that use ALL could not be removed
 by <a class="reference internal" href="#firebird.base.logging.LoggingManager.unbind" title="firebird.base.logging.LoggingManager.unbind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unbind()</span></code></a>.</p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.LoggingManager.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.clear"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.clear" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.clear"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove all logger bindings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.LoggingManager.get_logger">
-<span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.get_logger"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.get_logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><span class="pre">FBLoggerAdapter</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.get_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.get_logger"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.get_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a logger for the specified agent and context combination.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Agent identification.</p></li>
-<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Context identification.</p></li>
-<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Topic of recorded information.</p></li>
+<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Agent identification.</p></li>
+<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Context identification.</p></li>
+<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Topic of recorded information.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><em>FBLoggerAdapter</em></a></p>
 </dd>
 </dl>
 <p>The identification of agent and context could be:</p>
@@ -752,52 +723,45 @@ by <a class="reference internal" href="#firebird.base.logging.LoggingManager.unb
 <li><p>Return the root logger.</p></li>
 </ol>
 </div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FBLoggerAdapter</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.LoggingManager.unbind">
-<span class="sig-name descname"><span class="pre">unbind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.unbind"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.unbind" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">unbind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.unbind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.unbind"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.unbind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Drops logger bindings.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
+<li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
+<li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="mixins">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Mixins"></a><section id="mixins">
 <h2>Mixins<a class="headerlink" href="#mixins" title="Permalink to this heading">¶</a></h2>
-<section id="loggingidmixin">
-<h3>LoggingIdMixin<a class="headerlink" href="#loggingidmixin" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.logging.LoggingIdMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">LoggingIdMixin</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.LoggingIdMixin"></a><a class="headerlink" href="#firebird.base.logging.LoggingIdMixin" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">LoggingIdMixin</span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingIdMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.logging.LoggingIdMixin"></a><a class="headerlink" href="#firebird.base.logging.LoggingIdMixin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Mixin class that adds <a class="reference internal" href="#firebird.base.logging.LoggingIdMixin.logging_id" title="firebird.base.logging.LoggingIdMixin.logging_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_id</span></code></a> property and <code class="xref py py-obj docutils literal notranslate"><span class="pre">__str__</span></code> that returns <a class="reference internal" href="#firebird.base.logging.LoggingIdMixin.logging_id" title="firebird.base.logging.LoggingIdMixin.logging_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_id</span></code></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.logging.LoggingIdMixin.logging_id">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logging_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.logging.LoggingIdMixin.logging_id"></a><a class="headerlink" href="#firebird.base.logging.LoggingIdMixin.logging_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns <code class="xref py py-obj docutils literal notranslate"><span class="pre">_logging_id_</span></code> attribute if defined, else returns qualified class name.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="globals">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Globals"></a><section id="globals">
 <h2>Globals<a class="headerlink" href="#globals" title="Permalink to this heading">¶</a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="firebird.base.logging.logging_manager">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">logging_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.base.logging.LoggingManager" title="firebird.base.logging.LoggingManager"><span class="pre">LoggingManager</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;firebird.base.logging.LoggingManager</span> <span class="pre">object&gt;</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.logging.logging_manager"></a><a class="headerlink" href="#firebird.base.logging.logging_manager" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">logging_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.base.logging.LoggingManager" title="firebird.base.logging.LoggingManager"><span class="pre">LoggingManager</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.logging.logging_manager"></a><a class="headerlink" href="#firebird.base.logging.logging_manager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logging Manager</p>
 </dd></dl>
 </section>
@@ -812,7 +776,7 @@ by <a class="reference internal" href="#firebird.base.logging.LoggingManager.unb
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
 </p>
 </div>
 </footer>
