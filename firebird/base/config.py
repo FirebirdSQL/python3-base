@@ -55,10 +55,10 @@ from uuid import UUID
 from decimal import Decimal, DecimalException
 from configparser import ConfigParser, DEFAULTSECT
 from inspect import signature, Signature, Parameter
-from enum import Enum, Flag, _decompose
+from enum import Enum, Flag
 import os
 from .config_pb2 import ConfigProto
-from .types import Error, MIME, ZMQAddress, PyExpr, PyCode, PyCallable
+from .types import Error, MIME, ZMQAddress, PyExpr, PyCode, PyCallable, _decompose
 from .strconv import get_convertor, convert_to_str, Convertor
 
 PROTO_CONFIG = 'firebird.base.ConfigProto'
