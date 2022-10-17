@@ -37,7 +37,7 @@
 from __future__ import annotations
 from typing import Dict, Any, Callable, cast
 from dataclasses import dataclass
-from pkg_resources import iter_entry_points
+from importlib.metadata import entry_points
 from google.protobuf.message import Message as ProtoMessage
 from google.protobuf.descriptor import EnumDescriptor
 from google.protobuf.struct_pb2 import Struct as StructProto # pylint: disable=[E0611]
@@ -46,13 +46,21 @@ from google.protobuf import json_format, struct_pb2, any_pb2, duration_pb2, empt
 from .types import Distinct
 from .collections import Registry
 
+#: Name of well-known EMPTY protobuf message (for use with `.create_message()`)
 PROTO_EMPTY = 'google.protobuf.Empty'
+#: Name of well-known ANY protobuf message (for use with `.create_message()`)
 PROTO_ANY = 'google.protobuf.Any'
+#: Name of well-known DURATION protobuf message (for use with `.create_message()`)
 PROTO_DURATION = 'google.protobuf.Duration'
+#: Name of well-known TIMESTAMP protobuf message (for use with `.create_message()`)
 PROTO_TIMESTAMP = 'google.protobuf.Timestamp'
+#: Name of well-known STRUCT protobuf message (for use with `.create_message()`)
 PROTO_STRUCT = 'google.protobuf.Struct'
+#: Name of well-known VALUE protobuf message (for use with `.create_message()`)
 PROTO_VALUE = 'google.protobuf.Value'
+#: Name of well-known LISTVALUE protobuf message (for use with `.create_message()`)
 PROTO_LISTVALUE = 'google.protobuf.ListValue'
+#: Name of well-known FIELDMASK protobuf message (for use with `.create_message()`)
 PROTO_FIELDMASK = 'google.protobuf.FieldMask'
 
 # Classes
@@ -229,7 +237,7 @@ def load_registered(group: str) -> None: # pragma: no cover
 
            load_registered('firebird.base.protobuf')
     """
-    for desc in (entry.load() for entry in iter_entry_points(group)):
+    for desc in (entry.load() for entry in entry_points().get(group, [])):
         register_decriptor(desc)
 
 
