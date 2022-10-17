@@ -326,107 +326,38 @@ Application Directory Scheme
 .. versionchanged:: 1.2.0
 
 .. autoclass:: DirectoryScheme
-
------
-
 .. autoclass:: WindowsDirectoryScheme
-
------
-
 .. autoclass:: LinuxDirectoryScheme
-
------
-
 .. autoclass:: MacOSDirectoryScheme
-
------
-
 .. autofunction:: get_directory_scheme
 
 Config
 ======
-
 .. autoclass:: Config
 
 Options
 =======
-
 .. autoclass:: Option
-
------
-
 .. autoclass:: StrOption
-
------
-
 .. autoclass:: IntOption
-
------
-
 .. autoclass:: FloatOption
-
------
-
 .. autoclass:: DecimalOption
-
------
-
 .. autoclass:: BoolOption
-
------
-
 .. autoclass:: ZMQAddressOption
-
------
-
 .. autoclass:: EnumOption
-
------
-
 .. autoclass:: FlagOption
-
------
-
 .. autoclass:: UUIDOption
-
------
-
 .. autoclass:: MIMEOption
-
------
-
 .. autoclass:: ListOption
-
------
-
 .. autoclass:: DataclassOption
-
------
-
 .. autoclass:: PathOption
-
------
-
 .. autoclass:: PyExprOption
-
------
-
 .. autoclass:: PyCodeOption
-
------
-
 .. autoclass:: PyCallableOption
-
------
-
 .. autoclass:: ConfigOption
-
------
-
 .. autoclass:: ConfigListOption
 
 Functions
 =========
-
 .. autofunction:: create_config
 

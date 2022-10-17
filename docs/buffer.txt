@@ -13,19 +13,11 @@ data of various data type.
 
 MemoryBuffer
 ============
-
 .. autoclass:: MemoryBuffer
 
 Buffer factories
 ================
-
 .. autoclass:: BufferFactory
-
--------------
-
 .. autoclass:: BytesBufferFactory
-
---------------
-
 .. autoclass:: CTypesBufferFactory
 

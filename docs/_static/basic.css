@@ -681,3 +681,23 @@ span.changed {
     padding: 5px;
 }
 
+dl.class, dl.exception, dl.data, dl.function {
+/*    background: #fbe3e4 ;*/
+    border: 1px solid grey;
+    border-top-style: none;
+    border-left-style: none;
+    border-right-style: none;
+/*    padding: 3px;*/
+}
+
+dt.py {
+    background: #f8f8f8;
+/*    border: 2px solid #aacc99;*/
+/*    border: 2px solid #ffcccc;  /*#ffd324;*/
+/*    border: 2px solid #fbc2c4;*/
+    border: 1px solid #e1e1e8;
+    border-top-style: none;
+    border-left-style: none;
+/*    border-right-style: none; */
+    padding: 2px 5px;
+}
