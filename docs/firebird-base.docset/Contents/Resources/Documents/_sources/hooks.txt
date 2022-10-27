@@ -142,19 +142,9 @@ Output from sample code::
 
 Functions
 =========
-
 .. autofunction:: register_class
-
--------------
-
 .. autofunction:: register_name
-
---------
-
 .. autofunction:: add_hook
-
--------------
-
 .. autofunction:: get_callbacks
 
 Classes

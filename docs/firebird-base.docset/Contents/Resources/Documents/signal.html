@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>signal - Callback system based on Signals and Slots, and “Delphi events” — Firebird-base 1.4.2 documentation</title>
+<title>signal - Callback system based on Signals and Slots, and “Delphi events” — Firebird-base 1.4.3 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.4.2</b></span>
+<span class="navbar-text pull-left"><b>1.4.3</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -108,7 +108,7 @@
 <p>This module provides two callback mechanisms: one based on signals and slots similar to Qt
 signal/slot, and second based on optional method delegation similar to events in Delphi.</p>
 <p>In both cases, the callback callables could be functions, instance or class methods,
-partials and lambda functions. The <a class="reference external" href="https://docs.python.org/3/library/inspect.html#module-inspect" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inspect</span></code></a> module is used to define the signature for
+partials and lambda functions. The <a class="reference external" href="https://docs.python.org/3/library/inspect.html#module-inspect" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inspect</span></code></a> module is used to define the signature for
 callbacks, and to validate that only compatible callables are assigned.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -118,7 +118,7 @@ keyword  arguments with default values defined on connected callable.</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>You may use <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">functools.partial</span></code></a> to adapt callable with different signatures. However,
+<p>You may use <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">functools.partial</span></code></a> to adapt callable with different signatures. However,
 you can “mask” only keyword arguments (without default) and leading positional arguments
 (as any positional argument binded by name will not mask-out parameter from signature
 introspection).</p>
@@ -128,14 +128,14 @@ introspection).</p>
 <p>Signals and slots are suitable for 1:N notification schemes. The <a class="reference internal" href="#firebird.base.signal.Signal" title="firebird.base.signal.Signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Signal</span></code></a> works as a point
 to which one or more Slots could be connected. When <a class="reference internal" href="#firebird.base.signal.Signal" title="firebird.base.signal.Signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Signal</span></code></a> is “emitted”, all connected
 slots are called (executed). It’s possible to pass parameters to slot callables, but any
-value returned by slot callable is ignored. The Signal contructor takes <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inspect.Signature</span></code></a>
+value returned by slot callable is ignored. The Signal contructor takes <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inspect.Signature</span></code></a>
 argument that defines the required signature that callables (slots) must have to connect
 to this signal.</p>
 <p>This mechanism is provided in two forms:</p>
 <ul class="simple">
 <li><p>The <a class="reference internal" href="#firebird.base.signal.Signal" title="firebird.base.signal.Signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Signal</span></code></a> class to create signal instances for direct use.</p></li>
 <li><p>The <a class="reference internal" href="#firebird.base.signal.signal" title="firebird.base.signal.signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal</span></code></a> decorator to define signals on classes. This decorator works like builtin
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code></a> (without setter and deleter), where the ‘getter’ method is used only to define
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code></a> (without setter and deleter), where the ‘getter’ method is used only to define
 the signature required for slots.</p></li>
 </ul>
 <p><strong>Example:</strong></p>
@@ -194,7 +194,7 @@ or function.</p>
 <p>The ‘event’ works as a point to which one ‘slot’ could be connected. The event itself
 acts as callable, that executes the connected slot (if assigned). Events may have parameters
 and return values. Events could be defined only on classes using <a class="reference internal" href="#firebird.base.signal.eventsocket" title="firebird.base.signal.eventsocket"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eventsocket</span></code></a> decorator,
-that works like builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code></a> (without deleter), where the ‘getter’ method is used only
+that works like builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code></a> (without deleter), where the ‘getter’ method is used only
 to define the signature required for slot, and ‘setter’ is used to assign the callable.
 To disconnect the callable from event, simply assign None to the event.</p>
 <p><strong>Example:</strong></p>
@@ -265,8 +265,8 @@ To disconnect the callable from event, simply assign None to the event.</p>
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">Signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.10)"><span class="pre">Signature</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.Signal"></a><a class="headerlink" href="#firebird.base.signal.Signal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">Signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.11)"><span class="pre">Signature</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.Signal"></a><a class="headerlink" href="#firebird.base.signal.Signal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The Signal is the core object that handles connection with slots and emission.</p>
 <p>Slots are callables that are called when signal is emitted (the return value is ignored).
 They could be functions, instance or class methods, partials and lambda functions.</p>
@@ -277,10 +277,10 @@ They could be functions, instance or class methods, partials and lambda function
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.10)"><span class="pre">Signature</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.__init__"></a><a class="headerlink" href="#firebird.base.signal.Signal.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.11)"><span class="pre">Signature</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.__init__"></a><a class="headerlink" href="#firebird.base.signal.Signal.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>signature</strong> (<a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.10)"><em>Signature</em></a>) – Signature for slots.</p>
+<dd class="field-odd"><p><strong>signature</strong> (<a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.11)"><em>Signature</em></a>) – Signature for slots.</p>
 </dd>
 </dl>
 <div class="admonition important">
@@ -295,14 +295,14 @@ arguments with default values.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Signal functions with signatures different from signal could be adapted using
-<a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">functools.partial</span></code></a>. However, you can “mask” only keyword arguments (without
+<a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">functools.partial</span></code></a>. However, you can “mask” only keyword arguments (without
 default) and leading positional arguments (as any positional argument binded
 by name will not mask-out parameter from signature introspection).</p>
 </div>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.clear"></a><a class="headerlink" href="#firebird.base.signal.Signal.clear" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.clear"></a><a class="headerlink" href="#firebird.base.signal.Signal.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clears the signal of all connected slots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -312,14 +312,14 @@ by name will not mask-out parameter from signature introspection).</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.connect">
-<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.connect"></a><a class="headerlink" href="#firebird.base.signal.Signal.connect" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.connect"></a><a class="headerlink" href="#firebird.base.signal.Signal.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connects the signal to callable that will receive the signal when emitted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>slot</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a>) – Callable with signature that match the signature defined for signal.</p>
+<dd class="field-odd"><p><strong>slot</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a>) – Callable with signature that match the signature defined for signal.</p>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – When callable signature does not match the signature of signal.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – When callable signature does not match the signature of signal.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>None</p>
@@ -328,7 +328,7 @@ by name will not mask-out parameter from signature introspection).</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.disconnect">
-<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.disconnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.disconnect"></a><a class="headerlink" href="#firebird.base.signal.Signal.disconnect" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.disconnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.disconnect"></a><a class="headerlink" href="#firebird.base.signal.Signal.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disconnects the slot from the signal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -338,7 +338,7 @@ by name will not mask-out parameter from signature introspection).</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.emit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.emit"></a><a class="headerlink" href="#firebird.base.signal.Signal.emit" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.emit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.emit"></a><a class="headerlink" href="#firebird.base.signal.Signal.emit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calls all the connected slots with the provided args and kwargs unless block
 is activated.</p>
 <dl class="field-list simple">
@@ -349,15 +349,15 @@ is activated.</p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.block">
-<span class="sig-name descname"><span class="pre">block</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.signal.Signal.block"></a><a class="headerlink" href="#firebird.base.signal.Signal.block" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">block</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.signal.Signal.block"></a><a class="headerlink" href="#firebird.base.signal.Signal.block" title="Permalink to this definition">¶</a></dt>
 <dd><p>Toggle to block / unblock signal transmission</p>
 </dd></dl>
 </dd></dl>
 <hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal._EventSocket">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">_EventSocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal._EventSocket"></a><a class="headerlink" href="#firebird.base.signal._EventSocket" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">_EventSocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal._EventSocket"></a><a class="headerlink" href="#firebird.base.signal._EventSocket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Internal EventSocket handler.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -366,11 +366,11 @@ is activated.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.signal._EventSocket.is_set">
-<span class="sig-name descname"><span class="pre">is_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket.is_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal._EventSocket.is_set"></a><a class="headerlink" href="#firebird.base.signal._EventSocket.is_set" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket.is_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal._EventSocket.is_set"></a><a class="headerlink" href="#firebird.base.signal._EventSocket.is_set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if slot is assigned to eventsocket.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -381,18 +381,18 @@ is activated.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal.signal">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.signal"></a><a class="headerlink" href="#firebird.base.signal.signal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Decorator that defines signal as read-only property. The decorated function/method
 is used to define the signature required for slots to successfuly register to signal,
 and does not need to have a body as it’s never executed.</p>
-<p>The usage is similar to builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code></a>, except that it does not support custom
+<p>The usage is similar to builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#property" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property</span></code></a>, except that it does not support custom
 setter and deleter.</p>
 </dd></dl>
 <hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal.eventsocket">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">eventsocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#eventsocket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal.eventsocket"></a><a class="headerlink" href="#firebird.base.signal.eventsocket" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The <a class="reference internal" href="#firebird.base.signal.eventsocket" title="firebird.base.signal.eventsocket"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eventsocket</span></code></a> is like read/write property that handles connection and call
 delegation to single slot. It basically works like Delphi event.</p>
 <p>The Slot could be function, instance or class method, partial and lambda function.</p>
@@ -407,7 +407,7 @@ arguments with default values.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Eventsocket functions with signatures different from event could be adapted
-using <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">functools.partial</span></code></a>. However, you can “mask” only keyword arguments
+using <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">functools.partial</span></code></a>. However, you can “mask” only keyword arguments
 (without default) and leading positional arguments (as any positional argument
 binded by name will not mask-out parameter from signature introspection).</p>
 </div>
@@ -427,7 +427,7 @@ defined on property.</p>
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
 </p>
 </div>
 </footer>

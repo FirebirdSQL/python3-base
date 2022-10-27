@@ -2,6 +2,20 @@
 Changelog
 #########
 
+Version 1.4.3
+=============
+
+* `~firebird.base.types` module:
+
+  - Added internal functions `_decompose` and `_power_of_two` from stdlib `.enum` module,
+    because they were removed in Python 3.11.
+
+* `~firebird.base.protobuf` module:
+
+  - Use :ref:`importlib.metadata.entry_points <entry-points>` instead `pkg_resources.iter_entry_points`.
+
+* Improved documentation.
+
 Version 1.4.2
 =============
 

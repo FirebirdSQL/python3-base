@@ -2,8 +2,8 @@
 Changelog
 #########
 
-[Development] Version 1.4.3
-===========================
+Version 1.4.3
+=============
 
 * `~firebird.base.types` module:
 

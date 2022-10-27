@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>protobuf - Registry for Google Protocol Buffer messages and enums — Firebird-base 1.4.2 documentation</title>
+<title>protobuf - Registry for Google Protocol Buffer messages and enums — Firebird-base 1.4.3 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.4.2</b></span>
+<span class="navbar-text pull-left"><b>1.4.3</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -56,6 +56,17 @@
 <ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
 <li><a class="reference internal" href="#">protobuf - Registry for Google Protocol Buffer messages and enums</a><ul>
 <li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#constants">Constants</a><ul>
+<li><a class="reference internal" href="#firebird.base.protobuf.PROTO_EMPTY"><code class="docutils literal notranslate"><span class="pre">PROTO_EMPTY</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.protobuf.PROTO_ANY"><code class="docutils literal notranslate"><span class="pre">PROTO_ANY</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.protobuf.PROTO_DURATION"><code class="docutils literal notranslate"><span class="pre">PROTO_DURATION</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.protobuf.PROTO_TIMESTAMP"><code class="docutils literal notranslate"><span class="pre">PROTO_TIMESTAMP</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.protobuf.PROTO_STRUCT"><code class="docutils literal notranslate"><span class="pre">PROTO_STRUCT</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.protobuf.PROTO_VALUE"><code class="docutils literal notranslate"><span class="pre">PROTO_VALUE</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.protobuf.PROTO_LISTVALUE"><code class="docutils literal notranslate"><span class="pre">PROTO_LISTVALUE</span></code></a></li>
+<li><a class="reference internal" href="#firebird.base.protobuf.PROTO_FIELDMASK"><code class="docutils literal notranslate"><span class="pre">PROTO_FIELDMASK</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
 <li><a class="reference internal" href="#firebird.base.protobuf.register_decriptor"><code class="docutils literal notranslate"><span class="pre">register_decriptor()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.base.protobuf.load_registered"><code class="docutils literal notranslate"><span class="pre">load_registered()</span></code></a></li>
@@ -118,11 +129,54 @@ The generated <code class="xref py py-obj docutils literal notranslate"><span cl
 or <a class="reference internal" href="#firebird.base.protobuf.load_registered" title="firebird.base.protobuf.load_registered"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_registered</span></code></a> function. The registry could be then used to obtain information
 about protobuf messages or enum types, or to create message instances or enum values.</p>
 </section>
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Constants"></a><section id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.protobuf.PROTO_EMPTY">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">PROTO_EMPTY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'google.protobuf.Empty'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.protobuf.PROTO_EMPTY"></a><a class="headerlink" href="#firebird.base.protobuf.PROTO_EMPTY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of well-known EMPTY protobuf message (for use with <a class="reference internal" href="#firebird.base.protobuf.create_message" title="firebird.base.protobuf.create_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_message()</span></code></a>)</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.protobuf.PROTO_ANY">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">PROTO_ANY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'google.protobuf.Any'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.protobuf.PROTO_ANY"></a><a class="headerlink" href="#firebird.base.protobuf.PROTO_ANY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of well-known ANY protobuf message (for use with <a class="reference internal" href="#firebird.base.protobuf.create_message" title="firebird.base.protobuf.create_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_message()</span></code></a>)</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.protobuf.PROTO_DURATION">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">PROTO_DURATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'google.protobuf.Duration'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.protobuf.PROTO_DURATION"></a><a class="headerlink" href="#firebird.base.protobuf.PROTO_DURATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of well-known DURATION protobuf message (for use with <a class="reference internal" href="#firebird.base.protobuf.create_message" title="firebird.base.protobuf.create_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_message()</span></code></a>)</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.protobuf.PROTO_TIMESTAMP">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">PROTO_TIMESTAMP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'google.protobuf.Timestamp'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.protobuf.PROTO_TIMESTAMP"></a><a class="headerlink" href="#firebird.base.protobuf.PROTO_TIMESTAMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of well-known TIMESTAMP protobuf message (for use with <a class="reference internal" href="#firebird.base.protobuf.create_message" title="firebird.base.protobuf.create_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_message()</span></code></a>)</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.protobuf.PROTO_STRUCT">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">PROTO_STRUCT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'google.protobuf.Struct'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.protobuf.PROTO_STRUCT"></a><a class="headerlink" href="#firebird.base.protobuf.PROTO_STRUCT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of well-known STRUCT protobuf message (for use with <a class="reference internal" href="#firebird.base.protobuf.create_message" title="firebird.base.protobuf.create_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_message()</span></code></a>)</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.protobuf.PROTO_VALUE">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">PROTO_VALUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'google.protobuf.Value'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.protobuf.PROTO_VALUE"></a><a class="headerlink" href="#firebird.base.protobuf.PROTO_VALUE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of well-known VALUE protobuf message (for use with <a class="reference internal" href="#firebird.base.protobuf.create_message" title="firebird.base.protobuf.create_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_message()</span></code></a>)</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.protobuf.PROTO_LISTVALUE">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">PROTO_LISTVALUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'google.protobuf.ListValue'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.protobuf.PROTO_LISTVALUE"></a><a class="headerlink" href="#firebird.base.protobuf.PROTO_LISTVALUE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of well-known LISTVALUE protobuf message (for use with <a class="reference internal" href="#firebird.base.protobuf.create_message" title="firebird.base.protobuf.create_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_message()</span></code></a>)</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.base.protobuf.PROTO_FIELDMASK">
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">PROTO_FIELDMASK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'google.protobuf.FieldMask'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.base.protobuf.PROTO_FIELDMASK"></a><a class="headerlink" href="#firebird.base.protobuf.PROTO_FIELDMASK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of well-known FIELDMASK protobuf message (for use with <a class="reference internal" href="#firebird.base.protobuf.create_message" title="firebird.base.protobuf.create_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_message()</span></code></a>)</p>
+</dd></dl>
+</section>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Functions"></a><section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.register_decriptor">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">register_decriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_descriptor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#register_decriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.register_decriptor"></a><a class="headerlink" href="#firebird.base.protobuf.register_decriptor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">register_decriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_descriptor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#register_decriptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.register_decriptor"></a><a class="headerlink" href="#firebird.base.protobuf.register_decriptor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers enums and messages defined by protobuf file DESCRIPTOR.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -130,16 +184,15 @@ about protobuf messages or enum types, or to create message instances or enum va
 </dd>
 </dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.load_registered">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">load_registered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#load_registered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.load_registered"></a><a class="headerlink" href="#firebird.base.protobuf.load_registered" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">load_registered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#load_registered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.load_registered"></a><a class="headerlink" href="#firebird.base.protobuf.load_registered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load registered protobuf packages.</p>
 <p>Protobuf packages must register the pb2-file DESCRIPTOR in <code class="xref py py-obj docutils literal notranslate"><span class="pre">entry_points</span></code> section of
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">setup.cfg</span></code> file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Entry-point group name.</p>
+<dd class="field-odd"><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Entry-point group name.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>None</p>
@@ -160,83 +213,78 @@ about protobuf messages or enum types, or to create message instances or enum va
 </pre></div>
 </div>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.is_msg_registered">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">is_msg_registered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#is_msg_registered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.is_msg_registered"></a><a class="headerlink" href="#firebird.base.protobuf.is_msg_registered" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">is_msg_registered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#is_msg_registered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.is_msg_registered"></a><a class="headerlink" href="#firebird.base.protobuf.is_msg_registered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if specified <code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code> refers to registered protobuf message type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.is_enum_registered">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">is_enum_registered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#is_enum_registered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.is_enum_registered"></a><a class="headerlink" href="#firebird.base.protobuf.is_enum_registered" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">is_enum_registered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#is_enum_registered"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.is_enum_registered"></a><a class="headerlink" href="#firebird.base.protobuf.is_enum_registered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if specified <code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code> refers to registered protobuf enum type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.get_enum_type">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">get_enum_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#firebird.base.protobuf.ProtoEnumType" title="firebird.base.protobuf.ProtoEnumType"><span class="pre">ProtoEnumType</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#get_enum_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.get_enum_type"></a><a class="headerlink" href="#firebird.base.protobuf.get_enum_type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">get_enum_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#firebird.base.protobuf.ProtoEnumType" title="firebird.base.protobuf.ProtoEnumType"><span class="pre">ProtoEnumType</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#get_enum_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.get_enum_type"></a><a class="headerlink" href="#firebird.base.protobuf.get_enum_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns wrapper instance for protobuf enum type with specified <code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.10)"><strong>KeyError</strong></a> – When enum type is not registered.</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.11)"><strong>KeyError</strong></a> – When enum type is not registered.</p>
 </dd>
 <dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
+<dd class="field-even"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#firebird.base.protobuf.ProtoEnumType" title="firebird.base.protobuf.ProtoEnumType"><em>ProtoEnumType</em></a></p>
 </dd>
 </dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.get_enum_value_name">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">get_enum_value_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enum_type_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#get_enum_value_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.get_enum_value_name"></a><a class="headerlink" href="#firebird.base.protobuf.get_enum_value_name" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">get_enum_value_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enum_type_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#get_enum_value_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.get_enum_value_name"></a><a class="headerlink" href="#firebird.base.protobuf.get_enum_value_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns name for the enum value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>enum_type_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p></li>
+<li><p><strong>enum_type_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.create_message">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">create_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialized</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Message</span></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#create_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.create_message"></a><a class="headerlink" href="#firebird.base.protobuf.create_message" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">create_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialized</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Message</span></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#create_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.create_message"></a><a class="headerlink" href="#firebird.base.protobuf.create_message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns new protobuf message instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Fully qualified protobuf message name.</p></li>
-<li><p><strong>serialized</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><em>bytes</em></a><em>]</em>) – Serialized message.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Fully qualified protobuf message name.</p></li>
+<li><p><strong>serialized</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>]</em>) – Serialized message.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.10)"><strong>KeyError</strong></a> – When message type is not registered.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.11)"><strong>KeyError</strong></a> – When message type is not registered.</p></li>
 <li><p><strong>google.protobuf.message.DecodeError</strong> – When deserializations fails.</p></li>
 </ul>
 </dd>
@@ -245,45 +293,42 @@ about protobuf messages or enum types, or to create message instances or enum va
 </dd>
 </dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.get_enum_field_type">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">get_enum_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#get_enum_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.get_enum_field_type"></a><a class="headerlink" href="#firebird.base.protobuf.get_enum_field_type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">get_enum_field_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#get_enum_field_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.get_enum_field_type"></a><a class="headerlink" href="#firebird.base.protobuf.get_enum_field_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns name of enum type for message enum field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.10)"><strong>KeyError</strong></a> – When message does not have specified field.</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.11)"><strong>KeyError</strong></a> – When message does not have specified field.</p>
 </dd>
 <dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p>
+<dd class="field-even"><p><strong>field_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.struct2dict">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">struct2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Struct</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#struct2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.struct2dict"></a><a class="headerlink" href="#firebird.base.protobuf.struct2dict" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">struct2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Struct</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#struct2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.struct2dict"></a><a class="headerlink" href="#firebird.base.protobuf.struct2dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unpacks <code class="xref py py-obj docutils literal notranslate"><span class="pre">google.protobuf.Struct</span></code> message to Python dict value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>struct</strong> (<em>Struct</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a></p>
 </dd>
 </dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.protobuf.dict2struct">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">dict2struct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Struct</span></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#dict2struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.dict2struct"></a><a class="headerlink" href="#firebird.base.protobuf.dict2struct" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">dict2struct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Struct</span></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#dict2struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.protobuf.dict2struct"></a><a class="headerlink" href="#firebird.base.protobuf.dict2struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns dict packed into <code class="xref py py-obj docutils literal notranslate"><span class="pre">google.protobuf.Struct</span></code> message.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><em>Dict</em></a>) – </p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><em>Struct</em></p>
@@ -295,37 +340,36 @@ about protobuf messages or enum types, or to create message instances or enum va
 <h2>Data classes<a class="headerlink" href="#data-classes" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.protobuf.ProtoMessageType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">ProtoMessageType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoMessageType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.protobuf.ProtoMessageType"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoMessageType" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">ProtoMessageType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoMessageType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.protobuf.ProtoMessageType"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoMessageType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="types.html#firebird.base.types.Distinct" title="firebird.base.types.Distinct"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distinct</span></code></a></p>
 <p>Google protobuf message type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
-<li><p><strong>constructor</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a>) – </p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
+<li><p><strong>constructor</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a>) – </p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.protobuf.ProtoMessageType.get_key">
-<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoMessageType.get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.protobuf.ProtoMessageType.get_key"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoMessageType.get_key" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoMessageType.get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.protobuf.ProtoMessageType.get_key"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoMessageType.get_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns <a class="reference internal" href="#firebird.base.protobuf.ProtoMessageType.name" title="firebird.base.protobuf.ProtoMessageType.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.base.protobuf.ProtoMessageType.constructor">
-<span class="sig-name descname"><span class="pre">constructor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.protobuf.ProtoMessageType.constructor"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoMessageType.constructor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">constructor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.protobuf.ProtoMessageType.constructor"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoMessageType.constructor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.base.protobuf.ProtoMessageType.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.protobuf.ProtoMessageType.name"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoMessageType.name" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.protobuf.ProtoMessageType.name"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoMessageType.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 </dd></dl>
-<hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.protobuf.ProtoEnumType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.protobuf.</span></span><span class="sig-name descname"><span class="pre">ProtoEnumType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">EnumDescriptor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoEnumType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.protobuf.ProtoEnumType"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoEnumType" title="Permalink to this definition">¶</a></dt>
@@ -343,27 +387,27 @@ about protobuf messages or enum types, or to create message instances or enum va
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.protobuf.ProtoEnumType.get_key">
-<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoEnumType.get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.protobuf.ProtoEnumType.get_key"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoEnumType.get_key" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoEnumType.get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.protobuf.ProtoEnumType.get_key"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoEnumType.get_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns <a class="reference internal" href="#firebird.base.protobuf.ProtoEnumType.name" title="firebird.base.protobuf.ProtoEnumType.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.protobuf.ProtoEnumType.get_value_name">
-<span class="sig-name descname"><span class="pre">get_value_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoEnumType.get_value_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.protobuf.ProtoEnumType.get_value_name"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoEnumType.get_value_name" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_value_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/protobuf.html#ProtoEnumType.get_value_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.protobuf.ProtoEnumType.get_value_name"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoEnumType.get_value_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a string containing the name of an enum value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.10)"><strong>KeyError</strong></a> – If there is no value for specified name.</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.11)"><strong>KeyError</strong></a> – If there is no value for specified name.</p>
 </dd>
 <dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p>
+<dd class="field-even"><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -391,7 +435,7 @@ about protobuf messages or enum types, or to create message instances or enum va
 <dd></dd></dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.protobuf.ProtoEnumType.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.protobuf.ProtoEnumType.name"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoEnumType.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.protobuf.ProtoEnumType.name"></a><a class="headerlink" href="#firebird.base.protobuf.ProtoEnumType.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Full enum type name.</p>
 </dd></dl>
 </dd></dl>
@@ -407,7 +451,7 @@ about protobuf messages or enum types, or to create message instances or enum va
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
 </p>
 </div>
 </footer>

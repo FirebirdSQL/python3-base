@@ -282,43 +282,26 @@ The following program is an example of small but complex enough code that you ca
 
 Enums & Flags
 =============
-
 .. autoclass:: LogLevel
-
---------
-
 .. autoclass:: BindFlag
 
 Functions
 =========
-
 .. autofunction:: bind_logger
-
-----------
-
 .. autofunction:: get_logger
-
---------------
-
 .. autofunction:: get_logging_id
-
--------------------
-
 .. autofunction:: install_null_logger
 
 Logger adapter
 ==============
-
 .. autoclass:: FBLoggerAdapter
 
 Logging manager
 ===============
-
 .. autoclass:: LoggingManager
 
 Mixins
 ======
-
 .. autoclass:: LoggingIdMixin
 
 Globals
