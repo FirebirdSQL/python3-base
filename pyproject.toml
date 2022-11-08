@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "firebird-base"
-version = "1.4.3"
+version = "1.5.0"
 description = "Firebird base modules for Python"
 readme = "README.rst"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
 authors = [{ name = "Pavel Císař", email = "pcisar@users.sourceforge.net"}]
-keywords = ["Saturnin", "Firebird", "Butler", "Platform", "ZeroMQ"]
+keywords = ["Firebird"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -41,5 +41,4 @@ Source = "https://github.com/FirebirdSQL/python3-base"
 
 [tool.setuptools]
 zip-safe = true
-packages = ["firebird"]
 
