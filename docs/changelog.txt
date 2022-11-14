@@ -2,8 +2,8 @@
 Changelog
 #########
 
-Development Version 1.5.0 [unreleased]
-======================================
+Version 1.5.0
+=============
 
 * Move away from setup.cfg to pyproject.toml, new source tree layout.
 
