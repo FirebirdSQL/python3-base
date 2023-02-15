@@ -58,7 +58,7 @@ from inspect import signature, Signature, Parameter
 from enum import Enum, Flag
 import os
 from .config_pb2 import ConfigProto
-from .types import Error, MIME, ZMQAddress, PyExpr, PyCode, PyCallable, _decompose
+from .types import Error, MIME, ZMQAddress, PyExpr, PyCode, PyCallable
 from .strconv import get_convertor, convert_to_str, Convertor
 
 PROTO_CONFIG = 'firebird.base.ConfigProto'
@@ -84,6 +84,49 @@ def create_config(_cls: Type[Config], name: str) -> Config: # pragma: no cover
     """
     return _cls(name)
 
+# Next two functions are copied from stdlib enum module, as they were removed in Python 3.11
+
+def _decompose(flag, value):
+    """
+    Extract all members from the value.
+    """
+    # _decompose is only called if the value is not named
+    not_covered = value
+    negative = value < 0
+    # issue29167: wrap accesses to _value2member_map_ in a list to avoid race
+    #             conditions between iterating over it and having more pseudo-
+    #             members added to it
+    if negative:
+        # only check for named flags
+        flags_to_check = [
+                (m, v)
+                for v, m in list(flag._value2member_map_.items())
+                if m.name is not None
+                ]
+    else:
+        # check for named flags and powers-of-two flags
+        flags_to_check = [
+                (m, v)
+                for v, m in list(flag._value2member_map_.items())
+                if m.name is not None or _power_of_two(v)
+                ]
+    members = []
+    for member, member_value in flags_to_check:
+        if member_value and member_value & value == member_value:
+            members.append(member)
+            not_covered &= ~member_value
+    if not members and value in flag._value2member_map_:
+        members.append(flag._value2member_map_[value])
+    members.sort(key=lambda m: m._value_, reverse=True)
+    if len(members) > 1 and members[0].value == value:
+        # we have the breakdown, don't need the value member itself
+        members.pop(0)
+    return members, not_covered
+
+def _power_of_two(value):
+    if value < 1:
+        return False
+    return value == 2 ** (value.bit_length() - 1)
 
 class DirectoryScheme:
     """Class that provide paths to typically used application directories.
@@ -413,26 +456,30 @@ class Option(Generic[T], ABC):
                             f" not '{type(value).__name__}'")
     def _get_value_description(self) -> str:
         return f'{self.datatype.__name__}\n'
-    def _get_config_lines(self) -> List[str]:
+    def _get_config_lines(self, plain: bool=False) -> List[str]:
         """Returns list of strings containing text lines suitable for use in configuration
         file processed with `~configparser.ConfigParser`.
 
         Text lines with configuration start with comment marker `;` and end with newline.
+        
+        Arguments:
+          plain: When True, it outputs only the option value. When False, it includes also
+                 option description and other helpful information.
 
         Note:
            This function is intended for internal use. To get string describing current
            configuration that is suitable for configuration files, use `get_config` method.
         """
-        hdr = f"{self.name} [{self.datatype.__name__}][{'REQUIRED' if self.required else 'optional'}]"
         lines = []
-        if self.required:
-            lines.append("; REQUIRED option.\n")
-        for line in self.description.strip().splitlines():
-            lines.append(f"; {line}\n")
-        first = True
-        for line in self._get_value_description().splitlines():
-            lines.append(f"; {'Type: ' if first else ''}{line}\n")
-            first = False
+        if not plain:
+            if self.required:
+                lines.append("; REQUIRED option.\n")
+            for line in self.description.strip().splitlines():
+                lines.append(f"; {line}\n")
+            first = True
+            for line in self._get_value_description().splitlines():
+                lines.append(f"; {'Type: ' if first else ''}{line}\n")
+                first = False
         value = self.get_value()
         nodef = ';' if value == self.default else ''
         value = '<UNDEFINED>' if value is None else self.get_formatted()
@@ -467,11 +514,15 @@ class Option(Generic[T], ABC):
         """
         if self.required and self.get_value() is None:
             raise Error(f"Missing value for required option '{self.name}'")
-    def get_config(self) -> str:
+    def get_config(self, *, plain: bool=False) -> str:
         """Returns string containing text lines suitable for use in configuration file
         processed with `~configparser.ConfigParser`.
+        
+        Arguments:
+          plain: When True, it outputs only the option value. When False, it includes also
+                 option description and other helpful information.
         """
-        return ''.join(self._get_config_lines())
+        return ''.join(self._get_config_lines(plain=plain))
     def has_value(self) -> bool:
         """Returns True if option value is not None.
         """
@@ -585,18 +636,25 @@ class Config:
         Note:  If description is not provided on instance creation, class doc string.
         """
         return '' if self._description is None else self._description
-    def get_config(self) -> str:
+    def get_config(self, *, plain: bool=False) -> str:
         """Returns string containing text lines suitable for use in configuration file
         processed with `~configparser.ConfigParser`.
+
+        Arguments:
+          plain: When True, it outputs only the option values. When False, it includes also
+                 option descriptions and other helpful information.
         """
         lines = [f'[{self.name}]\n', ';\n']
-        for line in self.get_description().strip().splitlines():
-            lines.append(f"; {line}\n")
+        if not plain:
+            for line in self.get_description().strip().splitlines():
+                lines.append(f"; {line}\n")
         for option in self.options:
-            lines.append('\n')
-            lines.append(option.get_config())
+            if not plain:
+                lines.append('\n')
+            lines.append(option.get_config(plain=plain))
         for config in self.configs:
-            lines.append('\n')
+            if not plain:
+                lines.append('\n')
             lines.append(config.get_config())
         return ''.join(lines)
     def load_config(self, config: ConfigParser, section: str=None) -> None:
