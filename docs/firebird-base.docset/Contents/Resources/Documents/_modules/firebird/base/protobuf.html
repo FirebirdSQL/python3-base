@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>firebird.base.protobuf &#8212; Firebird-base 1.4.2 documentation</title>
+    <title>firebird.base.protobuf &#8212; Firebird-base 1.6.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -39,7 +39,7 @@
 
         <a class="brand" href="../../../index.html">
           Firebird-base</a>
-        <span class="navbar-text pull-left"><b>1.4.2</b></span>
+        <span class="navbar-text pull-left"><b>1.6.0</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -307,20 +307,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">get_enum_type</span><span class="p">(</span><span class="n">enum_type_name</span><span class="p">)</span><span class="o">.</span><span class="n">get_value_name</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="register_decriptor"><a class="viewcode-back" href="../../../protobuf.html#firebird.base.protobuf.register_decriptor">[docs]</a><span class="k">def</span> <span class="nf">register_decriptor</span><span class="p">(</span><span class="n">file_descriptor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Registers enums and messages defined by protobuf file DESCRIPTOR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">msg_desc</span> <span class="ow">in</span> <span class="n">file_descriptor</span><span class="o">.</span><span class="n">message_types_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">_msgreg</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">ProtoMessageType</span><span class="p">(</span><span class="n">msg_desc</span><span class="o">.</span><span class="n">full_name</span><span class="p">,</span> <span class="n">msg_desc</span><span class="o">.</span><span class="n">_concrete_class</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">msg_desc</span><span class="o">.</span><span class="n">full_name</span> <span class="ow">in</span> <span class="n">_msgreg</span><span class="p">:</span>
+            <span class="n">_msgreg</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">ProtoMessageType</span><span class="p">(</span><span class="n">msg_desc</span><span class="o">.</span><span class="n">full_name</span><span class="p">,</span> <span class="n">msg_desc</span><span class="o">.</span><span class="n">_concrete_class</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">enum_desc</span> <span class="ow">in</span> <span class="n">file_descriptor</span><span class="o">.</span><span class="n">enum_types_by_name</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="n">_enumreg</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">ProtoEnumType</span><span class="p">(</span><span class="n">enum_desc</span><span class="p">))</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">enum_desc</span><span class="o">.</span><span class="n">full_name</span> <span class="ow">in</span> <span class="n">_enumreg</span><span class="p">:</span>
+            <span class="n">_enumreg</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">ProtoEnumType</span><span class="p">(</span><span class="n">enum_desc</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="load_registered"><a class="viewcode-back" href="../../../protobuf.html#firebird.base.protobuf.load_registered">[docs]</a><span class="k">def</span> <span class="nf">load_registered</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
     <span class="sd">&quot;&quot;&quot;Load registered protobuf packages.</span>
 
 <span class="sd">    Protobuf packages must register the pb2-file DESCRIPTOR in `entry_points` section of</span>
-<span class="sd">    `setup.cfg` file.</span>
+<span class="sd">    `setup.cfg` or `pyproject.toml` file.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        group: Entry-point group name.</span>
@@ -336,13 +337,19 @@
 <span class="sd">               firebird.base.lib_b = firebird.base.lib_b_pb2:DESCRIPTOR</span>
 <span class="sd">               firebird.base.lib_c = firebird.base.lib_c_pb2:DESCRIPTOR</span>
 
+<span class="sd">           # pyproject.toml</span>
+
+<span class="sd">           [project.entry-points.&quot;firebird.base.protobuf&quot;]</span>
+<span class="sd">           &quot;firebird.base.lib_a&quot; = &quot;firebird.base.lib_a_pb2:DESCRIPTOR&quot;</span>
+<span class="sd">           &quot;firebird.base.lib_b&quot; = &quot;firebird.base.lib_b_pb2:DESCRIPTOR&quot;</span>
+<span class="sd">           &quot;firebird.base.lib_c&quot; = &quot;firebird.base.lib_c_pb2:DESCRIPTOR&quot;</span>
+
 <span class="sd">           # will be loaded with:</span>
 
 <span class="sd">           load_registered(&#39;firebird.base.protobuf&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">desc</span> <span class="ow">in</span> <span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">load</span><span class="p">()</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entry_points</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="p">[])):</span>
         <span class="n">register_decriptor</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span></div>
-
 
 <span class="k">for</span> <span class="n">well_known</span> <span class="ow">in</span> <span class="p">[</span><span class="n">any_pb2</span><span class="p">,</span> <span class="n">struct_pb2</span><span class="p">,</span> <span class="n">duration_pb2</span><span class="p">,</span> <span class="n">empty_pb2</span><span class="p">,</span> <span class="n">timestamp_pb2</span><span class="p">,</span> <span class="n">field_mask_pb2</span><span class="p">]:</span>
     <span class="n">register_decriptor</span><span class="p">(</span><span class="n">well_known</span><span class="o">.</span><span class="n">DESCRIPTOR</span><span class="p">)</span>
@@ -360,8 +367,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+        &copy; Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

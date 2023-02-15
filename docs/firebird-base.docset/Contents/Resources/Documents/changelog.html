@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>Changelog — Firebird-base 1.4.3 documentation</title>
+<title>Changelog — Firebird-base 1.6.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.4.3</b></span>
+<span class="navbar-text pull-left"><b>1.6.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -55,6 +55,8 @@
 <a data-target="#" data-toggle="dropdown" href="#" id="dLabelLocalToc" role="button">Page <b class="caret"></b></a>
 <ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#version-1-6-0">Version 1.6.0</a></li>
+<li><a class="reference internal" href="#version-1-5-0">Version 1.5.0</a></li>
 <li><a class="reference internal" href="#version-1-4-3">Version 1.4.3</a></li>
 <li><a class="reference internal" href="#version-1-4-2">Version 1.4.2</a></li>
 <li><a class="reference internal" href="#version-1-4-1">Version 1.4.1</a></li>
@@ -89,6 +91,34 @@
 <div class="body span12 content" role="main">
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Changelog"></a><section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h1>
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Version 1.6.0"></a><section id="version-1-6-0">
+<h2>Version 1.6.0<a class="headerlink" href="#version-1-6-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="protobuf.html#module-firebird.base.protobuf" title="firebird.base.protobuf: Registry for Google Protocol Buffer messages and enums"><code class="xref py py-obj docutils literal notranslate"><span class="pre">protobuf</span></code></a> module:</p>
+<ul>
+<li><p>Registration of already registered protobuf registration is now ignored instead
+raising exception.</p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="config.html#module-firebird.base.config" title="firebird.base.config: Configuration definitions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a> module:</p>
+<ul>
+<li><p><a class="reference internal" href="config.html#firebird.base.config.Config.get_config" title="firebird.base.config.Config.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Config.get_config()</span></code></a> and <a class="reference internal" href="config.html#firebird.base.config.Option.get_config" title="firebird.base.config.Option.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Option.get_config()</span></code></a> now provides <code class="xref py py-obj docutils literal notranslate"><span class="pre">plain</span></code> bool argument
+to return configuration text without comments. Deafult is False.</p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="trace.html#module-firebird.base.trace" title="firebird.base.trace: Trace/audit for class instances"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace</span></code></a> module:</p>
+<ul>
+<li><p>Fixed bug in <a class="reference internal" href="trace.html#firebird.base.trace.TraceManager.load_config" title="firebird.base.trace.TraceManager.load_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraceManager.load_config()</span></code></a>.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Version 1.5.0"></a><section id="version-1-5-0">
+<h2>Version 1.5.0<a class="headerlink" href="#version-1-5-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Move away from setup.cfg to pyproject.toml, new source tree layout.</p></li>
+</ul>
+</section>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Version 1.4.3"></a><section id="version-1-4-3">
 <h2>Version 1.4.3<a class="headerlink" href="#version-1-4-3" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
@@ -322,7 +352,7 @@ classes <a class="reference internal" href="trace.html#firebird.base.trace.BaseT
 <a href="#">Back to top</a>
 </p>
 <p>
-        © Copyright 2020-2022, The Firebird Project.<br/>
+        © Copyright 2020-2023, The Firebird Project.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
 </p>
 </div>

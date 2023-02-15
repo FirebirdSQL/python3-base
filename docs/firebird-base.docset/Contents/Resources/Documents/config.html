@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>config - Configuration definitions — Firebird-base 1.4.3 documentation</title>
+<title>config - Configuration definitions — Firebird-base 1.6.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.4.3</b></span>
+<span class="navbar-text pull-left"><b>1.6.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -1027,12 +1027,16 @@ configuration file (see <a class="reference internal" href="#firebird.base.confi
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.config.Config.get_config">
-<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/config.html#Config.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.config.Config.get_config"></a><a class="headerlink" href="#firebird.base.config.Config.get_config" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/config.html#Config.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.config.Config.get_config"></a><a class="headerlink" href="#firebird.base.config.Config.get_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns string containing text lines suitable for use in configuration file
 processed with <a class="reference external" href="https://docs.python.org/3/library/configparser.html#configparser.ConfigParser" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConfigParser</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>plain</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – When True, it outputs only the option values. When False, it includes also
+option descriptions and other helpful information.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1163,20 +1167,24 @@ attributes of <a class="reference internal" href="#firebird.base.config.Config" 
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.config.Option._get_config_lines">
-<span class="sig-name descname"><span class="pre">_get_config_lines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/firebird/base/config.html#Option._get_config_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.config.Option._get_config_lines"></a><a class="headerlink" href="#firebird.base.config.Option._get_config_lines" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_get_config_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/firebird/base/config.html#Option._get_config_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.config.Option._get_config_lines"></a><a class="headerlink" href="#firebird.base.config.Option._get_config_lines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns list of strings containing text lines suitable for use in configuration
 file processed with <a class="reference external" href="https://docs.python.org/3/library/configparser.html#configparser.ConfigParser" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConfigParser</span></code></a>.</p>
 <p>Text lines with configuration start with comment marker <code class="xref py py-obj docutils literal notranslate"><span class="pre">;</span></code> and end with newline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>plain</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – When True, it outputs only the option value. When False, it includes also
+option description and other helpful information.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This function is intended for internal use. To get string describing current
 configuration that is suitable for configuration files, use <a class="reference internal" href="#firebird.base.config.Option.get_config" title="firebird.base.config.Option.get_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config</span></code></a> method.</p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><em>List</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
-</dd>
-</dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.config.Option.clear">
@@ -1203,12 +1211,16 @@ configuration that is suitable for configuration files, use <a class="reference 
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.config.Option.get_config">
-<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/config.html#Option.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.config.Option.get_config"></a><a class="headerlink" href="#firebird.base.config.Option.get_config" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/config.html#Option.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.config.Option.get_config"></a><a class="headerlink" href="#firebird.base.config.Option.get_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns string containing text lines suitable for use in configuration file
 processed with <a class="reference external" href="https://docs.python.org/3/library/configparser.html#configparser.ConfigParser" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConfigParser</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>plain</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – When True, it outputs only the option value. When False, it includes also
+option description and other helpful information.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -3954,7 +3966,7 @@ break as separator, otherwise it uses comma as separator.</p>
 <a href="#">Back to top</a>
 </p>
 <p>
-        © Copyright 2020-2022, The Firebird Project.<br/>
+        © Copyright 2020-2023, The Firebird Project.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
 </p>
 </div>

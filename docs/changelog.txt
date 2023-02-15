@@ -2,6 +2,24 @@
 Changelog
 #########
 
+Version 1.6.0
+=============
+
+* `~firebird.base.protobuf` module:
+
+  - Registration of already registered protobuf registration is now ignored instead
+    raising exception.
+
+* `~firebird.base.config` module:
+
+  - `.Config.get_config()` and `.Option.get_config()` now provides `plain` bool argument
+    to return configuration text without comments. Deafult is False.
+
+* `~firebird.base.trace` module:
+
+  - Fixed bug in `.TraceManager.load_config()`.
+
+
 Version 1.5.0
 =============
 
