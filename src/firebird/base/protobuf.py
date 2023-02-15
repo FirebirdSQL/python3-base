@@ -204,20 +204,21 @@ def get_enum_value_name(enum_type_name: str, value: int) -> str:
     """
     return get_enum_type(enum_type_name).get_value_name(value)
 
-
 def register_decriptor(file_descriptor) -> None:
     """Registers enums and messages defined by protobuf file DESCRIPTOR.
     """
     for msg_desc in file_descriptor.message_types_by_name.values():
-        _msgreg.store(ProtoMessageType(msg_desc.full_name, msg_desc._concrete_class))
+        if not msg_desc.full_name in _msgreg:
+            _msgreg.store(ProtoMessageType(msg_desc.full_name, msg_desc._concrete_class))
     for enum_desc in file_descriptor.enum_types_by_name.values():
-        _enumreg.store(ProtoEnumType(enum_desc))
+        if not enum_desc.full_name in _enumreg:
+            _enumreg.store(ProtoEnumType(enum_desc))
 
 def load_registered(group: str) -> None: # pragma: no cover
     """Load registered protobuf packages.
 
     Protobuf packages must register the pb2-file DESCRIPTOR in `entry_points` section of
-    `setup.cfg` file.
+    `setup.cfg` or `pyproject.toml` file.
 
     Arguments:
         group: Entry-point group name.
@@ -233,13 +234,19 @@ def load_registered(group: str) -> None: # pragma: no cover
                firebird.base.lib_b = firebird.base.lib_b_pb2:DESCRIPTOR
                firebird.base.lib_c = firebird.base.lib_c_pb2:DESCRIPTOR
 
+           # pyproject.toml
+
+           [project.entry-points."firebird.base.protobuf"]
+           "firebird.base.lib_a" = "firebird.base.lib_a_pb2:DESCRIPTOR"
+           "firebird.base.lib_b" = "firebird.base.lib_b_pb2:DESCRIPTOR"
+           "firebird.base.lib_c" = "firebird.base.lib_c_pb2:DESCRIPTOR"
+
            # will be loaded with:
 
            load_registered('firebird.base.protobuf')
     """
     for desc in (entry.load() for entry in entry_points().get(group, [])):
         register_decriptor(desc)
-
 
 for well_known in [any_pb2, struct_pb2, duration_pb2, empty_pb2, timestamp_pb2, field_mask_pb2]:
     register_decriptor(well_known.DESCRIPTOR)
