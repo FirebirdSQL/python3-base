@@ -460,14 +460,14 @@ class TraceManager:
                 if (len(items) == 1) and (items[0] == '*'):
                     items = [i for i in dir(cls) if not i.startswith('_') and isfunction(getattr(cls, i))]
                 for item in items:
-                    self.add_trace(cls, item, traced, *[], **cls_kwargs)
+                    self.add_trace(cls, item, *[], **cls_kwargs)
             if (items := cls_cfg.special.value) is not None:
                 for mcfg in items:
                     method = mcfg.method.value
                     kwargs = {}
                     kwargs.update(cls_kwargs)
                     kwargs.update(build_kwargs(mcfg))
-                    self.add_trace(cls, method, traced, *[], **kwargs)
+                    self.add_trace(cls, method, *[], **kwargs)
         def with_name(name: str, obj: Any) -> bool:
             return f'{obj.cls.__module__}.{obj.cls.__name__}' == name
 
