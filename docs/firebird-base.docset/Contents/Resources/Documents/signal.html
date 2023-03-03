@@ -3,17 +3,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>signal - Callback system based on Signals and Slots, and “Delphi events” — Firebird-base 1.6.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>signal - Callback system based on Signals and Slots, and “Delphi events” — Firebird-base 1.6.1 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
-<link href="_static/fb-favicon.png" rel="shortcut icon"/>
+<link href="_static/fb-favicon.png" rel="icon"/>
 <link href="genindex.html" rel="index" title="Index"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="changelog.html" rel="next" title="Changelog"/>
@@ -38,7 +35,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.6.0</b></span>
+<span class="navbar-text pull-left"><b>1.6.1</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -208,8 +205,8 @@ To disconnect the callable from event, simply assign None to the event.</p>
     <span class="k">def</span> <span class="nf">on_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Component</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="s2">"Documentation for event"</span>
     <span class="k">def</span> <span class="nf">showtime</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.on_init handler is </span><span class="si">{</span><span class="s1">'SET'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_init</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="k">else</span> <span class="s1">'NOT SET'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.on_exit handler is </span><span class="si">{</span><span class="s1">'SET'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_exit</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="k">else</span> <span class="s1">'NOT SET'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.on_init handler is </span><span class="si">{</span><span class="s1">'SET'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">on_init</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'NOT SET'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.on_exit handler is </span><span class="si">{</span><span class="s1">'SET'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">on_exit</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'NOT SET'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">"Event handler returned"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'argument'</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> does something..."</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">on_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -271,7 +268,7 @@ To disconnect the callable from event, simply assign None to the event.</p>
 <p>Slots are callables that are called when signal is emitted (the return value is ignored).
 They could be functions, instance or class methods, partials and lambda functions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>signature</strong> (<em>Signature</em>) – </p>
 </dd>
 </dl>
@@ -279,7 +276,7 @@ They could be functions, instance or class methods, partials and lambda function
 <dt class="sig sig-object py" id="firebird.base.signal.Signal.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.11)"><span class="pre">Signature</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.__init__"></a><a class="headerlink" href="#firebird.base.signal.Signal.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>signature</strong> (<a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.Signature" title="(in Python v3.11)"><em>Signature</em></a>) – Signature for slots.</p>
 </dd>
 </dl>
@@ -305,7 +302,7 @@ by name will not mask-out parameter from signature introspection).</p>
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.clear"></a><a class="headerlink" href="#firebird.base.signal.Signal.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clears the signal of all connected slots.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -315,13 +312,13 @@ by name will not mask-out parameter from signature introspection).</p>
 <span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.connect"></a><a class="headerlink" href="#firebird.base.signal.Signal.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connects the signal to callable that will receive the signal when emitted.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>slot</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a>) – Callable with signature that match the signature defined for signal.</p>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – When callable signature does not match the signature of signal.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -331,7 +328,7 @@ by name will not mask-out parameter from signature introspection).</p>
 <span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#Signal.disconnect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal.Signal.disconnect"></a><a class="headerlink" href="#firebird.base.signal.Signal.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disconnects the slot from the signal.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -342,7 +339,7 @@ by name will not mask-out parameter from signature introspection).</p>
 <dd><p>Calls all the connected slots with the provided args and kwargs unless block
 is activated.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -356,11 +353,11 @@ is activated.</p>
 <hr class="docutils"/>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.signal._EventSocket">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">_EventSocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal._EventSocket"></a><a class="headerlink" href="#firebird.base.signal._EventSocket" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.signal.</span></span><span class="sig-name descname"><span class="pre">_EventSocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.signal._EventSocket"></a><a class="headerlink" href="#firebird.base.signal._EventSocket" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Internal EventSocket handler.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>slot</strong> (<em>Callable</em>) – </p>
 </dd>
 </dl>
@@ -369,7 +366,7 @@ is activated.</p>
 <span class="sig-name descname"><span class="pre">is_set</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/base/signal.html#_EventSocket.is_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.signal._EventSocket.is_set"></a><a class="headerlink" href="#firebird.base.signal._EventSocket.is_set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if slot is assigned to eventsocket.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
 </dd>
 </dl>
@@ -427,7 +424,7 @@ defined on property.</p>
 </p>
 <p>
         © Copyright 2020-2023, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
 </p>
 </div>
 </footer>

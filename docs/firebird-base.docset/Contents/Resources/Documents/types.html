@@ -3,17 +3,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>types - Common data types — Firebird-base 1.6.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>types - Common data types — Firebird-base 1.6.1 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
-<link href="_static/fb-favicon.png" rel="shortcut icon"/>
+<link href="_static/fb-favicon.png" rel="icon"/>
 <link href="genindex.html" rel="index" title="Index"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="collections.html" rel="next" title="collections - Various collection types"/>
@@ -38,7 +35,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.6.0</b></span>
+<span class="navbar-text pull-left"><b>1.6.1</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -294,7 +291,7 @@ the same name are singletons.</p>
 <dt class="sig sig-object py" id="firebird.base.types.Sentinel.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Sentinel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.Sentinel.__init__"></a><a class="headerlink" href="#firebird.base.types.Sentinel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Sentinel name.</p>
 </dd>
 </dl>
@@ -407,7 +404,7 @@ function. If the key is not suitable argument for <a class="reference external" 
 own <code class="xref py py-obj docutils literal notranslate"><span class="pre">__hash__</span></code> implementation as well!</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.11)"><em>Hashable</em></a></p>
 </dd>
 </dl>
@@ -430,7 +427,7 @@ own <code class="xref py py-obj docutils literal notranslate"><span class="pre">
 returned by instance <a class="reference internal" href="#firebird.base.types.Distinct.get_key" title="firebird.base.types.Distinct.get_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Distinct.get_key()</span></code></a>!</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.11)"><em>Hashable</em></a></p>
 </dd>
 </dl>
@@ -543,10 +540,10 @@ externally to typed strings.</p>
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is valid ZMQ endpoint address, has
 additional R/O properties and meaningful <code class="xref py py-obj docutils literal notranslate"><span class="pre">repr()</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – When string value passed to constructor is not a valid ZMQ endpoint address.</p>
 </dd>
-<dt class="field-even">Parameters</dt>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>value</strong> (<em>AnyStr</em>) – </p>
 </dd>
 </dl>
@@ -575,7 +572,7 @@ additional R/O properties and meaningful <code class="xref py py-obj docutils li
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is valid MIME type specification, has
 additional R/O properties and meaningful <code class="xref py py-obj docutils literal notranslate"><span class="pre">repr()</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<em>AnyStr</em>) – </p>
 </dd>
 </dl>
@@ -589,7 +586,7 @@ additional R/O properties and meaningful <code class="xref py py-obj docutils li
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mime_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.MIME.mime_type"></a><a class="headerlink" href="#firebird.base.types.MIME.mime_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>&lt;type&gt;/&lt;subtype&gt;.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>MIME type specification</p>
 </dd>
 </dl>
@@ -619,25 +616,25 @@ additional R/O properties and meaningful <code class="xref py py-obj docutils li
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is a valid Python expression, and provides
 direct access to compiled code.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SyntaxError" title="(in Python v3.11)"><strong>SyntaxError</strong></a> – When string value is not a valid Python expression.</p>
 </dd>
-<dt class="field-even">Parameters</dt>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.types.PyExpr.get_callable">
-<span class="sig-name descname"><span class="pre">get_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/types.html#PyExpr.get_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.PyExpr.get_callable"></a><a class="headerlink" href="#firebird.base.types.PyExpr.get_callable" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/types.html#PyExpr.get_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.types.PyExpr.get_callable"></a><a class="headerlink" href="#firebird.base.types.PyExpr.get_callable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns expression as callable function ready for execution.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arguments</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – String with arguments (names separated by coma) for returned function.</p></li>
-<li><p><strong>namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>]</em><em>]</em>) – Dictionary with namespace elements available for expression.</p></li>
+<li><p><strong>namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a><em>] </em><em>| </em><em>None</em>) – Dictionary with namespace elements available for expression.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><em>Callable</em></a></p>
 </dd>
 </dl>
@@ -645,7 +642,7 @@ direct access to compiled code.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.PyExpr.expr">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">expr</span></span><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.PyExpr.expr"></a><a class="headerlink" href="#firebird.base.types.PyExpr.expr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expression code ready to be appased to <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></a>.</p>
+<dd><p>Expression code ready to be pased to <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></a>.</p>
 </dd></dl>
 </dd></dl>
 <hr class="docutils"/>
@@ -657,17 +654,17 @@ direct access to compiled code.</p>
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is a valid Python code block, and provides
 direct access to compiled code.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SyntaxError" title="(in Python v3.11)"><strong>SyntaxError</strong></a> – When string value is not a valid Python code block.</p>
 </dd>
-<dt class="field-even">Parameters</dt>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="firebird.base.types.PyCode.code">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">code</span></span><a class="dashAnchor" name="//apple_ref/cpp/Property/firebird.base.types.PyCode.code"></a><a class="headerlink" href="#firebird.base.types.PyCode.code" title="Permalink to this definition">¶</a></dt>
-<dd><p>Python code ready to be appased to <a class="reference external" href="https://docs.python.org/3/library/functions.html#exec" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exec</span></code></a>.</p>
+<dd><p>Python code ready to be pased to <a class="reference external" href="https://docs.python.org/3/library/functions.html#exec" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exec</span></code></a>.</p>
 </dd></dl>
 </dd></dl>
 <hr class="docutils"/>
@@ -679,13 +676,13 @@ direct access to compiled code.</p>
 <p>It behaves like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, but checks that value is a valid Python callable (function of class
 definition), and acts like a callable (i.e. you can directly call the PyCallable value).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – When string value does not contains the function or class definition.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SyntaxError" title="(in Python v3.11)"><strong>SyntaxError</strong></a> – When string value is not a valid Python callable.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Parameters</dt>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p>
 </dd>
 </dl>
@@ -726,7 +723,8 @@ and stored in cache for later use.</p>
 <dt class="sig sig-object py" id="firebird.base.types.Conjunctive">
 <span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">Conjunctive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Conjunctive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.types.Conjunctive"></a><a class="headerlink" href="#firebird.base.types.Conjunctive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a metaclass that is conjunctive descendant of all metaclasses used by parent
-classes.</p>
+classes. It’s necessary to create a class with multiple inheritance, where multiple
+parent classes use different metaclasses.</p>
 <p class="rubric">Example</p>
 <p>class A(type): pass</p>
 <p>class B(type): pass</p>
@@ -742,10 +740,10 @@ classes.</p>
 <span class="sig-prename descclassname"><span class="pre">firebird.base.types.</span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/types.html#load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.types.load"></a><a class="headerlink" href="#firebird.base.types.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return object from module. Module is imported if necessary.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>spec</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Object specification in format <code class="xref py py-obj docutils literal notranslate"><span class="pre">module[.submodule...]:object_name[.object_name...]</span></code></p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a></p>
 </dd>
 </dl>
@@ -762,7 +760,7 @@ classes.</p>
 </p>
 <p>
         © Copyright 2020-2023, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
 </p>
 </div>
 </footer>

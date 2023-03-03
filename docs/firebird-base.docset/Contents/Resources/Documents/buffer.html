@@ -3,17 +3,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>buffer - Memory buffer manager — Firebird-base 1.6.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>buffer - Memory buffer manager — Firebird-base 1.6.1 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
-<link href="_static/fb-favicon.png" rel="shortcut icon"/>
+<link href="_static/fb-favicon.png" rel="icon"/>
 <link href="genindex.html" rel="index" title="Index"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="hooks.html" rel="next" title="hooks - Hook manager"/>
@@ -38,7 +35,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.6.0</b></span>
+<span class="navbar-text pull-left"><b>1.6.1</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -143,11 +140,11 @@ data of various data type.</p>
 <h2>MemoryBuffer<a class="headerlink" href="#memorybuffer" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.base.buffer.MemoryBuffer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.buffer.</span></span><span class="sig-name descname"><span class="pre">MemoryBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">init:</span> <span class="pre">~typing.Union[int,</span> <span class="pre">bytes],</span> <span class="pre">size:</span> <span class="pre">~typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">*,</span> <span class="pre">factory:</span> <span class="pre">~typing.Type[~firebird.base.buffer.BufferFactory]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'firebird.base.buffer.BytesBufferFactory'&gt;,</span> <span class="pre">eof_marker:</span> <span class="pre">~typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">max_size:</span> <span class="pre">~typing.Union[int,</span> <span class="pre">~firebird.base.types.Sentinel]</span> <span class="pre">=</span> <span class="pre">Sentinel('UNLIMITED'),</span> <span class="pre">byteorder:</span> <span class="pre">~firebird.base.types.ByteOrder</span> <span class="pre">=</span> <span class="pre">ByteOrder.LITTLE</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.buffer.MemoryBuffer"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.base.buffer.</span></span><span class="sig-name descname"><span class="pre">MemoryBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factory:</span> <span class="pre">~typing.Type[~firebird.base.buffer.BufferFactory]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'firebird.base.buffer.BytesBufferFactory'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eof_marker:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">~firebird.base.types.Sentinel</span> <span class="pre">=</span> <span class="pre">Sentinel('UNLIMITED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder:</span> <span class="pre">~firebird.base.types.ByteOrder</span> <span class="pre">=</span> <span class="pre">ByteOrder.LITTLE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.base.buffer.MemoryBuffer"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Generic memory buffer manager.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>init</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>]</em>) – </p></li>
 <li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
@@ -160,16 +157,16 @@ data of various data type.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.buffer.MemoryBuffer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">init:</span> <span class="pre">~typing.Union[int,</span> <span class="pre">bytes],</span> <span class="pre">size:</span> <span class="pre">~typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">*,</span> <span class="pre">factory:</span> <span class="pre">~typing.Type[~firebird.base.buffer.BufferFactory]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'firebird.base.buffer.BytesBufferFactory'&gt;,</span> <span class="pre">eof_marker:</span> <span class="pre">~typing.Optional[int]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">max_size:</span> <span class="pre">~typing.Union[int,</span> <span class="pre">~firebird.base.types.Sentinel]</span> <span class="pre">=</span> <span class="pre">Sentinel('UNLIMITED'),</span> <span class="pre">byteorder:</span> <span class="pre">~firebird.base.types.ByteOrder</span> <span class="pre">=</span> <span class="pre">ByteOrder.LITTLE</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.__init__"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factory:</span> <span class="pre">~typing.Type[~firebird.base.buffer.BufferFactory]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'firebird.base.buffer.BytesBufferFactory'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eof_marker:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_size:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">~firebird.base.types.Sentinel</span> <span class="pre">=</span> <span class="pre">Sentinel('UNLIMITED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder:</span> <span class="pre">~firebird.base.types.ByteOrder</span> <span class="pre">=</span> <span class="pre">ByteOrder.LITTLE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.__init__"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>init</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>]</em>) – Must be an integer which specifies the size of the array, or a <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> object
+<li><p><strong>init</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a>) – Must be an integer which specifies the size of the array, or a <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> object
 which will be used to initialize the array items.</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – Size of the array. The argument value is used only when <code class="xref py py-obj docutils literal notranslate"><span class="pre">init</span></code> is a <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> object.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – Size of the array. The argument value is used only when <code class="xref py py-obj docutils literal notranslate"><span class="pre">init</span></code> is a <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> object.</p></li>
 <li><p><strong>factory</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><em>Type</em></a><em>[</em><a class="reference internal" href="#firebird.base.buffer.BufferFactory" title="firebird.base.buffer.BufferFactory"><em>BufferFactory</em></a><em>]</em>) – Factory object used to create/resize the internal memory buffer.</p></li>
-<li><p><strong>eof_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – Value that indicates the end of data. Could be None.</p></li>
-<li><p><strong>max_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference internal" href="types.html#firebird.base.types.Sentinel" title="firebird.base.types.Sentinel"><em>Sentinel</em></a><em>]</em>) – If specified, the buffer couldn’t grow beyond specified number of bytes.</p></li>
+<li><p><strong>eof_marker</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – Value that indicates the end of data. Could be None.</p></li>
+<li><p><strong>max_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference internal" href="types.html#firebird.base.types.Sentinel" title="firebird.base.types.Sentinel"><em>Sentinel</em></a>) – If specified, the buffer couldn’t grow beyond specified number of bytes.</p></li>
 <li><p><strong>byteorder</strong> (<a class="reference internal" href="types.html#firebird.base.types.ByteOrder" title="firebird.base.types.ByteOrder"><em>ByteOrder</em></a>) – The byte order used to read/write numbers.</p></li>
 </ul>
 </dd>
@@ -180,7 +177,7 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.clear"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fills the buffer with zeros and resets the position in buffer to zero.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -191,7 +188,7 @@ which will be used to initialize the array items.</p></li>
 <dd><p>Return True when positioned past the end of buffer or on <a class="reference internal" href="#firebird.base.buffer.MemoryBuffer.eof_marker" title="firebird.base.buffer.MemoryBuffer.eof_marker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eof_marker</span></code></a>
 (if defined).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
 </dd>
 </dl>
@@ -201,10 +198,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads specified number of bytes, or all remaining data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)">bytes</a></p>
 </dd>
 </dl>
@@ -214,10 +211,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_bigint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_bigint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_bigint"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_bigint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read 8 byte number (c_ulonglong).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>signed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -227,10 +224,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_byte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_byte"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_byte"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_byte" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read 1 byte number (c_ubyte).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>signed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -240,7 +237,7 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_bytes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_bytes"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read content of binary cluster (2 bytes data length followed by data).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)">bytes</a></p>
 </dd>
 </dl>
@@ -250,10 +247,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_int"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_int" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read 4 byte number (c_uint).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>signed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -263,10 +260,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_number"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read number with specified size in bytes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -276,13 +273,13 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_pascal_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_pascal_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_pascal_string"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_pascal_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read Pascal string (1 byte length followed by string data).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
@@ -292,10 +289,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_short</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_short"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_short"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_short" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read 2 byte number (c_ushort).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>signed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -305,10 +302,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_sized_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_sized_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_sized_int"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_sized_int" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read number cluster (2 byte length followed by data).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>signed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -318,13 +315,13 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_sized_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_sized_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_sized_string"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_sized_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read string (2 byte length followed by data).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
@@ -334,13 +331,13 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">read_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.read_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.read_string"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.read_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read null-terminated string.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
@@ -350,10 +347,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.resize"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.resize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resize buffer to specified length.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -363,10 +360,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write bytes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -376,10 +373,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write_bigint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write_bigint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write_bigint"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write_bigint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write tagged 8 byte number (c_ulonglong).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -389,10 +386,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write_byte</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">byte</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write_byte"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write_byte"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write_byte" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write one byte.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>byte</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -402,10 +399,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write_int"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write_int" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write 4 byte number (c_uint).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -415,14 +412,14 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write_number"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write number with specified size (in bytes).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>signed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -432,14 +429,14 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write_pascal_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write_pascal_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write_pascal_string"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write_pascal_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write tagged Pascal string (2 byte length followed by data).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -449,10 +446,10 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write_short</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write_short"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write_short"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write_short" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write 2 byte number (c_ushort).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -462,14 +459,14 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write_sized_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write_sized_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write_sized_string"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write_sized_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write string (2 byte length followed by data).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -479,14 +476,14 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">write_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ascii'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#MemoryBuffer.write_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.MemoryBuffer.write_string"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.write_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write zero-terminated string.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -501,7 +498,7 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">byteorder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="types.html#firebird.base.types.ByteOrder" title="firebird.base.types.ByteOrder"><span class="pre">ByteOrder</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.buffer.MemoryBuffer.byteorder"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.byteorder" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference internal" href="types.html#firebird.base.types.ByteOrder.LITTLE" title="firebird.base.types.ByteOrder.LITTLE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LITTLE</span></code></a>].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The byte order used to read/write numbers [default</p>
 </dd>
 </dl>
@@ -516,7 +513,7 @@ which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">factory</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.base.buffer.BufferFactory" title="firebird.base.buffer.BufferFactory"><span class="pre">BufferFactory</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.buffer.MemoryBuffer.factory"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.factory" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference internal" href="#firebird.base.buffer.BytesBufferFactory" title="firebird.base.buffer.BytesBufferFactory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BytesBufferFactory</span></code></a>].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Buffer factory instance used by manager [default</p>
 </dd>
 </dl>
@@ -528,10 +525,10 @@ which will be used to initialize the array items.</p></li>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.base.buffer.MemoryBuffer.max_size">
-<span class="sig-name descname"><span class="pre">max_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="types.html#firebird.base.types.Sentinel" title="firebird.base.types.Sentinel"><span class="pre">Sentinel</span></a><span class="p"><span class="pre">]</span></span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.buffer.MemoryBuffer.max_size"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.max_size" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">max_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="types.html#firebird.base.types.Sentinel" title="firebird.base.types.Sentinel"><span class="pre">Sentinel</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.base.buffer.MemoryBuffer.max_size"></a><a class="headerlink" href="#firebird.base.buffer.MemoryBuffer.max_size" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference internal" href="types.html#firebird.base.types.UNLIMITED" title="firebird.base.types.UNLIMITED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNLIMITED</span></code></a>].</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The buffer couldn’t grow beyond specified number of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)">bytes</a> [default</p>
 </dd>
 </dl>
@@ -565,27 +562,27 @@ but it must provide direct acces to cells, slices and length like <a class="refe
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.buffer.BufferFactory.create">
-<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_or_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#BufferFactory.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.BufferFactory.create"></a><a class="headerlink" href="#firebird.base.buffer.BufferFactory.create" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_or_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#BufferFactory.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.BufferFactory.create"></a><a class="headerlink" href="#firebird.base.buffer.BufferFactory.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function must create and return a mutable character buffer.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>init_or_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>]</em>) – Must be an integer which specifies the size of the array, or a bytes
+<li><p><strong>init_or_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a>) – Must be an integer which specifies the size of the array, or a bytes
 object which will be used to initialize the array items.</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – Size of the array.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – Size of the array.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a></p>
 </dd>
 </dl>
@@ -601,28 +598,28 @@ object which will be used to initialize the array items.</p></li>
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><span class="pre">bytearray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#BytesBufferFactory.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.BytesBufferFactory.clear"></a><a class="headerlink" href="#firebird.base.buffer.BytesBufferFactory.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fills the buffer with zero.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><em>bytearray</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.buffer.BytesBufferFactory.create">
-<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_or_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><span class="pre">bytearray</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#BytesBufferFactory.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.BytesBufferFactory.create"></a><a class="headerlink" href="#firebird.base.buffer.BytesBufferFactory.create" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_or_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><span class="pre">bytearray</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#BytesBufferFactory.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.BytesBufferFactory.create"></a><a class="headerlink" href="#firebird.base.buffer.BytesBufferFactory.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function creates a mutable character buffer. The returned object is a
 <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>init_or_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>]</em>) – Must be an integer which specifies the size of the array,
+<li><p><strong>init_or_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a>) – Must be an integer which specifies the size of the array,
 or a bytes object which will be used to initialize the array items.</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – Size of the array.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – Size of the array.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)">bytearray</a></p>
 </dd>
 </dl>
@@ -651,31 +648,31 @@ element in the array is a NUL termination character.</p></li>
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><span class="pre">bytearray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#CTypesBufferFactory.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.CTypesBufferFactory.clear"></a><a class="headerlink" href="#firebird.base.buffer.CTypesBufferFactory.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fills the buffer with specified value (default).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><em>bytearray</em></a>) – </p></li>
 <li><p><strong>init</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.buffer.CTypesBufferFactory.create">
-<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_or_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><span class="pre">bytearray</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#CTypesBufferFactory.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.CTypesBufferFactory.create"></a><a class="headerlink" href="#firebird.base.buffer.CTypesBufferFactory.create" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_or_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><span class="pre">bytearray</span></a></span></span><a class="reference internal" href="_modules/firebird/base/buffer.html#CTypesBufferFactory.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.buffer.CTypesBufferFactory.create"></a><a class="headerlink" href="#firebird.base.buffer.CTypesBufferFactory.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function creates a <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ctypes</span></code></a> mutable character buffer. The returned object
 is an array of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_char" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ctypes.c_char</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>init_or_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>]</em>) – Must be an integer which specifies the size of the array,
+<li><p><strong>init_or_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a>) – Must be an integer which specifies the size of the array,
 or a bytes object which will be used to initialize the array items.</p></li>
-<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – Size of the array.</p></li>
+<li><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – Size of the array.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)">bytearray</a></p>
 </dd>
 </dl>
@@ -706,7 +703,7 @@ element in the array is a NUL termination character.</p></li>
 </p>
 <p>
         © Copyright 2020-2023, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
 </p>
 </div>
 </footer>

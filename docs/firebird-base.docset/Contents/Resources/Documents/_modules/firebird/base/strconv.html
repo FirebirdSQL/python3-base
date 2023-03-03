@@ -4,16 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>firebird.base.strconv &#8212; Firebird-base 1.4.2 documentation</title>
+    <title>firebird.base.strconv &#8212; Firebird-base 1.6.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
-    <link rel="shortcut icon" href="../../../_static/fb-favicon.png"/>
+    <link rel="icon" href="../../../_static/fb-favicon.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -39,7 +36,7 @@
 
         <a class="brand" href="../../../index.html">
           Firebird-base</a>
-        <span class="navbar-text pull-left"><b>1.4.2</b></span>
+        <span class="navbar-text pull-left"><b>1.6.1</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -153,23 +150,23 @@
 
 <div class="viewcode-block" id="Convertor"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.Convertor">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Convertor</span><span class="p">(</span><span class="n">Distinct</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data convertor registry entry.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data convertor registry entry.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span>
     <span class="n">to_str</span><span class="p">:</span> <span class="n">TConvertToStr</span>
     <span class="n">from_str</span><span class="p">:</span> <span class="n">TConvertFromStr</span>
 <div class="viewcode-block" id="Convertor.get_key"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.Convertor.get_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns instance key.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns instance key.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span></div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Type name.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">full_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Type name including source module.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type name including source module.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span></div>
 
@@ -184,19 +181,19 @@
 <span class="n">FALSE_STR</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;no&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">,</span> <span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="any2str"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.any2str">[docs]</a><span class="k">def</span> <span class="nf">any2str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Converts value to string using `str(value)`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts value to string using `str(value)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="str2any"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.str2any">[docs]</a><span class="k">def</span> <span class="nf">str2any</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Converts string to data type value using `type(value)`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts string to data type value using `type(value)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="register_convertor"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.register_convertor">[docs]</a><span class="k">def</span> <span class="nf">register_convertor</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">to_str</span><span class="p">:</span> <span class="n">TConvertToStr</span><span class="o">=</span><span class="n">any2str</span><span class="p">,</span>
                        <span class="n">from_str</span><span class="p">:</span> <span class="n">TConvertFromStr</span><span class="o">=</span><span class="n">str2any</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Registers convertor function(s).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registers convertor function(s).</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        cls:      Class or class name</span>
@@ -206,7 +203,7 @@
     <span class="n">_convertors</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">Convertor</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">to_str</span><span class="p">,</span> <span class="n">from_str</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="register_class"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.register_class">[docs]</a><span class="k">def</span> <span class="nf">register_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Registers class for name lookup.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registers class for name lookup.</span>
 
 <span class="sd">    .. seealso:: `has_convertor()`, `get_convertor()`</span>
 
@@ -221,7 +218,7 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">_classes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">conv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_convertors</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;item.</span><span class="si">{</span><span class="s1">&#39;full_name&#39;</span> <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="bp">cls</span> <span class="k">else</span> <span class="s1">&#39;name&#39;</span><span class="si">}</span><span class="s2"> == &#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">))</span>
+        <span class="n">conv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_convertors</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;item.</span><span class="si">{</span><span class="s1">&#39;full_name&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">&#39;.&#39;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">cls</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;name&#39;</span><span class="si">}</span><span class="s2"> == &#39;</span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">))</span>
         <span class="n">conv</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">conv</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">conv</span> <span class="o">:=</span> <span class="n">_convertors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -232,7 +229,7 @@
     <span class="k">return</span> <span class="n">conv</span>
 
 <div class="viewcode-block" id="has_convertor"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.has_convertor">[docs]</a><span class="k">def</span> <span class="nf">has_convertor</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns True if class has a convertor.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns True if class has a convertor.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        cls: Type or type name. The name could be simple class name, or full name that includes</span>
@@ -252,7 +249,7 @@
 <div class="viewcode-block" id="update_convertor"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.update_convertor">[docs]</a><span class="k">def</span> <span class="nf">update_convertor</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">to_str</span><span class="p">:</span> <span class="n">TConvertToStr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                      <span class="n">from_str</span><span class="p">:</span> <span class="n">TConvertFromStr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Update convertor function(s).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update convertor function(s).</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        cls:      Class or class name</span>
@@ -269,7 +266,7 @@
         <span class="n">conv</span><span class="o">.</span><span class="n">from_str</span> <span class="o">=</span> <span class="n">from_str</span></div>
 
 <div class="viewcode-block" id="convert_to_str"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.convert_to_str">[docs]</a><span class="k">def</span> <span class="nf">convert_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Converts value to string using registered convertor.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts value to string using registered convertor.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        value:  Value to be converted.</span>
@@ -283,7 +280,7 @@
 
 
 <div class="viewcode-block" id="convert_from_str"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.convert_from_str">[docs]</a><span class="k">def</span> <span class="nf">convert_from_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Converts value from string to data type using registered convertor.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts value from string to data type using registered convertor.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        cls:   Type or type name. The name could be simple class name, or full name that includes</span>
@@ -305,7 +302,7 @@
     <span class="k">return</span> <span class="n">get_convertor</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="get_convertor"><a class="viewcode-back" href="../../../strconv.html#firebird.base.strconv.get_convertor">[docs]</a><span class="k">def</span> <span class="nf">get_convertor</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Convertor</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns Convertor for data type.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns Convertor for data type.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        cls: Type or type name. The name could be simple class name, or full name that includes</span>
@@ -324,11 +321,11 @@
 <span class="sd">        TypeError: If there is no convertor for `cls` or any from its bases classes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">conv</span> <span class="o">:=</span> <span class="n">_get_convertor</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type &#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="k">else</span> <span class="bp">cls</span><span class="si">}</span><span class="s2">&#39; has no Convertor&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Type &#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span><span class="w"> </span><span class="nb">type</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="bp">cls</span><span class="si">}</span><span class="s2">&#39; has no Convertor&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">conv</span></div>
 
 <span class="k">def</span> <span class="nf">_register</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Internal function for registration of builtin converters.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal function for registration of builtin converters.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">bool2str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">TRUE_STR</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="n">FALSE_STR</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -379,8 +376,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+        &copy; Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
     </p>
   </div>
 </footer>

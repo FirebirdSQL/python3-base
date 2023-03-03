@@ -3,17 +3,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>logging - Context-based logging — Firebird-base 1.6.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>logging - Context-based logging — Firebird-base 1.6.1 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
-<link href="_static/fb-favicon.png" rel="shortcut icon"/>
+<link href="_static/fb-favicon.png" rel="icon"/>
 <link href="genindex.html" rel="index" title="Index"/>
 <link href="search.html" rel="search" title="Search"/>
 <link href="trace.html" rel="next" title="trace - Trace/audit for class instances"/>
@@ -38,7 +35,7 @@
 </button>
 <a class="brand" href="index.html">
           Firebird-base</a>
-<span class="navbar-text pull-left"><b>1.6.0</b></span>
+<span class="navbar-text pull-left"><b>1.6.1</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -343,7 +340,7 @@ any context, or any agent operating in specific context etc.</p>
 
     <span class="n">start</span> <span class="o">=</span> <span class="n">monotonic</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">"Meeting started..."</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Attendees: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Attendees: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">persons</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">:</span>
@@ -358,7 +355,7 @@ any context, or any agent operating in specific context etc.</p>
 
     <span class="n">e</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Meeting closed in </span><span class="si">{</span><span class="n">e</span><span class="p">[:</span><span class="n">e</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span><span class="o">+</span><span class="mi">6</span><span class="p">]</span><span class="si">}</span><span class="s2"> sec."</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Outcome: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Outcome: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">mood</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">persons</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">test_loggig</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="n">Mood</span><span class="p">,</span> <span class="n">second</span><span class="p">:</span> <span class="n">Mood</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">meeting</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">Person</span><span class="p">(</span><span class="s1">'Alex'</span><span class="p">,</span> <span class="n">first</span><span class="p">),</span> <span class="n">Person</span><span class="p">(</span><span class="s1">'David'</span><span class="p">,</span> <span class="n">second</span><span class="p">)])</span>
@@ -485,18 +482,18 @@ Outcome: Alex [SAD], David [SAD]
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.base.logging.bind_logger">
-<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><span class="pre">Logger</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.bind_logger"></a><a class="headerlink" href="#firebird.base.logging.bind_logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><span class="pre">Logger</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.bind_logger"></a><a class="headerlink" href="#firebird.base.logging.bind_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_manager.bind_logger()</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
 <li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
-<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><em>Logger</em></a><em>]</em>) – </p></li>
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><em>Logger</em></a>) – </p></li>
 <li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -506,14 +503,14 @@ Outcome: Alex [SAD], David [SAD]
 <span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><span class="pre">FBLoggerAdapter</span></a></span></span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.get_logger"></a><a class="headerlink" href="#firebird.base.logging.get_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>shortcut for <code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_manager.get_logger()</span></code></p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
 <li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
 <li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><em>FBLoggerAdapter</em></a></p>
 </dd>
 </dl>
@@ -523,10 +520,10 @@ Outcome: Alex [SAD], David [SAD]
 <span class="sig-prename descclassname"><span class="pre">firebird.base.logging.</span></span><span class="sig-name descname"><span class="pre">get_logging_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#get_logging_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.base.logging.get_logging_id"></a><a class="headerlink" href="#firebird.base.logging.get_logging_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns logging ID for object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>obj</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – Any object</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ol class="arabic simple">
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_id</span></code> attribute if <code class="xref py py-obj docutils literal notranslate"><span class="pre">obj</span></code> does have it, or..</p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__qualname__</span></code> attribute if <code class="xref py py-obj docutils literal notranslate"><span class="pre">obj</span></code> does have it, or..</p></li>
@@ -534,7 +531,7 @@ Outcome: Alex [SAD], David [SAD]
 </ol>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a></p>
 </dd>
 </dl>
@@ -557,7 +554,7 @@ into <code class="xref py py-obj docutils literal notranslate"><span class="pre"
 <dt class="sig sig-object py" id="firebird.base.logging.FBLoggerAdapter.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><span class="pre">Logger</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.__init__"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><em>Logger</em></a>) – Adapted Logger instance.</p></li>
 <li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – Agent for logger</p></li>
@@ -572,7 +569,7 @@ into <code class="xref py py-obj docutils literal notranslate"><span class="pre"
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.11)"><span class="pre">Hashable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter.extract_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.extract_key"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.extract_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns instance key extracted from constructor arguments.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.11)"><em>Hashable</em></a></p>
 </dd>
 </dl>
@@ -582,7 +579,7 @@ into <code class="xref py py-obj docutils literal notranslate"><span class="pre"
 <span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.11)"><span class="pre">Hashable</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#FBLoggerAdapter.get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.FBLoggerAdapter.get_key"></a><a class="headerlink" href="#firebird.base.logging.FBLoggerAdapter.get_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns instance key.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Hashable" title="(in Python v3.11)"><em>Hashable</em></a></p>
 </dd>
 </dl>
@@ -605,7 +602,7 @@ a logging call to insert contextual information. You can either
 manipulate the message itself, the keyword args or both. Return
 the message and kwargs modified (or not) to suit your needs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><em>Tuple</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>]</p>
 </dd>
 </dl>
@@ -641,18 +638,18 @@ the message and kwargs modified (or not) to suit your needs.</p>
 <p>Logger manager.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.base.logging.LoggingManager.bind_logger">
-<span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><span class="pre">Logger</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.bind_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.bind_logger"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.bind_logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">bind_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><span class="pre">Logger</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.bind_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.bind_logger"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.bind_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bind agent and context to specific logger.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – Agent identification</p></li>
 <li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – Context identification</p></li>
-<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><em>Logger</em></a><em>]</em>) – Loger (instance or name)</p></li>
+<li><p><strong>logger</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.11)"><em>Logger</em></a>) – Loger (instance or name)</p></li>
 <li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Topic of recorded information</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -678,7 +675,7 @@ by <a class="reference internal" href="#firebird.base.logging.LoggingManager.unb
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.clear"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.clear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove all logger bindings.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
@@ -688,14 +685,14 @@ by <a class="reference internal" href="#firebird.base.logging.LoggingManager.unb
 <span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('UNDEFINED')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Sentinel('DEFAULT')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><span class="pre">FBLoggerAdapter</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.get_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.get_logger"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.get_logger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a logger for the specified agent and context combination.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – Agent identification.</p></li>
 <li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – Context identification.</p></li>
 <li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Topic of recorded information.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#firebird.base.logging.FBLoggerAdapter" title="firebird.base.logging.FBLoggerAdapter"><em>FBLoggerAdapter</em></a></p>
 </dd>
 </dl>
@@ -725,14 +722,14 @@ by <a class="reference internal" href="#firebird.base.logging.LoggingManager.unb
 <span class="sig-name descname"><span class="pre">unbind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/base/logging.html#LoggingManager.unbind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.base.logging.LoggingManager.unbind"></a><a class="headerlink" href="#firebird.base.logging.LoggingManager.unbind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Drops logger bindings.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
 <li><p><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
 <li><p><strong>topic</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -772,7 +769,7 @@ by <a class="reference internal" href="#firebird.base.logging.LoggingManager.unb
 </p>
 <p>
         © Copyright 2020-2023, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
 </p>
 </div>
 </footer>

@@ -4,16 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>firebird.base.trace &#8212; Firebird-base 1.6.0 documentation</title>
+    <title>firebird.base.trace &#8212; Firebird-base 1.6.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
-    <link rel="shortcut icon" href="../../../_static/fb-favicon.png"/>
+    <link rel="icon" href="../../../_static/fb-favicon.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -39,7 +36,7 @@
 
         <a class="brand" href="../../../index.html">
           Firebird-base</a>
-        <span class="navbar-text pull-left"><b>1.6.0</b></span>
+        <span class="navbar-text pull-left"><b>1.6.1</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -155,7 +152,7 @@
 <span class="kn">from</span> <span class="nn">.logging</span> <span class="kn">import</span> <span class="n">LogLevel</span><span class="p">,</span> <span class="n">FBLoggerAdapter</span><span class="p">,</span> <span class="n">get_logger</span>
 
 <div class="viewcode-block" id="TraceFlag"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceFlag">[docs]</a><span class="k">class</span> <span class="nc">TraceFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;`LoggingManager` trace/audit flags.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;`LoggingManager` trace/audit flags.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">ACTIVE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
@@ -165,36 +162,36 @@
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">TracedItem</span><span class="p">(</span><span class="n">Distinct</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class method trace specification.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class method trace specification.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">method</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">decorator</span><span class="p">:</span> <span class="n">Callable</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
     <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns Distinct key for traced item [method].&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns Distinct key for traced item [method].&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span>
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">TracedClass</span><span class="p">(</span><span class="n">Distinct</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Traced class registry entry.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Traced class registry entry.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span>
     <span class="n">traced</span><span class="p">:</span> <span class="n">Registry</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Registry</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns Distinct key for traced item [cls].&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns Distinct key for traced item [cls].&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span>
 
 <span class="n">_traced</span><span class="p">:</span> <span class="n">Registry</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">()</span>
 
 <span class="k">class</span> <span class="nc">TracedMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Metaclass that instruments instances on creation.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metaclass that instruments instances on creation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">trace_object</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TracedMixin"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TracedMixin">[docs]</a><span class="k">class</span> <span class="nc">TracedMixin</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">TracedMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Mixin class that automatically registers descendants for trace and instruments</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixin class that automatically registers descendants for trace and instruments</span>
 <span class="sd">    instances on creation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -202,7 +199,7 @@
         <span class="n">trace_manager</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="traced"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.traced">[docs]</a><span class="k">class</span> <span class="nc">traced</span><span class="p">:</span> <span class="c1"># pylint: disable=[R0902]</span>
-    <span class="sd">&quot;&quot;&quot;Base decorator for logging of callables, suitable for trace/audit.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base decorator for logging of callables, suitable for trace/audit.</span>
 
 <span class="sd">    It&#39;s not applied on decorated function/method if `FBASE_TRACE` environment variable is</span>
 <span class="sd">    set to False, or if `FBASE_TRACE` is not defined and `__debug__` is False (optimized</span>
@@ -217,7 +214,7 @@
                  <span class="n">max_param_length</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="n">UNLIMITED</span><span class="p">,</span> <span class="n">extra</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">has_result</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="n">DEFAULT</span><span class="p">,</span>
                  <span class="n">with_args</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            agent: Agent identification</span>
 <span class="sd">            context: Context identification</span>
@@ -267,35 +264,35 @@
         <span class="c1">#: If True, function arguments are available for interpolation in `msg_before`</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">with_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">with_args</span></div>
     <span class="k">def</span> <span class="nf">__callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="c1"># pylint: disable=[W0613]</span>
-        <span class="sd">&quot;&quot;&quot;Default callback, does nothing.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Default callback, does nothing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
 <div class="viewcode-block" id="traced.set_before_msg"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.traced.set_before_msg">[docs]</a>    <span class="k">def</span> <span class="nf">set_before_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">sig</span><span class="p">:</span> <span class="n">Signature</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Sets the DEFAULT before message f-string template.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the DEFAULT before message f-string template.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_args</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">msg_before</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&gt;&gt;&gt; </span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">=</span><span class="se">}}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;self&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg_before</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&gt;&gt;&gt; </span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">{{</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">=</span><span class="se">}}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s1">&#39;self&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">msg_before</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&gt;&gt;&gt; </span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span></div>
 <div class="viewcode-block" id="traced.set_after_msg"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.traced.set_after_msg">[docs]</a>    <span class="k">def</span> <span class="nf">set_after_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">sig</span><span class="p">:</span> <span class="n">Signature</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># pylint: disable=[W0613]</span>
-        <span class="sd">&quot;&quot;&quot;Sets the DEFAULT after message f-string template.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the DEFAULT after message f-string template.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msg_after</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&lt;&lt;&lt; </span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">[</span><span class="se">{{</span><span class="s2">_etime_</span><span class="se">}}</span><span class="s2">] Result: </span><span class="se">{{</span><span class="s2">_result_</span><span class="se">}}</span><span class="s2">&quot;</span> \
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_result</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;&lt;&lt;&lt; </span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">[</span><span class="se">{{</span><span class="s2">_etime_</span><span class="se">}}</span><span class="s2">]&quot;</span></div>
 <div class="viewcode-block" id="traced.set_fail_msg"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.traced.set_fail_msg">[docs]</a>    <span class="k">def</span> <span class="nf">set_fail_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">sig</span><span class="p">:</span> <span class="n">Signature</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># pylint: disable=[W0613]</span>
-        <span class="sd">&quot;&quot;&quot;Sets the DEFAULT fail message f-string template.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the DEFAULT fail message f-string template.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msg_failed</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&lt;-- </span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">[</span><span class="se">{{</span><span class="s2">_etime_</span><span class="se">}}</span><span class="s2">] </span><span class="se">{{</span><span class="s2">_exc_</span><span class="se">}}</span><span class="s2">&quot;</span></div>
 <div class="viewcode-block" id="traced.log_before"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.traced.log_before">[docs]</a>    <span class="k">def</span> <span class="nf">log_before</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">FBLoggerAdapter</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Executed before decorated callable.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executed before decorated callable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_before</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
 <div class="viewcode-block" id="traced.log_after"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.traced.log_after">[docs]</a>    <span class="k">def</span> <span class="nf">log_after</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">FBLoggerAdapter</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Executed after decorated callable.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executed after decorated callable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_after</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
 <div class="viewcode-block" id="traced.log_failed"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.traced.log_failed">[docs]</a>    <span class="k">def</span> <span class="nf">log_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">FBLoggerAdapter</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Executed when decorated callable raises an exception.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executed when decorated callable raises an exception.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg_failed</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span> <span class="c1"># pylint: disable=[R0915]</span>
@@ -316,7 +313,7 @@
                             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                                 <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="p">:</span>
-                                    <span class="n">params</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">s</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="p">]</span><span class="si">}</span><span class="s1">..[</span><span class="si">{</span><span class="n">i</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="si">}</span><span class="s1">]&#39;</span>
+                                    <span class="n">params</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">s</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="p">]</span><span class="si">}</span><span class="s1">..[</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="si">}</span><span class="s1">]&#39;</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">)</span>
                     <span class="n">params</span><span class="p">[</span><span class="s1">&#39;_fname_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span>
@@ -344,7 +341,7 @@
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">UNLIMITED</span><span class="p">:</span>
                             <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
                             <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="p">:</span>
-                                <span class="n">params</span><span class="p">[</span><span class="s1">&#39;_result_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">s</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="p">]</span><span class="si">}</span><span class="s1">..[</span><span class="si">{</span><span class="n">i</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="si">}</span><span class="s1">]&#39;</span>
+                                <span class="n">params</span><span class="p">[</span><span class="s1">&#39;_result_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">s</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="p">]</span><span class="si">}</span><span class="s1">..[</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">max_len</span><span class="si">}</span><span class="s1">]&#39;</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">log_after</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">result</span>
 
@@ -368,7 +365,7 @@
 
 
 <div class="viewcode-block" id="BaseTraceConfig"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.BaseTraceConfig">[docs]</a><span class="k">class</span> <span class="nc">BaseTraceConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span> <span class="c1"># pylint: disable=[R0902]</span>
-    <span class="sd">&quot;&quot;&quot;Base configuration for trace.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base configuration for trace.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -408,7 +405,7 @@
                        <span class="s2">&quot;If True, function arguments are available for interpolation in `msg_before`&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TracedMethodConfig"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TracedMethodConfig">[docs]</a><span class="k">class</span> <span class="nc">TracedMethodConfig</span><span class="p">(</span><span class="n">BaseTraceConfig</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Configuration of traced Python method.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration of traced Python method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -417,7 +414,7 @@
             <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s2">&quot;Class method name&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TracedClassConfig"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TracedClassConfig">[docs]</a><span class="k">class</span> <span class="nc">TracedClassConfig</span><span class="p">(</span><span class="n">BaseTraceConfig</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Configuration of traced Python class.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration of traced Python class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -439,7 +436,7 @@
                        <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TraceConfig"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceConfig">[docs]</a><span class="k">class</span> <span class="nc">TraceConfig</span><span class="p">(</span><span class="n">BaseTraceConfig</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Trace manager configuration.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace manager configuration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -455,7 +452,7 @@
                              <span class="n">TracedClassConfig</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TraceManager"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager">[docs]</a><span class="k">class</span> <span class="nc">TraceManager</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Trace manager.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace manager.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1">#: Decorator that should be used for trace instrumentation (via `add_trace`),</span>
@@ -471,16 +468,16 @@
         <span class="k">if</span> <span class="n">convert_from_str</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;FBASE_TRACE_FAIL&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_flag</span><span class="p">(</span><span class="n">TraceFlag</span><span class="o">.</span><span class="n">FAIL</span><span class="p">)</span>
 <div class="viewcode-block" id="TraceManager.is_registered"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.is_registered">[docs]</a>    <span class="k">def</span> <span class="nf">is_registered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return True if class is registered.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if class is registered.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traced</span></div>
 <div class="viewcode-block" id="TraceManager.clear"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Removes all trace specifications.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes all trace specifications.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traced</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">traced</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 <div class="viewcode-block" id="TraceManager.register"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Register class for trace.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register class for trace.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            cls: Class to be registered.</span>
@@ -490,7 +487,7 @@
         <span class="k">if</span> <span class="bp">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traced</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_traced</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">TracedClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span></div>
 <div class="viewcode-block" id="TraceManager.add_trace"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.add_trace">[docs]</a>    <span class="k">def</span> <span class="nf">add_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">/</span> <span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add/update trace specification for class method.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add/update trace specification for class method.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            cls: Registered traced class</span>
@@ -500,7 +497,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_traced</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span><span class="o">.</span><span class="n">traced</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">TracedItem</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorator</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">))</span></div>
 <div class="viewcode-block" id="TraceManager.remove_trace"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.remove_trace">[docs]</a>    <span class="k">def</span> <span class="nf">remove_trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Remove trace specification for class method.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove trace specification for class method.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            cls: Registered traced class</span>
@@ -508,7 +505,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traced</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span><span class="o">.</span><span class="n">traced</span><span class="p">[</span><span class="n">method</span><span class="p">]</span></div>
 <div class="viewcode-block" id="TraceManager.trace_object"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.trace_object">[docs]</a>    <span class="k">def</span> <span class="nf">trace_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Instruments object&#39;s methods with decorator according to trace configuration.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instruments object&#39;s methods with decorator according to trace configuration.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            strict: Determines the response if the object class is not registered for trace.</span>
@@ -536,7 +533,7 @@
             <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">decorator</span><span class="p">(</span><span class="o">*</span><span class="n">item</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">item</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">method</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 <div class="viewcode-block" id="TraceManager.load_config"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.load_config">[docs]</a>    <span class="k">def</span> <span class="nf">load_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;trace&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Update trace from configuration.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update trace from configuration.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            config:  ConfigParser instance with trace configuration.</span>
@@ -597,16 +594,16 @@
                     <span class="k">if</span> <span class="p">(</span><span class="n">cls_desc</span><span class="o">.</span><span class="n">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">cls</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls_desc</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
                         <span class="n">apply_on</span><span class="p">(</span><span class="n">cls_desc</span><span class="o">.</span><span class="n">cls</span><span class="p">)</span></div>
 <div class="viewcode-block" id="TraceManager.set_flag"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.set_flag">[docs]</a>    <span class="k">def</span> <span class="nf">set_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="n">TraceFlag</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Set flag specified by `flag` mask.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set flag specified by `flag` mask.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span> <span class="o">|=</span> <span class="n">flag</span></div>
 <div class="viewcode-block" id="TraceManager.clear_flag"><a class="viewcode-back" href="../../../trace.html#firebird.base.trace.TraceManager.clear_flag">[docs]</a>    <span class="k">def</span> <span class="nf">clear_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="n">TraceFlag</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Clear flag specified by `flag` mask.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear flag specified by `flag` mask.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">flag</span></div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">flags</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TraceFlag</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Trace flags.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Trace flags.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span>
     <span class="nd">@flags</span><span class="o">.</span><span class="n">setter</span>
@@ -614,7 +611,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TraceFlag</span><span class="p">)</span> <span class="k">else</span> <span class="n">TraceFlag</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">trace_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;True if trace is active.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True if trace is active.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">TraceFlag</span><span class="o">.</span><span class="n">ACTIVE</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flags</span>
     <span class="nd">@trace_active</span><span class="o">.</span><span class="n">setter</span>
@@ -647,7 +644,7 @@
     </p>
     <p>
         &copy; Copyright 2020-2023, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
     </p>
   </div>
 </footer>

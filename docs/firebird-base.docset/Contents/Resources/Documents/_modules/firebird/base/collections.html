@@ -4,16 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>firebird.base.collections &#8212; Firebird-base 1.4.2 documentation</title>
+    <title>firebird.base.collections &#8212; Firebird-base 1.6.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
-    <link rel="shortcut icon" href="../../../_static/fb-favicon.png"/>
+    <link rel="icon" href="../../../_static/fb-favicon.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -39,7 +36,7 @@
 
         <a class="brand" href="../../../index.html">
           Firebird-base</a>
-        <span class="navbar-text pull-left"><b>1.4.2</b></span>
+        <span class="navbar-text pull-left"><b>1.6.1</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -167,7 +164,7 @@
 
 
 <div class="viewcode-block" id="make_lambda"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.make_lambda">[docs]</a><span class="k">def</span> <span class="nf">make_lambda</span><span class="p">(</span><span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;item&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Makes lambda function from expression.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Makes lambda function from expression.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        expr: Python expression as string.</span>
@@ -189,10 +186,10 @@
 <span class="n">CheckExpr</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Item</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]]</span>
 
 <div class="viewcode-block" id="BaseObjectCollection"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection">[docs]</a><span class="k">class</span> <span class="nc">BaseObjectCollection</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Base class for collection of objects.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for collection of objects.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="BaseObjectCollection.filter"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Item</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns generator that yields items for which `expr` is evaluated as True.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns generator that yields items for which `expr` is evaluated as True.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            expr: Bool expression, a callable accepting one parameter and returning bool or</span>
@@ -207,7 +204,7 @@
         <span class="n">fce</span> <span class="o">=</span> <span class="n">expr</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="k">else</span> <span class="n">make_lambda</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">fce</span><span class="p">(</span><span class="n">item</span><span class="p">))</span></div>
 <div class="viewcode-block" id="BaseObjectCollection.filterfalse"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection.filterfalse">[docs]</a>    <span class="k">def</span> <span class="nf">filterfalse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Item</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns generator that yields items for which `expr` is evaluated as False.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns generator that yields items for which `expr` is evaluated as False.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            expr: Bool expression, a callable accepting one parameter and returning bool or</span>
@@ -222,7 +219,7 @@
         <span class="n">fce</span> <span class="o">=</span> <span class="n">expr</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="k">else</span> <span class="n">make_lambda</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">fce</span><span class="p">(</span><span class="n">item</span><span class="p">))</span></div>
 <div class="viewcode-block" id="BaseObjectCollection.find"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Item</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns first item for which `expr` is evaluated as True, or default.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns first item for which `expr` is evaluated as True, or default.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            expr:    Bool expression, a callable accepting one parameter and returning bool or</span>
@@ -239,7 +236,7 @@
             <span class="k">return</span> <span class="n">item</span>
         <span class="k">return</span> <span class="n">default</span></div>
 <div class="viewcode-block" id="BaseObjectCollection.contains"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns True if there is any item for which `expr` is evaluated as True.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if there is any item for which `expr` is evaluated as True.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            expr: Bool expression, a callable accepting one parameter and returning bool or</span>
@@ -255,7 +252,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 <div class="viewcode-block" id="BaseObjectCollection.report"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection.report">[docs]</a>    <span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns generator that yields data produced by expression(s) evaluated on list items.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns generator that yields data produced by expression(s) evaluated on list items.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            args: Parameter(s) could be one from:</span>
@@ -279,11 +276,11 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="n">fce</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">attrs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">)&#39;</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">)&#39;</span>
             <span class="n">fce</span> <span class="o">=</span> <span class="n">make_lambda</span><span class="p">(</span><span class="n">attrs</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">fce</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span></div>
 <div class="viewcode-block" id="BaseObjectCollection.occurrence"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection.occurrence">[docs]</a>    <span class="k">def</span> <span class="nf">occurrence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return number of items for which `expr` is evaluated as True.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return number of items for which `expr` is evaluated as True.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            expr: Bool expression, a callable accepting one parameter and returning bool or</span>
@@ -297,7 +294,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">expr</span><span class="p">))</span></div>
 <div class="viewcode-block" id="BaseObjectCollection.all"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection.all">[docs]</a>    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return True if `expr` is evaluated as True for all list elements.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if `expr` is evaluated as True for all list elements.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            expr: Bool expression, a callable accepting one parameter and returning bool or</span>
@@ -315,7 +312,7 @@
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 <div class="viewcode-block" id="BaseObjectCollection.any"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.BaseObjectCollection.any">[docs]</a>    <span class="k">def</span> <span class="nf">any</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return True if `expr` is evaluated as True for any list element.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if `expr` is evaluated as True for any list element.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            expr: Bool expression, a callable accepting one parameter and returnin bool or</span>
@@ -334,11 +331,11 @@
         <span class="k">return</span> <span class="kc">False</span></div></div>
 
 <div class="viewcode-block" id="DataList"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList">[docs]</a><span class="k">class</span> <span class="nc">DataList</span><span class="p">(</span><span class="n">List</span><span class="p">[</span><span class="n">Item</span><span class="p">],</span> <span class="n">BaseObjectCollection</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;List of data (objects) with additional functionality.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List of data (objects) with additional functionality.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="DataList.__init__"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">Iterable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_spec</span><span class="p">:</span> <span class="n">TypeSpec</span><span class="o">=</span><span class="n">UNDEFINED</span><span class="p">,</span>
                  <span class="n">key_expr</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frozen</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            items:     Sequence to initialize the collection.</span>
 <span class="sd">            type_spec: Reject instances that are not instances of specified types.</span>
@@ -396,7 +393,7 @@
             <span class="k">return</span> <span class="n">make_lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__key_expr</span><span class="p">)(</span><span class="n">o</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
 <div class="viewcode-block" id="DataList.insert"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Insert item before index.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Insert item before index.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: When item is not an instance of allowed class, or list is frozen</span>
@@ -405,7 +402,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__valchk</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div>
 <div class="viewcode-block" id="DataList.remove"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Remove first occurrence of item.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove first occurrence of item.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If the value is not present, or list is frozen</span>
@@ -413,7 +410,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__updchk</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 <div class="viewcode-block" id="DataList.append"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add an item to the end of the list.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an item to the end of the list.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: When item is not an instance of allowed class, or list is frozen</span>
@@ -422,7 +419,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__valchk</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 <div class="viewcode-block" id="DataList.extend"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Extend the list by appending all the items in the given iterable.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend the list by appending all the items in the given iterable.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: When item is not an instance of allowed class, or list is frozen</span>
@@ -430,7 +427,7 @@
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 <div class="viewcode-block" id="DataList.sort"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.sort">[docs]</a>    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="n">List</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">ItemExpr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reverse</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Sort items in-place, optionaly using attribute values as key or key expression.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sort items in-place, optionaly using attribute values as key or key expression.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            attrs: List of attribute names.</span>
@@ -458,7 +455,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span></div>
 <div class="viewcode-block" id="DataList.clear"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Remove all items from the list.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all items from the list.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: When list is frozen.</span>
@@ -466,7 +463,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__updchk</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 <div class="viewcode-block" id="DataList.freeze"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.freeze">[docs]</a>    <span class="k">def</span> <span class="nf">freeze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Set list to immutable (frozen) state.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set list to immutable (frozen) state.</span>
 
 <span class="sd">        Freezing list makes internal map from `key_expr` to item index that significantly</span>
 <span class="sd">        speeds up retrieval by key using the `get()` method.</span>
@@ -479,7 +476,7 @@
             <span class="n">fce</span> <span class="o">=</span> <span class="n">make_lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__key_expr</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(((</span><span class="n">key</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="n">fce</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">))))</span></div>
 <div class="viewcode-block" id="DataList.split"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="p">,</span> <span class="n">frozen</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">DataList</span><span class="p">,</span> <span class="n">DataList</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Return two new `DataList` instances, first with items for which `expr` is</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return two new `DataList` instances, first with items for which `expr` is</span>
 <span class="sd">        evaluated as True and second for `expr` evaluated as False.</span>
 
 <span class="sd">        Arguments:</span>
@@ -496,7 +493,7 @@
         <span class="k">return</span> <span class="n">DataList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__key_expr</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="n">frozen</span><span class="p">),</span> \
                <span class="n">DataList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterfalse</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_spec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__key_expr</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="n">frozen</span><span class="p">)</span></div>
 <div class="viewcode-block" id="DataList.extract"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.extract">[docs]</a>    <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">FilterExpr</span><span class="p">,</span> <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataList</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Move/copy items for which `expr` is evaluated as True into new `DataList`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Move/copy items for which `expr` is evaluated as True into new `DataList`.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            expr: A callable accepting one parameter or expression as string referencing list item</span>
@@ -529,7 +526,7 @@
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">l</span></div>
 <div class="viewcode-block" id="DataList.get"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.DataList.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Item</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns item with given key using default key expression. Returns `default`</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns item with given key using default key expression. Returns `default`</span>
 <span class="sd">        value if item is not found.</span>
 
 <span class="sd">        Uses very fast method to look up value of default key expression in `frozen` list,</span>
@@ -560,23 +557,23 @@
         <span class="k">return</span> <span class="n">default</span></div>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">frozen</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;True if list items couldn&#39;t be changed.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True if list items couldn&#39;t be changed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frozen</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">key_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Item</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Key expression.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Key expression.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__key_expr</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">type_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeSpec</span><span class="p">,</span> <span class="n">Sentinel</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Specification of valid type(s) for list values, or `.UNDEFINED` if there is</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specification of valid type(s) for list values, or `.UNDEFINED` if there is</span>
 <span class="sd">        no such constraint.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_spec</span></div>
 
 <div class="viewcode-block" id="Registry"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry">[docs]</a><span class="k">class</span> <span class="nc">Registry</span><span class="p">(</span><span class="n">BaseObjectCollection</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Distinct</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Mapping container for `.Distinct` objects.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mapping container for `.Distinct` objects.</span>
 
 <span class="sd">    Any method that expects a `key` also acepts `.Distinct` instance.</span>
 
@@ -605,7 +602,7 @@
 <span class="sd">    that represens a key value for instances of stored type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="Registry.__init__"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Registry</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`</span>
 <span class="sd">                  instances.</span>
@@ -626,21 +623,21 @@
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reg</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(&quot;</span> \
-               <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">])&quot;</span>
+               <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">])&quot;</span>
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Distinct</span><span class="p">):</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get_key</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reg</span>
 <div class="viewcode-block" id="Registry.clear"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Remove all items from registry.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all items from registry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reg</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 <div class="viewcode-block" id="Registry.get"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distinct</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; D.get(key[,d]) -&gt; D[key] if key in D else d. d defaults to None.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; D.get(key[,d]) -&gt; D[key] if key in D else d. d defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">get_key</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Distinct</span><span class="p">)</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span></div>
 <div class="viewcode-block" id="Registry.store"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.store">[docs]</a>    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Distinct</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distinct</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Register an item.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an item.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: When item is already registered.</span>
@@ -652,11 +649,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_reg</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span>
         <span class="k">return</span> <span class="n">item</span></div>
 <div class="viewcode-block" id="Registry.remove"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Distinct</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Removes item from registry (same as: del R[item]).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes item from registry (same as: del R[item]).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reg</span><span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">get_key</span><span class="p">()]</span></div>
 <div class="viewcode-block" id="Registry.update"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_from</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Distinct</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Update items in the registry.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update items in the registry.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            _from: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`</span>
@@ -668,7 +665,7 @@
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="n">Mapping</span><span class="p">,</span> <span class="n">_from</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">_from</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">_from</span><span class="p">:</span>
                 <span class="bp">self</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span></div>
 <div class="viewcode-block" id="Registry.extend"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_from</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Distinct</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Store one or more items to the registry.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store one or more items to the registry.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            _from: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`</span>
@@ -680,7 +677,7 @@
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="n">Mapping</span><span class="p">,</span> <span class="n">_from</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">_from</span><span class="p">,</span> <span class="s1">&#39;values&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">_from</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 <div class="viewcode-block" id="Registry.copy"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Registry</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Shalow copy of the registry.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shalow copy of the registry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span> <span class="ow">is</span> <span class="n">Registry</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -693,12 +690,12 @@
         <span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">c</span></div>
 <div class="viewcode-block" id="Registry.pop"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.pop">[docs]</a>    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distinct</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Remove specified `key` and return the corresponding `.Distinct` object. If `key`</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove specified `key` and return the corresponding `.Distinct` object. If `key`</span>
 <span class="sd">        is not found, the `default` is returned if given, otherwise `KeyError` is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">get_key</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Distinct</span><span class="p">)</span> <span class="k">else</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span></div>
 <div class="viewcode-block" id="Registry.popitem"><a class="viewcode-back" href="../../../collections.html#firebird.base.collections.Registry.popitem">[docs]</a>    <span class="k">def</span> <span class="nf">popitem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">last</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distinct</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns and removes a `.Distinct` object. The objects are returned in LIFO order</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns and removes a `.Distinct` object. The objects are returned in LIFO order</span>
 <span class="sd">        if `last` is true or FIFO order if false.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">last</span><span class="p">:</span>
@@ -720,8 +717,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+        &copy; Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br/>
     </p>
   </div>
 </footer>

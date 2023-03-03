@@ -24,7 +24,9 @@ callables at runtime.
 Example
 =======
 
-The following program is an example of small but complex enough code that you can use to experiment with code tracing options. The parts relevant to tracing are highlighted in the code by embedded comments.
+The following program is an example of small but complex enough code that you can use to
+experiment with code tracing options. The parts relevant to tracing are highlighted in
+the code by embedded comments.
 
 .. code-block:: python
 
