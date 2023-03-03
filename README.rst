@@ -53,8 +53,8 @@ custom `__str__` methods), there is no symetric operation that converts string c
 `str()` back to typed value. Module `strconv` provides support for such symetric conversion
 from/to string for any data type.
 
-Symetric string conversion is used by `~firebird.base.config` module, notably by
-`~firebird.base.config.ListOption` and `~firebird.base.config.DataclassOption`. You can
+Symetric string conversion is used by `firebird.base.config` module, notably by
+`firebird.base.config.ListOption` and `firebird.base.config.DataclassOption`. You can
 extend the range of data types supported by these options by registering convertors for
 required data types.
 
@@ -62,7 +62,7 @@ Configuration definitions
 =========================
 
 Complex applications (and some library modules like `logging`) could be often parametrized
-via configuration. Module `~firebird.base.config` provides a framework for unified structured
+via configuration. Module `firebird.base.config` provides a framework for unified structured
 configuration that supports:
 
 * configuration options of various data type, including lists and other complex types
@@ -98,7 +98,7 @@ module.
 The context-based logging:
 
 * Adds context information (defined as combination of topic, agent and context string values)
-  into `~logging.LogRecord`, that could be used in logging message.
+  into `logging.LogRecord`, that could be used in logging message.
 * Adds support for f-string message format.
 * Allows assignment of loggers to specific contexts. The `LoggingManager` class maintains
   a set of bindings between `Logger` objects and combination of `agent`, `context` and `topic`
@@ -123,7 +123,7 @@ callable, execution time, return value, information about raised exception etc. 
 The trace logging is managed by `TraceManager`, that allows dynamic configuration of traced
 callables at runtime.
 
-Trace supports configuration based on `~firebird.base.config`.
+Trace supports configuration based on `firebird.base.config`.
 
 Registry for Google Protocol Buffer messages and enums
 ======================================================
@@ -136,7 +136,7 @@ protobuf messages or enum types, or to create message instances or enum values.
 Callback systems
 ================
 
-Module `~firebird.base.signal` provides two callback mechanisms: one based on signals and
+Module `firebird.base.signal` provides two callback mechanisms: one based on signals and
 slots similar to Qt signal/slot, and second based on optional method delegation similar to
 events in Delphi.
 
