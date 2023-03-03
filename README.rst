@@ -2,8 +2,8 @@
 Firebird base modules for Python
 ================================
 
-The firebird-base package is a set of Python 3 modules commonly used by Firebird Project_ in
-various development projects (for example the firebird-driver or Saturnin). However, these
+The firebird-base package is a set of Python 3 modules commonly used by `Firebird Project`_
+in various development projects (for example the firebird-driver or Saturnin). However, these
 modules have general applicability outside the scope of development for Firebird_.
 
 Common data types
