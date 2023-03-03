@@ -359,5 +359,7 @@ Options
 
 Functions
 =========
+.. autofunction:: has_verticals
+.. autofunction:: has_leading_spaces
 .. autofunction:: create_config
 

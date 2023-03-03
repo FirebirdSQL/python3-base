@@ -2,6 +2,16 @@
 Changelog
 #########
 
+Version 1.6.1
+=============
+
+* `~firebird.base.config` module:
+
+  - Fixed bug with `.Config.get_config()` and `plain` bool argument.
+  - `.StrOption` now supports preservation of significant leading whitespace for multiline
+    values (like `.PyCodeOption`).
+
+
 Version 1.6.0
 =============
 
@@ -14,6 +24,7 @@ Version 1.6.0
 
   - `.Config.get_config()` and `.Option.get_config()` now provides `plain` bool argument
     to return configuration text without comments. Deafult is False.
+  - `.create_config` is now deprecated, will be removed in version 2.0.
 
 * `~firebird.base.trace` module:
 

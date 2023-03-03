@@ -129,6 +129,13 @@ option_name = present_value
 [%(ABSENT)s]
 [%(BAD)s]
 option_name =
+[VERTICALS]
+option_name =
+    | def pp(value):
+    |     print("Value:",value,file=output)
+    |
+    | for i in [1,2,3]:
+    |     pp(i)
 """)
     def test_simple(self):
         opt = config.StrOption('option_name', 'description')
@@ -156,6 +163,9 @@ option_name =
         opt.set_value(self.NEW_VAL)
         self.assertEqual(opt.value, self.NEW_VAL)
         self.assertIsInstance(opt.value, opt.datatype)
+        # Verticals
+        opt.load_config(self.conf, 'VERTICALS')
+        self.assertEqual(opt.get_as_str(), '\ndef pp(value):\n    print("Value:",value,file=output)\n\nfor i in [1,2,3]:\n    pp(i)')
     def test_required(self):
         opt = config.StrOption('option_name', 'description', required=True)
         self.assertEqual(opt.name, 'option_name')
@@ -259,6 +269,16 @@ option_name = <UNDEFINED>
 """
         opt.set_value(None)
         self.assertEqual(opt.get_config(), lines)
+        lines = """; description
+; Type: str
+option_name =
+   | def pp(value):
+   |     print("Value:",value,file=output)
+   |
+   | for i in [1,2,3]:
+   |     pp(i)"""
+        opt.set_value('\ndef pp(value):\n    print("Value:",value,file=output)\n\nfor i in [1,2,3]:\n    pp(i)')
+        self.assertEqual('\n'.join(x.rstrip() for x in opt.get_config().splitlines()), lines)
 
 class TestIntOption(BaseConfigTest):
     "Unit tests for firebird.base.config.IntOption"

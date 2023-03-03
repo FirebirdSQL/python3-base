@@ -63,8 +63,16 @@ from .strconv import get_convertor, convert_to_str, Convertor
 
 PROTO_CONFIG = 'firebird.base.ConfigProto'
 
+def has_verticals(value: str) -> bool:
+    "Returns True if lines in multiline string contains leading '|' character."
+    return any(1 for line in value.split('\n') if line.startswith('|'))
+
+def has_leading_spaces(value: str) -> bool:
+    "Returns True if any line in multiline string starts with space(s)."
+    return any(1 for line in value.split('\n') if line.startswith(' '))
+
 def unindent_verticals(value: str) -> str:
-    """Removes trailing '|' character from each line in multiline string."""
+    """Removes leading '|' character from each line in multiline string."""
     lines = []
     indent = None
     for line in value.split('\n'):
@@ -81,11 +89,13 @@ def _eq(a: Any, b: Any) -> bool:
 
 def create_config(_cls: Type[Config], name: str) -> Config: # pragma: no cover
     """Return newly created `Config` instance. Intended to be used with `functools.partial`.
+
+    .. deprecated:: 1.6
+       Will be removed in version 2.0
     """
     return _cls(name)
 
 # Next two functions are copied from stdlib enum module, as they were removed in Python 3.11
-
 def _decompose(flag, value):
     """
     Extract all members from the value.
@@ -409,8 +419,8 @@ def get_directory_scheme(app_name: str, version: str=None, *, force_home: bool=F
         app_name: Application name
         version: Application version string
         force_home: When True, the general directies are always set to subdirectories of
-                    `DirectoryScheme.home` directory. When False, these the home is used
-                    ONLY when it's set by "<app_name>_HOME" environment variable.
+                    `DirectoryScheme.home` directory. When False, then home is used ONLY
+                    when it's set by "<app_name>_HOME" environment variable.
     """
     return {'Windows': WindowsDirectoryScheme,
             'Linux':LinuxDirectoryScheme,
@@ -461,7 +471,7 @@ class Option(Generic[T], ABC):
         file processed with `~configparser.ConfigParser`.
 
         Text lines with configuration start with comment marker `;` and end with newline.
-        
+
         Arguments:
           plain: When True, it outputs only the option value. When False, it includes also
                  option description and other helpful information.
@@ -517,7 +527,7 @@ class Option(Generic[T], ABC):
     def get_config(self, *, plain: bool=False) -> str:
         """Returns string containing text lines suitable for use in configuration file
         processed with `~configparser.ConfigParser`.
-        
+
         Arguments:
           plain: When True, it outputs only the option value. When False, it includes also
                  option description and other helpful information.
@@ -655,7 +665,7 @@ class Config:
         for config in self.configs:
             if not plain:
                 lines.append('\n')
-            lines.append(config.get_config())
+            lines.append(config.get_config(plain=plain))
         return ''.join(lines)
     def load_config(self, config: ConfigParser, section: str=None) -> None:
         """Update configuration.
@@ -738,6 +748,17 @@ class Config:
 # Options
 class StrOption(Option[str]):
     """Configuration option with string value.
+
+    .. versionadded:: 1.6.1
+       Support for verticals to preserve leading whitespace.
+
+    Important:
+        Multiline string values could contain significant leading whitespace, but
+        ConfigParser multiline string values have leading whitespace removed. To circumvent
+        this, the `StrOption` supports assignment of text values where lines start with `|`
+        character. This character is removed, along with any number of subsequent whitespace
+        characters that are between `|` and first non-whitespace character on first line
+        starting with `|`.
     """
     def __init__(self, name: str, description: str, *, required: bool=False, default: str=None):
         """
@@ -764,9 +785,10 @@ class StrOption(Option[str]):
         result = self._value
         if '\n' in result:
             lines = []
+            indent = '   | ' if has_leading_spaces(result) else '   '
             for line in result.splitlines(True):
                 if lines:
-                    lines.append('   ' + line)
+                    lines.append(indent + line)
                 else:
                     lines.append(line)
             result = ''.join(lines)
@@ -780,6 +802,7 @@ class StrOption(Option[str]):
         Raises:
             ValueError: When the argument is not a valid option value.
         """
+        value = unindent_verticals(value)
         self._value = value
     def get_as_str(self) -> str:
         """Returns value as string.

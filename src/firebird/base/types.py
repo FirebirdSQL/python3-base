@@ -374,7 +374,7 @@ class PyExpr(str):
         return ns['expr']
     @property
     def expr(self):
-        "Expression code ready to be appased to `eval`."
+        "Expression code ready to be pased to `eval`."
         return self._expr_
 
 class PyCode(str):
@@ -394,7 +394,7 @@ class PyCode(str):
         return new
     @property
     def code(self):
-        """Python code ready to be appased to `exec`.
+        """Python code ready to be pased to `exec`.
         """
         return self._code_
 
@@ -436,7 +436,8 @@ class PyCallable(str):
 # Metaclasses
 def Conjunctive(name, bases, attrs):
     """Returns a metaclass that is conjunctive descendant of all metaclasses used by parent
-    classes.
+    classes. It's necessary to create a class with multiple inheritance, where multiple
+    parent classes use different metaclasses.
 
     Example:
 
