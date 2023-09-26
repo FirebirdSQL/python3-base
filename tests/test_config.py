@@ -38,6 +38,7 @@ from __future__ import annotations
 from unittest import TestCase, mock, main as unittest_main
 from uuid import UUID
 from decimal import Decimal
+import sys
 import io
 import os
 import platform
@@ -1110,7 +1111,7 @@ option_name = 1000
         opt.validate()
         opt.load_config(self.conf, PRESENT_S)
         self.assertEqual(opt.value, self.PRESENT_VAL)
-        self.assertEqual(opt.get_as_str(), 'THREE | TWO')
+        self.assertEqual(opt.get_as_str(), 'THREE | TWO' if sys.version_info.minor < 11 else 'TWO|THREE')
         self.assertIsInstance(opt.value, opt.datatype)
         opt.clear()
         self.assertIsNone(opt.value)
@@ -1188,7 +1189,11 @@ option_name = 1000
         self.assertEqual(opt.value, self.DEFAULT_VAL)
         with self.assertRaises(ValueError) as cm:
             opt.set_value(self.NEW_VAL)
-        self.assertEqual(cm.exception.args, ("Illegal value 'SimpleIntFlag.FIVE' for flag option 'option_name'",))
+        if sys.version_info.minor < 11:
+            exc_args = ("Illegal value 'SimpleIntFlag.FIVE' for flag option 'option_name'",)
+        else:
+            exc_args = ("Illegal value '16' for flag option 'option_name'",)
+        self.assertEqual(cm.exception.args, exc_args)
     def test_default(self):
         opt = config.FlagOption('option_name', SimpleIntFlag, 'description', default=self.DEFAULT_OPT_VAL)
         self.assertEqual(opt.name, 'option_name')
@@ -1251,9 +1256,15 @@ option_name = 1000
         self.assertFalse('option_name' in self.proto.options)
     def test_get_config(self):
         opt = config.FlagOption('option_name', SimpleIntFlag, 'description', default=self.DEFAULT_OPT_VAL)
-        lines = """; description
+        if sys.version_info.minor < 11:
+            lines = """; description
 ; Type: flag [one, two, three, four, five]
 ;option_name = four | three
+"""
+        else:
+            lines = """; description
+; Type: flag [one, two, three, four, five]
+;option_name = three|four
 """
         self.assertEqual(opt.get_config(), lines)
         lines = """; description
@@ -2274,7 +2285,11 @@ option_name = This is not a valid Python expression
         opt = config.PyExprOption('option_name', 'description')
         with self.assertRaises(SyntaxError) as cm:
             opt.load_config(self.conf, BAD_S)
-        self.assertEqual(cm.exception.args, ('invalid syntax', ('PyExpr', 1, 15, 'This is not a valid Python expression')))
+        if sys.version_info.minor < 10:
+            exc_args = ('PyExpr', 1, 15, 'This is not a valid Python expression')
+        else:
+            exc_args = ('PyExpr', 1, 15, 'This is not a valid Python expression', 1, 20)
+        self.assertEqual(cm.exception.args, ('invalid syntax', exc_args))
         with self.assertRaises(TypeError) as cm:
             opt.set_value(10.0)
         self.assertEqual(cm.exception.args, ("Option 'option_name' value must be a 'PyExpr', not 'float'",))
@@ -2430,7 +2445,11 @@ option_name = This is not a valid Python code block
         opt = config.PyCodeOption('option_name', 'description')
         with self.assertRaises(SyntaxError) as cm:
             opt.load_config(self.conf, BAD_S)
-        self.assertEqual(cm.exception.args, ('invalid syntax', ('PyCode', 1, 15, 'This is not a valid Python code block\n')))
+        if sys.version_info.minor < 10:
+            exc_args = ('PyCode', 1, 15, 'This is not a valid Python code block\n')
+        else:
+            exc_args = ('PyCode', 1, 15, 'This is not a valid Python code block\n', 1, 20)
+        self.assertEqual(cm.exception.args, ('invalid syntax', exc_args))
         with self.assertRaises(TypeError) as cm:
             opt.set_value(10.0)
         self.assertEqual(cm.exception.args, ("Option 'option_name' value must be a 'PyCode', not 'float'",))

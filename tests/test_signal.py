@@ -57,29 +57,29 @@ def value_signal(value):
 
 slot_signature = inspect.Signature.from_callable(value_signal)
 
-def testFunc(test, value):
+def _Func(test, value):
     """A test standalone function for signals to attach onto"""
     test.checkval = value
     test.func_call_count += 1
 
-testFunc_signature = inspect.Signature.from_callable(testFunc)
+testFunc_signature = inspect.Signature.from_callable(_Func)
 
-def testFuncWithKWDeafult(test, value, kiwi=None):
+def _FuncWithKWDeafult(test, value, kiwi=None):
     """A test standalone function with excess default keyword argument for signals to attach onto"""
     test.checkval = value
     test.func_call_count += 1
 
-def testFuncWithKW(test, value, *, kiwi):
+def _FuncWithKW(test, value, *, kiwi):
     """A test standalone function with excess keyword argument for signals to attach onto"""
     test.checkval = value
     test.func_call_count += 1
 
-def testLocalEmit(signal_instance):
+def _LocalEmit(signal_instance):
     """A test standalone function for signals to emit at local level"""
     exec('signal_instance.emit()')
 
 
-def testModuleEmit(signal_instance):
+def _ModuleEmit(signal_instance):
     """A test standalone function for signals to emit at module level"""
     signal_instance.emit()
 
@@ -208,26 +208,26 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_PartialConnect(self):
         """Tests connecting signals to partials"""
         partialSignal = Signal(nopar_signature)
-        partialSignal.connect(partial(testFunc, self, 'Partial'))
+        partialSignal.connect(partial(_Func, self, 'Partial'))
         self.assertEqual(len(partialSignal._slots), 1, "Expected single connected slot")
 
     def test_PartialConnectKWDifferOk(self):
         """Tests connecting signals to partials"""
         partialSignal = Signal(nopar_signature)
-        partialSignal.connect(partial(testFuncWithKWDeafult, self, 'Partial'))
+        partialSignal.connect(partial(_FuncWithKWDeafult, self, 'Partial'))
         self.assertEqual(len(partialSignal._slots), 1, "Expected single connected slot")
 
     def test_PartialConnectKWDifferBad(self):
         """Tests connecting signals to partials"""
         partialSignal = Signal(nopar_signature)
         with self.assertRaises(ValueError):
-            partialSignal.connect(partial(testFuncWithKW, self, 'Partial'))
+            partialSignal.connect(partial(_FuncWithKW, self, 'Partial'))
         self.assertEqual(len(partialSignal._slots), 0, "Expected single connected slot")
 
     def test_PartialConnectDuplicate(self):
         """Tests connecting signals to partials"""
         partialSignal = Signal(nopar_signature)
-        func = partial(testFunc, self, 'Partial')
+        func = partial(_Func, self, 'Partial')
         partialSignal.connect(func)
         partialSignal.connect(func)
         self.assertEqual(len(partialSignal._slots), 1, "Expected single connected slot")
@@ -235,13 +235,13 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_LambdaConnect(self):
         """Tests connecting signals to lambdas"""
         lambdaSignal = Signal(slot_signature)
-        lambdaSignal.connect(lambda value: testFunc(self, value))
+        lambdaSignal.connect(lambda value: _Func(self, value))
         self.assertEqual(len(lambdaSignal._slots), 1, "Expected single connected slot")
 
     def test_LambdaConnectDuplicate(self):
         """Tests connecting signals to duplicate lambdas"""
         lambdaSignal = Signal(slot_signature)
-        func = lambda value: testFunc(self, value)
+        func = lambda value: _Func(self, value)
         lambdaSignal.connect(func)
         lambdaSignal.connect(func)
         self.assertEqual(len(lambdaSignal._slots), 1, "Expected single connected slot")
@@ -274,14 +274,14 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_FunctionConnect(self):
         """Test connecting signals to standalone functions"""
         funcSignal = Signal(testFunc_signature)
-        funcSignal.connect(testFunc)
+        funcSignal.connect(_Func)
         self.assertEqual(len(funcSignal._slots), 1, "Expected single connected slot")
 
     def test_FunctionConnectDuplicate(self):
         """Test that each function connection is unique"""
         funcSignal = Signal(testFunc_signature)
-        funcSignal.connect(testFunc)
-        funcSignal.connect(testFunc)
+        funcSignal.connect(_Func)
+        funcSignal.connect(_Func)
         self.assertEqual(len(funcSignal._slots), 1, "Expected single connected slot")
 
     def test_ConnectNonCallable(self):
@@ -293,7 +293,7 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_EmitToPartial(self):
         """Test emitting signals to partial"""
         partialSignal = Signal(nopar_signature)
-        partialSignal.connect(partial(testFunc, self, 'Partial'))
+        partialSignal.connect(partial(_Func, self, 'Partial'))
         partialSignal.emit()
         self.assertEqual(self.checkval, 'Partial')
         self.assertEqual(self.func_call_count, 1, "Expected function to be called once")
@@ -301,7 +301,7 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_EmitToLambda(self):
         """Test emitting signal to lambda"""
         lambdaSignal = Signal(slot_signature)
-        lambdaSignal.connect(lambda value: testFunc(self, value))
+        lambdaSignal.connect(lambda value: _Func(self, value))
         lambdaSignal.emit('Lambda')
         self.assertEqual(self.checkval, 'Lambda')
         self.assertEqual(self.func_call_count, 1, "Expected function to be called once")
@@ -327,7 +327,7 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_EmitToFunction(self):
         """Test emitting signal to standalone function"""
         funcSignal = Signal(testFunc_signature)
-        funcSignal.connect(testFunc)
+        funcSignal.connect(_Func)
         funcSignal.emit(self, 'Function')
         self.assertEqual(self.checkval, 'Function')
         self.assertEqual(self.func_call_count, 1, "Expected function to be called once")
@@ -347,7 +347,7 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_PartialDisconnect(self):
         """Test disconnecting partial function"""
         partialSignal = Signal(nopar_signature)
-        part = partial(testFunc, self, 'Partial')
+        part = partial(_Func, self, 'Partial')
         partialSignal.connect(part)
         partialSignal.disconnect(part)
         self.assertEqual(self.checkval, None, "Slot was not removed from signal")
@@ -355,7 +355,7 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_PartialDisconnectUnconnected(self):
         """Test disconnecting unconnected partial function"""
         partialSignal = Signal(slot_signature)
-        part = partial(testFunc, self, 'Partial')
+        part = partial(_Func, self, 'Partial')
         try:
             partialSignal.disconnect(part)
         except:
@@ -364,7 +364,7 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_LambdaDisconnect(self):
         """Test disconnecting lambda function"""
         lambdaSignal = Signal(slot_signature)
-        func = lambda value: testFunc(self, value)
+        func = lambda value: _Func(self, value)
         lambdaSignal.connect(func)
         lambdaSignal.disconnect(func)
         self.assertEqual(len(lambdaSignal._slots), 0, "Slot was not removed from signal")
@@ -372,7 +372,7 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_LambdaDisconnectUnconnected(self):
         """Test disconnecting unconnected lambda function"""
         lambdaSignal = Signal(slot_signature)
-        func = lambda value: testFunc(self, value)
+        func = lambda value: _Func(self, value)
         try:
             lambdaSignal.disconnect(func)
         except:
@@ -398,15 +398,15 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
     def test_FunctionDisconnect(self):
         """Test disconnecting function"""
         funcSignal = Signal(testFunc_signature)
-        funcSignal.connect(testFunc)
-        funcSignal.disconnect(testFunc)
+        funcSignal.connect(_Func)
+        funcSignal.disconnect(_Func)
         self.assertEqual(len(funcSignal._slots), 0, "Slot was not removed from signal")
 
     def test_FunctionDisconnectUnconnected(self):
         """Test disconnecting unconnected function"""
         funcSignal = Signal(slot_signature)
         try:
-            funcSignal.disconnect(testFunc)
+            funcSignal.disconnect(_Func)
         except:
             self.fail("Disconnecting unconnected function should not raise")
 
@@ -422,7 +422,7 @@ class SignalTest(unittest.TestCase, SignalTestMixin):
         """Test clearing all slots"""
         multiSignal = Signal(slot_signature)
         func = lambda value: self.setVal(value)
-        multiSignal.connect(partial(testFunc, self))
+        multiSignal.connect(partial(_Func, self))
         multiSignal.connect(self.setVal)
         multiSignal.clear()
         self.assertEqual(len(multiSignal._slots), 0, "Not all slots were removed from signal")
