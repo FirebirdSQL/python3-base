@@ -2,6 +2,13 @@
 Changelog
 #########
 
+Version 1.7.0 [unreleased]
+==========================
+
+* Update dependency to protobuf >=4.24.3
+* Build system changed from setuptools to hatch
+* Package version is now defined in firebird.base.__about__.py (__version__)
+
 Version 1.6.1
 =============
 
@@ -10,7 +17,6 @@ Version 1.6.1
   - Fixed bug with `.Config.get_config()` and `plain` bool argument.
   - `.StrOption` now supports preservation of significant leading whitespace for multiline
     values (like `.PyCodeOption`).
-
 
 Version 1.6.0
 =============
@@ -29,7 +35,6 @@ Version 1.6.0
 * `~firebird.base.trace` module:
 
   - Fixed bug in `.TraceManager.load_config()`.
-
 
 Version 1.5.0
 =============

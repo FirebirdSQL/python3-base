@@ -15,6 +15,7 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import sphinx_bootstrap_theme
+from firebird.base.__about__ import __version__
 
 # -- Project information -----------------------------------------------------
 
@@ -23,10 +24,10 @@ copyright = '2020-2023, The Firebird Project'
 author = 'Pavel Císař'
 
 # The short X.Y version
-version = '1.6.1'
+version = __version__
 
 # The full version, including alpha/beta/rc tags
-release = '1.6.1'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------

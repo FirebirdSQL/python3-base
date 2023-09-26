@@ -6,9 +6,9 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/firebird-base.svg)](https://pypi.org/project/firebird-base)
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 
-The firebird-base package is a set of Python 3 modules commonly used by `Firebird Project`_
+The firebird-base package is a set of Python 3 modules commonly used by [Firebird Project](https://github.com/FirebirdSQL)
 in various development projects (for example the firebird-driver or Saturnin). However, these
-modules have general applicability outside the scope of development for Firebird_.
+modules have general applicability outside the scope of development for [Firebird](https://www.firebirdsql.org).
 
 -----
 
