@@ -2,8 +2,8 @@
 Changelog
 #########
 
-Version 1.7.0 [unreleased]
-==========================
+Version 1.7.0
+=============
 
 * Update dependency to protobuf >=4.24.3
 * Build system changed from setuptools to hatch
