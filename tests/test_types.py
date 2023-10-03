@@ -1,26 +1,37 @@
-#!/usr/bin/python
-#coding:utf-8
+# SPDX-FileCopyrightText: 2020-present The Firebird Projects <www.firebirdsql.org>
+#
+# SPDX-License-Identifier: MIT
 #
 #   PROGRAM/MODULE: firebird-base
 #   FILE:           test/test_types.py
 #   DESCRIPTION:    Unit tests for firebird.base.types
 #   CREATED:        14.5.2020
 #
-#  Software distributed under the License is distributed AS IS,
-#  WITHOUT WARRANTY OF ANY KIND, either express or implied.
-#  See the License for the specific language governing rights
-#  and limitations under the License.
+# The contents of this file are subject to the MIT License
 #
-#  The Original Code was created by Pavel Cisar
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-#  Copyright (c) Pavel Cisar <pcisar@users.sourceforge.net>
-#  and all contributors signed below.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 #
-#  All Rights Reserved.
-#  Contributor(s): Pavel Císař (original code)
-#                  ______________________________________.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 #
-# See LICENSE.TXT for details.
+# Copyright (c) 2020 Firebird Project (www.firebirdsql.org)
+# All Rights Reserved.
+#
+# Contributor(s): Pavel Císař (original code)
+#                 ______________________________________.
 
 from __future__ import annotations
 from typing import List

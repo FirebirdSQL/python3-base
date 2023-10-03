@@ -1,5 +1,6 @@
-#!/usr/bin/python
-#coding:utf-8
+# SPDX-FileCopyrightText: 2020-present The Firebird Projects <www.firebirdsql.org>
+#
+# SPDX-License-Identifier: MIT
 #
 # PROGRAM/MODULE: firebird-base
 # FILE:           test/test_logging.py
