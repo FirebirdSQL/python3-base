@@ -1248,9 +1248,12 @@ option_name = 1000
         self.assertEqual(cm.exception.args, ('Wrong value type: uint32',))
         self.proto.Clear()
         self.proto.options['option_name'].as_uint64 = 1000
-        with self.assertRaises(ValueError) as cm:
-            opt.load_proto(self.proto)
-        self.assertEqual(cm.exception.args, ("Illegal value 'SimpleIntFlag.512|256|128|64|32|FOUR' for flag option 'option_name'",))
+        # Python 3.11 changed how flag boundaries are checked, default is more benevolent
+        # see https://docs.python.org/3.11/library/enum.html#enum.FlagBoundary.KEEP
+        if int(platform.python_version_tuple()[1]) < 11:
+            with self.assertRaises(ValueError) as cm:
+                opt.load_proto(self.proto)
+            self.assertEqual(cm.exception.args, ("Illegal value 'SimpleIntFlag.512|256|128|64|32|FOUR' for flag option 'option_name'",))
         self.proto.Clear()
         opt.clear(to_default=False)
         opt.save_proto(self.proto)

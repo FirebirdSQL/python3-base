@@ -38,6 +38,7 @@
 
 from __future__ import annotations
 import unittest
+import platform
 from logging import getLogger, Formatter, lastResort, LogRecord
 from firebird.base.types import *
 from firebird.base.logging import logging_manager, get_logger, bind_logger, \
@@ -78,6 +79,10 @@ class TestLogging(BaseLoggingTest):
         self.assertIsNotNone(lastResort)
         self.assertIsNotNone(lastResort.formatter)
     def test_aaa(self):
+        if int(platform.python_version_tuple()[1]) < 11:
+            AGENT = 'test_aaa (test_logging.TestLogging)'
+        else:
+            AGENT = 'test_aaa (test_logging.TestLogging.test_aaa)'
         # root
         with self.assertLogs() as log:
             get_logger(self).info('Message')
@@ -89,7 +94,7 @@ class TestLogging(BaseLoggingTest):
         self.assertEqual(rec.filename, 'test_logging.py')
         self.assertEqual(rec.funcName, 'test_aaa')
         self.assertEqual(rec.topic, '')
-        self.assertEqual(rec.agent, 'test_aaa (test_logging.TestLogging)')
+        self.assertEqual(rec.agent, AGENT)
         self.assertEqual(rec.context, UNDEFINED)
         self.assertEqual(rec.message, 'Message')
         # trace
@@ -103,7 +108,7 @@ class TestLogging(BaseLoggingTest):
         self.assertEqual(rec.filename, 'test_logging.py')
         self.assertEqual(rec.funcName, 'test_aaa')
         self.assertEqual(rec.topic, 'trace')
-        self.assertEqual(rec.agent, 'test_aaa (test_logging.TestLogging)')
+        self.assertEqual(rec.agent, AGENT)
         self.assertEqual(rec.context, UNDEFINED)
         self.assertEqual(rec.message, 'Message')
     def test_interpolation(self):
