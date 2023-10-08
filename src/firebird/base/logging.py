@@ -43,6 +43,7 @@ from enum import IntEnum, Flag, auto
 from collections.abc import Mapping
 from dataclasses import dataclass
 from logging import Logger, LoggerAdapter, getLogger, lastResort, Formatter
+from platform import python_version_tuple
 from .types import UNDEFINED, DEFAULT, ANY, ALL, Distinct, CachedDistinct, Sentinel
 from .collections import Registry
 
@@ -124,7 +125,7 @@ class FBLoggerAdapter(LoggerAdapter, CachedDistinct):
             msg = eval(f'f"""{msg}"""', globals(), ns)
             args = ()
             if 'stacklevel' not in kwargs:
-                kwargs['stacklevel'] = 3
+                kwargs['stacklevel'] = 3 if int(python_version_tuple()[1]) < 11 else 2
             kwargs.setdefault('extra', {}).update(topic=self.topic, agent=self.agent,
                                                   context=self.context)
             self.logger.log(level, msg, *args, **{k: v for k, v in kwargs.items()
