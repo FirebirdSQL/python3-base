@@ -76,6 +76,8 @@ class Error(Exception):
         for name, value in kwargs.items():
             setattr(self, name, value)
     def __getattr__(self, name):
+        if name == '__notes__':
+            raise AttributeError
         return None
 
 # Singletons
