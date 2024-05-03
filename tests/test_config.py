@@ -47,7 +47,7 @@ from pathlib import Path
 from enum import IntEnum, IntFlag, Flag, auto
 from dataclasses import dataclass
 from inspect import signature
-from configparser import ConfigParser, ExtendedInterpolation
+from configparser import ConfigParser
 from firebird.base.types import Error, ZMQAddress, MIME, PyExpr, PyCode, PyCallable
 from firebird.base.strconv import convert_to_str
 from firebird.base import config
@@ -108,7 +108,7 @@ class BaseConfigTest(TestCase):
     "Base class for firebird.base.config unit tests"
     def setUp(self):
         self.proto: config.ConfigProto = config.ConfigProto()
-        self.conf: ConfigParser = ConfigParser(interpolation=ExtendedInterpolation())
+        self.conf: ConfigParser = ConfigParser(interpolation=config.EnvExtendedInterpolation())
     def tearDown(self):
         pass
     def setConf(self, conf_str):
@@ -3383,6 +3383,31 @@ class TestApplicationDirScheme(BaseConfigTest):
         self.assertEqual(scheme.user_data, Path('~/.local/share/test_app').expanduser())
         self.assertEqual(scheme.user_sync, Path('~/.local/sync/test_app').expanduser())
         self.assertEqual(scheme.user_cache, Path('~/.cache/test_app').expanduser())
+
+class TestInterpolation(BaseConfigTest):
+    "Unit tests for firebird.base.config.EnvExtendedInterpolation"
+    CONFIG = """[base]
+base_value = BASE
+
+[my-config]
+value_str = VALUE
+value_int = 1
+base_value = ${base:base_value}
+value_env_1 = ${env:mysecret}
+value_env_2 = ${env:not-present}
+value_env_path = ${env:path}
+"""
+    @mock.patch.dict(os.environ, {'MYSECRET': 'secret'})
+    def test_01(self):
+        cfg = ConfigParser(interpolation=config.EnvExtendedInterpolation())
+        cfg.read_string(self.CONFIG)
+        self.assertEqual(cfg['my-config']['value_str'], 'VALUE')
+        self.assertEqual(cfg['my-config']['value_int'], '1')
+        self.assertEqual(cfg['my-config']['base_value'], 'BASE')
+        self.assertEqual(cfg['my-config']['value_env_1'], 'secret')
+        self.assertEqual(cfg['my-config']['value_env_2'], '')
+        self.assertEqual(cfg['my-config']['value_env_path'], os.getenv('PATH'))
+
 
 if __name__ == '__main__':
     unittest_main()

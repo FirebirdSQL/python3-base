@@ -33,15 +33,20 @@ The framework is based around two classes:
   `.PyCode` and `.PyCallable`. It also provides special options `ConfigOption` and
   `ConfigListOption`.
 
-Additionally, the `.ApplicationDirectoryScheme` abstract base class defines set of mostly
+Additionally, the `.DirectoryScheme` abstract base class defines set of mostly
 used application directories. The function `.get_directory_scheme()` could be then used
 to obtain instance that implements platform-specific standards for file-system location
 for these directories. Currently, only "Windows", "Linux" and "MacOS" directory schemes
 are supported.
 
-.. note::
-    You may use `platform.system` call to determine the scheme name suitable for platform
+.. tip::
+    You may use `.get_directory_scheme()` function to get the scheme suitable for platform
     where your application is running.
+
+.. tip::
+    If your configurations contain secrets like passwords or access tokens, that would be
+    read from files via `configparser`, you should consider to use `.EnvExtendedInterpolation`
+    that has support for option values defined via environment variables.
 
 Usage
 -----
@@ -288,7 +293,7 @@ The protobuf message is defined in :file:`/proto/config.proto`.
       cfg_msg = ConfigProto()
 
    Because the proto file is NOT registered in `.protobuf` registry, you must register
-   it manually. The proto file is listed in `setup.cfg` under *"firebird.base.protobuf"*
+   it manually. The proto file is listed in `pyproject.toml` under *"firebird.base.protobuf"*
    entrypoint, so use `load_registered('firebird.base.protobuf')` for its registration.
 
    .. code-block::
@@ -330,6 +335,11 @@ Application Directory Scheme
 .. autoclass:: LinuxDirectoryScheme
 .. autoclass:: MacOSDirectoryScheme
 .. autofunction:: get_directory_scheme
+
+Configparser interpolation
+==========================
+
+.. autoclass:: EnvExtendedInterpolation
 
 Config
 ======

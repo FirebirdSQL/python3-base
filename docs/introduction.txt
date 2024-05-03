@@ -69,10 +69,11 @@ configuration that supports:
 * configuration options of various data type, including lists and other complex types
 * validation
 * direct manipulation of configuration values
-* reading from (and writing into) configuration in `configparser` format
+* reading from (and writing into) configuration in `configparser` format, including support
+  for option values defined via environment variables (see `.EnvExtendedInterpolation`)
 * exchanging configuration (for example between processes) using Google protobuf messages
 
-Additionally, the `.ApplicationDirectoryScheme` abstract base class defines set of mostly
+Additionally, the `.DirectoryScheme` abstract base class defines set of mostly
 used application directories. The function `.get_directory_scheme()` could be then used
 to obtain instance that implements platform-specific standards for file-system location
 for these directories. Currently, only "Windows", "Linux" and "MacOS" directory schemes
