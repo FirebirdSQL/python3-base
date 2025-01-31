@@ -4,7 +4,7 @@
 #
 #   PROGRAM/MODULE: firebird-base
 #   FILE:           test/test_hooks.py
-#   DESCRIPTION:    Unit tests for firebird.base.hooks
+#   DESCRIPTION:    Tests for firebird.base.hooks
 #   CREATED:        14.5.2020
 #
 # The contents of this file are subject to the MIT License
@@ -33,14 +33,16 @@
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________.
 
-"Firebird Base - Unit tests for firebird.base.hooks."
-
 from __future__ import annotations
-from typing import Protocol, List, cast
-import unittest
+
 from enum import Enum, auto
-from firebird.base.hooks import hook_manager, HookFlag
+from typing import Protocol, cast
+
+import pytest
+
+from firebird.base.hooks import HookFlag, hook_manager
 from firebird.base.types import ANY
+
 
 class MyEvents(Enum):
     CREATE = auto()
@@ -49,6 +51,14 @@ class MyEvents(Enum):
 class with_print(Protocol):
     def print(self, msg: str) -> None:
         ...
+
+class Output:
+    def __init__(self):
+        self.output: list[str] = []
+    def print(self, msg: str) -> None:
+        self.output.append(msg)
+    def clear(self) -> None:
+        self.output.clear()
 
 class MyHookable:
     def __init__(self, owner: with_print, name: str, *, register: bool=False,
@@ -82,9 +92,9 @@ class MyHookable:
 class MySuperHookable(MyHookable):
     def super_action(self):
         self.owner.print(f"{self.name}.SUPER-ACTION!")
-        for hook in hook_manager.get_callbacks('super-action', self):
+        for hook in hook_manager.get_callbacks("super-action", self):
             try:
-                hook(self, 'super-action')
+                hook(self, "super-action")
             except Exception as e:
                 self.owner.print(f"{self.name}.SUPER-ACTION hook call outcome: ERROR ({e.args[0]})")
             else:
@@ -125,381 +135,358 @@ def iter_class_variables(cls):
 """
     for varname in vars(cls):
         value = getattr(cls, varname)
-        if not (isinstance(value, property) or callable(value)) and not varname.startswith('_'):
+        if not (isinstance(value, property) or callable(value)) and not varname.startswith("_"):
             yield varname
 
+@pytest.fixture
+def output():
+    return Output()
 
-class TestHooks(unittest.TestCase):
-    """Unit tests for firebird.base.hooks.HookManager"""
-    def __init__(self, methodName='runTest'):
-        super().__init__(methodName)
-        self.output: List = []
-    def setUp(self) -> None:
-        self.output.clear()
-        hook_manager.reset()
-    def tearDown(self):
-        pass
-    def print(self, msg: str) -> None:
-        self.output.append(msg)
-    def test_aaa_hooks(self):
-        # register hookables
-        hook_manager.register_class(MyHookable, MyEvents)
-        self.assertTupleEqual(tuple(hook_manager.hookables.keys()), (MyHookable, ))
-        self.assertSetEqual(hook_manager.hookables[MyHookable],
-                            set(x for x in cast(Enum, MyEvents).__members__.values()))
-        # Optimizations
-        self.assertNotIn(HookFlag.CLASS, hook_manager.flags)
-        self.assertNotIn(HookFlag.INSTANCE, hook_manager.flags)
-        self.assertNotIn(HookFlag.ANY_EVENT, hook_manager.flags)
-        self.assertNotIn(HookFlag.NAME, hook_manager.flags)
-        # Install hooks
-        hook_A: MyHook = MyHook(self, 'Hook-A')
-        hook_B: MyHook = MyHook(self, 'Hook-B')
-        hook_C: MyHook = MyHook(self, 'Hook-C')
-        hook_N: MyHook = MyHook(self, 'Hook-N')
-        #
-        hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
-        self.assertIn(HookFlag.CLASS, hook_manager.flags)
-        hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
-        hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
-        hook_manager.add_hook(MyEvents.ACTION, 'Source-A', hook_N.callback)
-        self.assertIn(HookFlag.NAME, hook_manager.flags)
-        #
-        key = (MyEvents.CREATE, MyHookable, ANY)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_A.callback, hook_manager.hooks[key].callbacks)
-        self.assertIn(hook_B.err_callback, hook_manager.hooks[key].callbacks)
-        key = (MyEvents.ACTION, MyHookable, ANY)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_C.callback, hook_manager.hooks[key].callbacks)
-        # Create event sources, emits CREATE
-        self.output.clear()
-        src_A: MyHookable = MyHookable(self, 'Source-A', register=True)
-        self.assertListEqual(self.output,
-                             ['Hook Hook-A event CREATE called by Source-A',
-                              'Source-A.CREATE hook call outcome: OK',
-                              'Hook Hook-B event CREATE called by Source-A',
-                              'Source-A.CREATE hook call outcome: ERROR (Error in hook)'])
-        self.output.clear()
-        src_B: MyHookable = MyHookable(self, 'Source-B', register=True)
-        self.assertListEqual(self.output,
-                             ['Hook Hook-A event CREATE called by Source-B',
-                              'Source-B.CREATE hook call outcome: OK',
-                              'Hook Hook-B event CREATE called by Source-B',
-                              'Source-B.CREATE hook call outcome: ERROR (Error in hook)'])
-        # Install instance hooks
-        hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
-        self.assertIn(HookFlag.INSTANCE, hook_manager.flags)
-        hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
-        #
-        key = (MyEvents.ACTION, ANY, src_A)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_A.callback, hook_manager.hooks[key].callbacks)
-        key = (MyEvents.ACTION, ANY, src_B)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_B.callback, hook_manager.hooks[key].callbacks)
-        # And action!
-        self.output.clear()
-        src_A.action()
-        self.assertListEqual(self.output,
-                             ['Source-A.ACTION!',
-                              'Hook Hook-A event ACTION called by Source-A',
-                              'Source-A.ACTION hook call outcome: OK',
-                              'Hook Hook-N event ACTION called by Source-A',
-                              'Source-A.ACTION hook call outcome: OK',
-                              'Hook Hook-C event ACTION called by Source-A',
-                              'Source-A.ACTION hook call outcome: OK'])
-        #
-        self.output.clear()
-        src_B.action()
-        self.assertListEqual(self.output,
-                             ['Source-B.ACTION!',
-                              'Hook Hook-B event ACTION called by Source-B',
-                              'Source-B.ACTION hook call outcome: OK',
-                              'Hook Hook-C event ACTION called by Source-B',
-                              'Source-B.ACTION hook call outcome: OK'])
-        # Optimizations
-        self.assertIn(HookFlag.CLASS, hook_manager.flags)
-        self.assertIn(HookFlag.INSTANCE, hook_manager.flags)
-        self.assertNotIn(HookFlag.ANY_EVENT, hook_manager.flags)
-        self.assertIn(HookFlag.NAME, hook_manager.flags)
-        # Remove hooks
-        hook_manager.remove_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
-        key = (MyEvents.CREATE, MyHookable, ANY)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertNotIn(hook_A.callback, hook_manager.hooks[key].callbacks)
-        hook_manager.remove_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
-        self.assertFalse(key in hook_manager.hooks)
-        #
-        hook_manager.remove_hook(MyEvents.ACTION, src_A, hook_A.callback)
-        key = (MyEvents.ACTION, ANY, src_A)
-        self.assertFalse(key in hook_manager.hooks)
-        #
-        hook_manager.remove_all_hooks()
-        self.assertEqual(len(hook_manager.hooks), 0)
-        #
-        hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
-        hook_manager.reset()
-        self.assertEqual(len(hook_manager.hookables), 0)
-        self.assertEqual(len(hook_manager.hooks), 0)
-    def test_inherited_hookable(self):
-        # register hookables
-        hook_manager.register_class(MyHookable, MyEvents)
-        self.assertTupleEqual(tuple(hook_manager.hookables.keys()), (MyHookable, ))
-        self.assertSetEqual(hook_manager.hookables[MyHookable],
-                            set(x for x in cast(Enum, MyEvents).__members__.values()))
-        # Install hooks
-        hook_A: MyHook = MyHook(self, 'Hook-A')
-        hook_B: MyHook = MyHook(self, 'Hook-B')
-        hook_C: MyHook = MyHook(self, 'Hook-C')
-        #
-        hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
-        hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
-        hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
-        #
-        key = (MyEvents.CREATE, MyHookable, ANY)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_A.callback, hook_manager.hooks[key].callbacks)
-        self.assertIn(hook_B.err_callback, hook_manager.hooks[key].callbacks)
-        key = (MyEvents.ACTION, MyHookable, ANY)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_C.callback, hook_manager.hooks[key].callbacks)
-        # Create event sources, emits CREATE
-        self.output.clear()
-        src_A: MySuperHookable = MySuperHookable(self, 'SuperSource-A')
-        self.assertListEqual(self.output,
-                             ['Hook Hook-A event CREATE called by SuperSource-A',
-                              'SuperSource-A.CREATE hook call outcome: OK',
-                              'Hook Hook-B event CREATE called by SuperSource-A',
-                              'SuperSource-A.CREATE hook call outcome: ERROR (Error in hook)'])
-        self.output.clear()
-        src_B: MySuperHookable = MySuperHookable(self, 'SuperSource-B')
-        self.assertListEqual(self.output,
-                             ['Hook Hook-A event CREATE called by SuperSource-B',
-                              'SuperSource-B.CREATE hook call outcome: OK',
-                              'Hook Hook-B event CREATE called by SuperSource-B',
-                              'SuperSource-B.CREATE hook call outcome: ERROR (Error in hook)'])
-        # Install instance hooks
-        hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
-        hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
-        #
-        key = (MyEvents.ACTION, ANY, src_A)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_A.callback, hook_manager.hooks[key].callbacks)
-        key = (MyEvents.ACTION, ANY, src_B)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_B.callback, hook_manager.hooks[key].callbacks)
-        # And action!
-        self.output.clear()
-        src_A.action()
-        self.assertListEqual(self.output,
-                             ['SuperSource-A.ACTION!',
-                              'Hook Hook-A event ACTION called by SuperSource-A',
-                              'SuperSource-A.ACTION hook call outcome: OK',
-                              'Hook Hook-C event ACTION called by SuperSource-A',
-                              'SuperSource-A.ACTION hook call outcome: OK'])
-        #
-        self.output.clear()
-        src_B.action()
-        self.assertListEqual(self.output,
-                             ['SuperSource-B.ACTION!',
-                              'Hook Hook-B event ACTION called by SuperSource-B',
-                              'SuperSource-B.ACTION hook call outcome: OK',
-                              'Hook Hook-C event ACTION called by SuperSource-B',
-                              'SuperSource-B.ACTION hook call outcome: OK'])
-    def test_inheritance(self):
-        # register hookables
-        hook_manager.register_class(MyHookable, MyEvents)
-        hook_manager.register_class(MySuperHookable, ('super-action', ))
-        self.assertTupleEqual(tuple(hook_manager.hookables.keys()), (MyHookable, MySuperHookable))
-        self.assertSetEqual(hook_manager.hookables[MyHookable],
-                            set(x for x in cast(Enum, MyEvents).__members__.values()))
-        self.assertTupleEqual(hook_manager.hookables[MySuperHookable], ('super-action', ))
-        # Install hooks
-        hook_A: MyHook = MyHook(self, 'Hook-A')
-        hook_B: MyHook = MyHook(self, 'Hook-B')
-        hook_C: MyHook = MyHook(self, 'Hook-C')
-        hook_S: MyHook = MyHook(self, 'Hook-S')
-        #
-        hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
-        hook_manager.add_hook(MyEvents.CREATE, MySuperHookable, hook_B.err_callback)
-        hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
-        hook_manager.add_hook('super-action', MySuperHookable, hook_S.callback)
-        #
-        key = (MyEvents.CREATE, MyHookable, ANY)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_A.callback, hook_manager.hooks[key].callbacks)
-        key = (MyEvents.CREATE, MySuperHookable, ANY)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_B.err_callback, hook_manager.hooks[key].callbacks)
-        key = (MyEvents.ACTION, MyHookable, ANY)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_C.callback, hook_manager.hooks[key].callbacks)
-        # Create event sources, emits CREATE
-        self.output.clear()
-        src_A: MySuperHookable = MySuperHookable(self, 'SuperSource-A')
-        self.assertListEqual(self.output,
-                             ['Hook Hook-A event CREATE called by SuperSource-A',
-                              'SuperSource-A.CREATE hook call outcome: OK',
-                              'Hook Hook-B event CREATE called by SuperSource-A',
-                              'SuperSource-A.CREATE hook call outcome: ERROR (Error in hook)'])
-        self.output.clear()
-        src_B: MySuperHookable = MySuperHookable(self, 'SuperSource-B')
-        self.assertListEqual(self.output,
-                             ['Hook Hook-A event CREATE called by SuperSource-B',
-                              'SuperSource-B.CREATE hook call outcome: OK',
-                              'Hook Hook-B event CREATE called by SuperSource-B',
-                              'SuperSource-B.CREATE hook call outcome: ERROR (Error in hook)'])
-        # Install instance hooks
-        hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
-        hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
-        #
-        key = (MyEvents.ACTION, ANY, src_A)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_A.callback, hook_manager.hooks[key].callbacks)
-        key = (MyEvents.ACTION, ANY, src_B)
-        self.assertTrue(key in hook_manager.hooks)
-        self.assertIn(hook_B.callback, hook_manager.hooks[key].callbacks)
-        # And action!
-        self.output.clear()
-        src_A.action()
-        self.assertListEqual(self.output,
-                             ['SuperSource-A.ACTION!',
-                              'Hook Hook-A event ACTION called by SuperSource-A',
-                              'SuperSource-A.ACTION hook call outcome: OK',
-                              'Hook Hook-C event ACTION called by SuperSource-A',
-                              'SuperSource-A.ACTION hook call outcome: OK'])
-        #
-        self.output.clear()
-        src_B.action()
-        self.assertListEqual(self.output,
-                             ['SuperSource-B.ACTION!',
-                              'Hook Hook-B event ACTION called by SuperSource-B',
-                              'SuperSource-B.ACTION hook call outcome: OK',
-                              'Hook Hook-C event ACTION called by SuperSource-B',
-                              'SuperSource-B.ACTION hook call outcome: OK'])
-        #
-        self.output.clear()
-        src_B.super_action()
-        self.assertListEqual(self.output,
-                             ['SuperSource-B.SUPER-ACTION!',
-                              'Hook Hook-S event super-action called by SuperSource-B',
-                              'SuperSource-B.SUPER-ACTION hook call outcome: OK'])
-    def test_bad_hooks(self):
-        # register hookables
-        hook_manager.register_class(MyHookable, MyEvents)
-        hook_manager.register_class(MySuperHookable, ('super-action', ))
-        src_A: MyHookable = MyHookable(self, 'Source-A')
-        src_B: MySuperHookable = MySuperHookable(self, 'SuperSource-B')
-        # Install hooks
-        bad_hook: MyHook = MyHook(self, 'BAD-Hook')
-        # Wrong hookables
-        with self.assertRaises(TypeError) as cm:
-            hook_manager.add_hook(MyEvents.CREATE, ANY, bad_hook.callback) # hook object
-        self.assertEqual(cm.exception.args, ("Subject must be hookable class or instance, or name",))
-        with self.assertRaises(TypeError) as cm:
-            hook_manager.add_hook(MyEvents.CREATE, Enum, bad_hook.callback) # hook class
-        self.assertEqual(cm.exception.args, ('The type is not registered as hookable',))
-        self.assertDictEqual(hook_manager.hooks._reg, {})
-        # Wrong events
-        with self.assertRaises(ValueError) as cm:
-            hook_manager.add_hook('BAD EVENT', MyHookable, bad_hook.callback)
-        self.assertEqual(cm.exception.args, ("Event 'BAD EVENT' is not supported by 'MyHookable'",))
-        with self.assertRaises(ValueError) as cm:
-            hook_manager.add_hook('BAD EVENT', MySuperHookable, bad_hook.callback)
-        self.assertEqual(cm.exception.args, ("Event 'BAD EVENT' is not supported by 'MySuperHookable'",))
-        #
-        with self.assertRaises(ValueError) as cm:
-            hook_manager.add_hook('BAD EVENT', src_A, bad_hook.callback)
-        self.assertEqual(cm.exception.args, ("Event 'BAD EVENT' is not supported by 'MyHookable'",))
-        with self.assertRaises(ValueError) as cm:
-            hook_manager.add_hook('BAD EVENT', src_B, bad_hook.callback)
-        self.assertEqual(cm.exception.args, ("Event 'BAD EVENT' is not supported by 'MySuperHookable'",))
-        # Bad hookable instances
-        with self.assertRaises(TypeError) as cm:
-            hook_manager.register_name(self, 'BAD_CLASS')
-        self.assertEqual(cm.exception.args, ("The instance is not of hookable type",))
-    def test_any_event(self):
-        # register hookables
-        hook_manager.register_class(MyHookable, MyEvents)
-        # Install hooks
-        hook_A: MyHook = MyHook(self, 'Hook-A')
-        hook_B: MyHook = MyHook(self, 'Hook-B')
-        hook_C: MyHook = MyHook(self, 'Hook-C')
-        hook_D: MyHook = MyHook(self, 'Hook-D')
-        hook_manager.add_hook(ANY, MyHookable, hook_A.callback)
-        hook_manager.add_hook(ANY, MyHookable, hook_B.err_callback)
-        # Create event sources, emits CREATE
-        self.output.clear()
-        src_A: MyHookable = MyHookable(self, 'Source-A', register=True)
-        self.assertListEqual(self.output,
-                             ['Hook Hook-A event CREATE called by Source-A',
-                              'Source-A.CREATE hook call outcome: OK',
-                              'Hook Hook-B event CREATE called by Source-A',
-                              'Source-A.CREATE hook call outcome: ERROR (Error in hook)'])
-        # Install instance hooks
-        hook_manager.add_hook(ANY, src_A, hook_C.callback)
-        hook_manager.add_hook(ANY, 'Source-A', hook_D.callback)
-        # And action!
-        self.output.clear()
-        src_A.action()
-        self.assertListEqual(self.output,
-                             ['Source-A.ACTION!',
-                              'Hook Hook-C event ACTION called by Source-A',
-                              'Source-A.ACTION hook call outcome: OK',
-                              'Hook Hook-D event ACTION called by Source-A',
-                              'Source-A.ACTION hook call outcome: OK',
-                              'Hook Hook-A event ACTION called by Source-A',
-                              'Source-A.ACTION hook call outcome: OK',
-                              'Hook Hook-B event ACTION called by Source-A',
-                              'Source-A.ACTION hook call outcome: ERROR (Error in hook)'])
-        # Optimizations
-        self.assertIn(HookFlag.CLASS, hook_manager.flags)
-        self.assertIn(HookFlag.INSTANCE, hook_manager.flags)
-        self.assertIn(HookFlag.ANY_EVENT, hook_manager.flags)
-        self.assertIn(HookFlag.NAME, hook_manager.flags)
-    def test_class_hooks(self):
-        # register hookables
-        hook_manager.register_class(MyHookable, MyEvents)
-        # Install hooks
-        hook_A: MyHook = MyHook(self, 'Hook-A')
-        hook_B: MyHook = MyHook(self, 'Hook-B')
-        hook_C: MyHook = MyHook(self, 'Hook-C')
-        hook_D: MyHook = MyHook(self, 'Hook-D')
-        hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
-        hook_manager.add_hook(ANY, MyHookable, hook_B.err_callback)
-        hook_manager.add_hook(MyEvents.CREATE, 'Source-A', hook_C.callback)
-        hook_manager.add_hook(ANY, 'Source-A', hook_D.callback)
-        # Create event sources, emits CREATE
-        self.output.clear()
-        MyHookable(self, 'Source-A', use_class=True)
-        self.assertListEqual(self.output,
-                             ['Hook Hook-A event CREATE called by Source-A',
-                              'Source-A.CREATE hook call outcome: OK',
-                              'Hook Hook-B event CREATE called by Source-A',
-                              'Source-A.CREATE hook call outcome: ERROR (Error in hook)'])
-    def test_name_hooks(self):
-        # register hookables
-        hook_manager.register_class(MyHookable, MyEvents)
-        # Install hooks
-        hook_A: MyHook = MyHook(self, 'Hook-A')
-        hook_B: MyHook = MyHook(self, 'Hook-B')
-        hook_C: MyHook = MyHook(self, 'Hook-C')
-        hook_D: MyHook = MyHook(self, 'Hook-D')
-        hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
-        hook_manager.add_hook(ANY, MyHookable, hook_B.err_callback)
-        hook_manager.add_hook(MyEvents.CREATE, 'Source-A', hook_C.callback)
-        hook_manager.add_hook(ANY, 'Source-A', hook_D.err_callback)
-        # Create event sources, emits CREATE
-        self.output.clear()
-        MyHookable(self, 'Source-A', use_name=True)
-        self.assertListEqual(self.output,
-                             ['Hook Hook-C event CREATE called by Source-A',
-                              'Source-A.CREATE hook call outcome: OK',
-                              'Hook Hook-D event CREATE called by Source-A',
-                              'Source-A.CREATE hook call outcome: ERROR (Error in hook)'])
+@pytest.fixture(autouse=True)
+def manager():
+    hook_manager.reset()
+    return hook_manager
+#
+def test_01_general_tests(output):
+    # register hookables
+    hook_manager.register_class(MyHookable, MyEvents)
+    assert tuple(hook_manager.hookables.keys()) == (MyHookable, )
+    assert hook_manager.hookables[MyHookable] == set(x for x in cast(Enum, MyEvents).__members__.values())
+    # Optimizations
+    assert HookFlag.CLASS not in hook_manager.flags
+    assert HookFlag.INSTANCE not in hook_manager.flags
+    assert HookFlag.ANY_EVENT not in hook_manager.flags
+    assert HookFlag.NAME not in hook_manager.flags
+    # Install hooks
+    hook_A: MyHook = MyHook(output, "Hook-A")
+    hook_B: MyHook = MyHook(output, "Hook-B")
+    hook_C: MyHook = MyHook(output, "Hook-C")
+    hook_N: MyHook = MyHook(output, "Hook-N")
+    #
+    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
+    assert HookFlag.CLASS in hook_manager.flags
+    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
+    hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
+    hook_manager.add_hook(MyEvents.ACTION, "Source-A", hook_N.callback)
+    assert HookFlag.NAME in hook_manager.flags
+    #
+    key = (MyEvents.CREATE, MyHookable, ANY)
+    assert key in hook_manager.hooks
+    assert hook_A.callback in hook_manager.hooks[key].callbacks
+    assert hook_B.err_callback in hook_manager.hooks[key].callbacks
+    key = (MyEvents.ACTION, MyHookable, ANY)
+    assert key in hook_manager.hooks
+    assert hook_C.callback in hook_manager.hooks[key].callbacks
+    # Create event sources, emits CREATE
+    output.clear()
+    src_A: MyHookable = MyHookable(output, "Source-A", register=True)
+    assert output.output == ["Hook Hook-A event CREATE called by Source-A",
+                             "Source-A.CREATE hook call outcome: OK",
+                             "Hook Hook-B event CREATE called by Source-A",
+                             "Source-A.CREATE hook call outcome: ERROR (Error in hook)"]
+    output.clear()
+    src_B: MyHookable = MyHookable(output, "Source-B", register=True)
+    assert output.output ==  ["Hook Hook-A event CREATE called by Source-B",
+                              "Source-B.CREATE hook call outcome: OK",
+                              "Hook Hook-B event CREATE called by Source-B",
+                              "Source-B.CREATE hook call outcome: ERROR (Error in hook)"]
+    # Install instance hooks
+    hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
+    assert HookFlag.INSTANCE in hook_manager.flags
+    hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
+    #
+    key = (MyEvents.ACTION, ANY, src_A)
+    assert key in hook_manager.hooks
+    assert hook_A.callback in hook_manager.hooks[key].callbacks
+    key = (MyEvents.ACTION, ANY, src_B)
+    assert key in hook_manager.hooks
+    assert hook_B.callback in hook_manager.hooks[key].callbacks
+    # And action!
+    output.clear()
+    src_A.action()
+    assert output.output == ["Source-A.ACTION!",
+                             "Hook Hook-A event ACTION called by Source-A",
+                             "Source-A.ACTION hook call outcome: OK",
+                             "Hook Hook-N event ACTION called by Source-A",
+                             "Source-A.ACTION hook call outcome: OK",
+                             "Hook Hook-C event ACTION called by Source-A",
+                             "Source-A.ACTION hook call outcome: OK"]
+    #
+    output.clear()
+    src_B.action()
+    assert output.output == ["Source-B.ACTION!",
+                             "Hook Hook-B event ACTION called by Source-B",
+                             "Source-B.ACTION hook call outcome: OK",
+                             "Hook Hook-C event ACTION called by Source-B",
+                             "Source-B.ACTION hook call outcome: OK"]
+    # Optimizations
+    assert HookFlag.CLASS in hook_manager.flags
+    assert HookFlag.INSTANCE in hook_manager.flags
+    assert HookFlag.ANY_EVENT not in hook_manager.flags
+    assert HookFlag.NAME in hook_manager.flags
+    # Remove hooks
+    hook_manager.remove_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
+    key = (MyEvents.CREATE, MyHookable, ANY)
+    assert key in hook_manager.hooks
+    assert hook_A.callback not in hook_manager.hooks[key].callbacks
+    hook_manager.remove_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
+    assert key not in hook_manager.hooks
+    #
+    hook_manager.remove_hook(MyEvents.ACTION, src_A, hook_A.callback)
+    key = (MyEvents.ACTION, ANY, src_A)
+    assert key not in hook_manager.hooks
+    #
+    hook_manager.remove_all_hooks()
+    assert len(hook_manager.hooks) == 0
+    #
+    hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
+    hook_manager.reset()
+    assert len(hook_manager.hookables) == 0
+    assert len(hook_manager.hooks) == 0
 
+def test_02_inherited_hookable(output):
+    # register hookables
+    hook_manager.register_class(MyHookable, MyEvents)
+    assert tuple(hook_manager.hookables.keys()) == (MyHookable, )
+    assert hook_manager.hookables[MyHookable] ==  set(x for x in cast(Enum, MyEvents).__members__.values())
+    # Install hooks
+    hook_A: MyHook = MyHook(output, "Hook-A")
+    hook_B: MyHook = MyHook(output, "Hook-B")
+    hook_C: MyHook = MyHook(output, "Hook-C")
+    #
+    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
+    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
+    hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
+    #
+    key = (MyEvents.CREATE, MyHookable, ANY)
+    assert key in hook_manager.hooks
+    assert hook_A.callback in hook_manager.hooks[key].callbacks
+    assert hook_B.err_callback in hook_manager.hooks[key].callbacks
+    key = (MyEvents.ACTION, MyHookable, ANY)
+    assert key in hook_manager.hooks
+    assert hook_C.callback in hook_manager.hooks[key].callbacks
+    # Create event sources, emits CREATE
+    output.clear()
+    src_A: MySuperHookable = MySuperHookable(output, "SuperSource-A")
+    assert output.output ==  ["Hook Hook-A event CREATE called by SuperSource-A",
+                              "SuperSource-A.CREATE hook call outcome: OK",
+                              "Hook Hook-B event CREATE called by SuperSource-A",
+                              "SuperSource-A.CREATE hook call outcome: ERROR (Error in hook)"]
+    output.clear()
+    src_B: MySuperHookable = MySuperHookable(output, "SuperSource-B")
+    assert output.output == ["Hook Hook-A event CREATE called by SuperSource-B",
+                             "SuperSource-B.CREATE hook call outcome: OK",
+                             "Hook Hook-B event CREATE called by SuperSource-B",
+                             "SuperSource-B.CREATE hook call outcome: ERROR (Error in hook)"]
+    # Install instance hooks
+    hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
+    hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
+    #
+    key = (MyEvents.ACTION, ANY, src_A)
+    assert key in hook_manager.hooks
+    assert hook_A.callback in hook_manager.hooks[key].callbacks
+    key = (MyEvents.ACTION, ANY, src_B)
+    assert key in hook_manager.hooks
+    assert hook_B.callback in hook_manager.hooks[key].callbacks
+    # And action!
+    output.clear()
+    src_A.action()
+    assert output.output ==  ["SuperSource-A.ACTION!",
+                              "Hook Hook-A event ACTION called by SuperSource-A",
+                              "SuperSource-A.ACTION hook call outcome: OK",
+                              "Hook Hook-C event ACTION called by SuperSource-A",
+                              "SuperSource-A.ACTION hook call outcome: OK"]
+    #
+    output.clear()
+    src_B.action()
+    assert output.output == ["SuperSource-B.ACTION!",
+                             "Hook Hook-B event ACTION called by SuperSource-B",
+                             "SuperSource-B.ACTION hook call outcome: OK",
+                             "Hook Hook-C event ACTION called by SuperSource-B",
+                             "SuperSource-B.ACTION hook call outcome: OK"]
 
+def test_03_inheritance(output):
+    # register hookables
+    hook_manager.register_class(MyHookable, MyEvents)
+    hook_manager.register_class(MySuperHookable, ("super-action", ))
+    assert tuple(hook_manager.hookables.keys()) == (MyHookable, MySuperHookable)
+    assert hook_manager.hookables[MyHookable] == set(x for x in cast(Enum, MyEvents).__members__.values())
+    assert hook_manager.hookables[MySuperHookable] == ("super-action", )
+    # Install hooks
+    hook_A: MyHook = MyHook(output, "Hook-A")
+    hook_B: MyHook = MyHook(output, "Hook-B")
+    hook_C: MyHook = MyHook(output, "Hook-C")
+    hook_S: MyHook = MyHook(output, "Hook-S")
+    #
+    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
+    hook_manager.add_hook(MyEvents.CREATE, MySuperHookable, hook_B.err_callback)
+    hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
+    hook_manager.add_hook("super-action", MySuperHookable, hook_S.callback)
+    #
+    key = (MyEvents.CREATE, MyHookable, ANY)
+    assert key in hook_manager.hooks
+    assert hook_A.callback in hook_manager.hooks[key].callbacks
+    key = (MyEvents.CREATE, MySuperHookable, ANY)
+    assert key in hook_manager.hooks
+    assert hook_B.err_callback in hook_manager.hooks[key].callbacks
+    key = (MyEvents.ACTION, MyHookable, ANY)
+    assert key in hook_manager.hooks
+    assert hook_C.callback in hook_manager.hooks[key].callbacks
+    # Create event sources, emits CREATE
+    output.clear()
+    src_A: MySuperHookable = MySuperHookable(output, "SuperSource-A")
+    assert output.output == ["Hook Hook-A event CREATE called by SuperSource-A",
+                            "SuperSource-A.CREATE hook call outcome: OK",
+                            "Hook Hook-B event CREATE called by SuperSource-A",
+                            "SuperSource-A.CREATE hook call outcome: ERROR (Error in hook)"]
+    output.clear()
+    src_B: MySuperHookable = MySuperHookable(output, "SuperSource-B")
+    assert output.output == ["Hook Hook-A event CREATE called by SuperSource-B",
+                            "SuperSource-B.CREATE hook call outcome: OK",
+                            "Hook Hook-B event CREATE called by SuperSource-B",
+                            "SuperSource-B.CREATE hook call outcome: ERROR (Error in hook)"]
+    # Install instance hooks
+    hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
+    hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
+    #
+    key = (MyEvents.ACTION, ANY, src_A)
+    assert key in hook_manager.hooks
+    assert hook_A.callback in hook_manager.hooks[key].callbacks
+    key = (MyEvents.ACTION, ANY, src_B)
+    assert key in hook_manager.hooks
+    assert hook_B.callback in hook_manager.hooks[key].callbacks
+    # And action!
+    output.clear()
+    src_A.action()
+    assert output.output == ["SuperSource-A.ACTION!",
+                            "Hook Hook-A event ACTION called by SuperSource-A",
+                            "SuperSource-A.ACTION hook call outcome: OK",
+                            "Hook Hook-C event ACTION called by SuperSource-A",
+                            "SuperSource-A.ACTION hook call outcome: OK"]
+    #
+    output.clear()
+    src_B.action()
+    assert output.output == ["SuperSource-B.ACTION!",
+                            "Hook Hook-B event ACTION called by SuperSource-B",
+                            "SuperSource-B.ACTION hook call outcome: OK",
+                            "Hook Hook-C event ACTION called by SuperSource-B",
+                            "SuperSource-B.ACTION hook call outcome: OK"]
+    #
+    output.clear()
+    src_B.super_action()
+    assert output.output == ["SuperSource-B.SUPER-ACTION!",
+                            "Hook Hook-S event super-action called by SuperSource-B",
+                            "SuperSource-B.SUPER-ACTION hook call outcome: OK"]
 
-if __name__ == '__main__':
-    unittest.main()
+def test_04_bad_hooks(output):
+    # register hookables
+    hook_manager.register_class(MyHookable, MyEvents)
+    hook_manager.register_class(MySuperHookable, ("super-action", ))
+    src_A: MyHookable = MyHookable(output, "Source-A")
+    src_B: MySuperHookable = MySuperHookable(output, "SuperSource-B")
+    # Install hooks
+    bad_hook: MyHook = MyHook(output, "BAD-Hook")
+    # Wrong hookables
+    with pytest.raises(TypeError) as cm:
+        hook_manager.add_hook(MyEvents.CREATE, ANY, bad_hook.callback) # hook object
+    assert cm.value.args == ("Subject must be hookable class or instance, or name",)
+    with pytest.raises(TypeError) as cm:
+        hook_manager.add_hook(MyEvents.CREATE, Enum, bad_hook.callback) # hook class
+    assert cm.value.args == ("The type is not registered as hookable",)
+    assert hook_manager.hooks._reg == {}
+    # Wrong events
+    with pytest.raises(ValueError) as cm:
+        hook_manager.add_hook("BAD EVENT", MyHookable, bad_hook.callback)
+    assert cm.value.args == ("Event 'BAD EVENT' is not supported by 'MyHookable'",)
+    with pytest.raises(ValueError) as cm:
+        hook_manager.add_hook("BAD EVENT", MySuperHookable, bad_hook.callback)
+    assert cm.value.args == ("Event 'BAD EVENT' is not supported by 'MySuperHookable'",)
+    #
+    with pytest.raises(ValueError) as cm:
+        hook_manager.add_hook("BAD EVENT", src_A, bad_hook.callback)
+    assert cm.value.args == ("Event 'BAD EVENT' is not supported by 'MyHookable'",)
+    with pytest.raises(ValueError) as cm:
+        hook_manager.add_hook("BAD EVENT", src_B, bad_hook.callback)
+    assert cm.value.args == ("Event 'BAD EVENT' is not supported by 'MySuperHookable'",)
+    # Bad hookable instances
+    with pytest.raises(TypeError) as cm:
+        hook_manager.register_name(output, "BAD_CLASS")
+    assert cm.value.args == ("The instance is not of hookable type",)
+
+def test_05_any_event(output):
+    # register hookables
+    hook_manager.register_class(MyHookable, MyEvents)
+    # Install hooks
+    hook_A: MyHook = MyHook(output, "Hook-A")
+    hook_B: MyHook = MyHook(output, "Hook-B")
+    hook_C: MyHook = MyHook(output, "Hook-C")
+    hook_D: MyHook = MyHook(output, "Hook-D")
+    hook_manager.add_hook(ANY, MyHookable, hook_A.callback)
+    hook_manager.add_hook(ANY, MyHookable, hook_B.err_callback)
+    # Create event sources, emits CREATE
+    output.clear()
+    src_A: MyHookable = MyHookable(output, "Source-A", register=True)
+    assert output.output == ["Hook Hook-A event CREATE called by Source-A",
+                             "Source-A.CREATE hook call outcome: OK",
+                             "Hook Hook-B event CREATE called by Source-A",
+                             "Source-A.CREATE hook call outcome: ERROR (Error in hook)"]
+    # Install instance hooks
+    hook_manager.add_hook(ANY, src_A, hook_C.callback)
+    hook_manager.add_hook(ANY, "Source-A", hook_D.callback)
+    # And action!
+    output.clear()
+    src_A.action()
+    assert output.output == ["Source-A.ACTION!",
+                             "Hook Hook-C event ACTION called by Source-A",
+                             "Source-A.ACTION hook call outcome: OK",
+                             "Hook Hook-D event ACTION called by Source-A",
+                             "Source-A.ACTION hook call outcome: OK",
+                             "Hook Hook-A event ACTION called by Source-A",
+                             "Source-A.ACTION hook call outcome: OK",
+                             "Hook Hook-B event ACTION called by Source-A",
+                             "Source-A.ACTION hook call outcome: ERROR (Error in hook)"]
+    # Optimizations
+    assert HookFlag.CLASS in hook_manager.flags
+    assert HookFlag.INSTANCE in hook_manager.flags
+    assert HookFlag.ANY_EVENT in hook_manager.flags
+    assert HookFlag.NAME in hook_manager.flags
+
+def test_06_class_hooks(output):
+    # register hookables
+    hook_manager.register_class(MyHookable, MyEvents)
+    # Install hooks
+    hook_A: MyHook = MyHook(output, "Hook-A")
+    hook_B: MyHook = MyHook(output, "Hook-B")
+    hook_C: MyHook = MyHook(output, "Hook-C")
+    hook_D: MyHook = MyHook(output, "Hook-D")
+    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
+    hook_manager.add_hook(ANY, MyHookable, hook_B.err_callback)
+    hook_manager.add_hook(MyEvents.CREATE, "Source-A", hook_C.callback)
+    hook_manager.add_hook(ANY, "Source-A", hook_D.callback)
+    # Create event sources, emits CREATE
+    output.clear()
+    MyHookable(output, "Source-A", use_class=True)
+    assert output.output == ["Hook Hook-A event CREATE called by Source-A",
+                             "Source-A.CREATE hook call outcome: OK",
+                             "Hook Hook-B event CREATE called by Source-A",
+                             "Source-A.CREATE hook call outcome: ERROR (Error in hook)"]
+
+def test_07_name_hooks(output):
+    # register hookables
+    hook_manager.register_class(MyHookable, MyEvents)
+    # Install hooks
+    hook_A: MyHook = MyHook(output, "Hook-A")
+    hook_B: MyHook = MyHook(output, "Hook-B")
+    hook_C: MyHook = MyHook(output, "Hook-C")
+    hook_D: MyHook = MyHook(output, "Hook-D")
+    hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
+    hook_manager.add_hook(ANY, MyHookable, hook_B.err_callback)
+    hook_manager.add_hook(MyEvents.CREATE, "Source-A", hook_C.callback)
+    hook_manager.add_hook(ANY, "Source-A", hook_D.err_callback)
+    # Create event sources, emits CREATE
+    output.clear()
+    MyHookable(output, "Source-A", use_name=True)
+    assert output.output == ["Hook Hook-C event CREATE called by Source-A",
+                             "Source-A.CREATE hook call outcome: OK",
+                             "Hook Hook-D event CREATE called by Source-A",
+                             "Source-A.CREATE hook call outcome: ERROR (Error in hook)"]

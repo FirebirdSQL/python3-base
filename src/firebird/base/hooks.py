@@ -39,12 +39,16 @@ This module provides a general framework for callbacks and "hookable" events.
 """
 
 from __future__ import annotations
-from typing import Union, Any, Type, Dict, List, Set, Callable, cast
-from enum import Enum, Flag, auto
-from weakref import WeakKeyDictionary
+
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from .types import Distinct, ANY, Singleton
+from enum import Enum, Flag, auto
+from typing import Any, cast
+from weakref import WeakKeyDictionary
+
 from .collections import Registry
+from .types import ANY, Distinct, Singleton
+
 
 @dataclass(order=True, frozen=True)
 class Hook(Distinct):
@@ -57,7 +61,7 @@ class Hook(Distinct):
     #: Instance of registered hookable class
     instance: Any = ANY
     #: List of callbacks
-    callbacks: List[Callable] = field(default_factory=list)
+    callbacks: list[Callable] = field(default_factory=list)
     def get_key(self) -> Any:
         """Returns hook key.
         """
@@ -77,7 +81,7 @@ class HookManager(Singleton):
     """
     def __init__(self):
         self.obj_map: WeakKeyDictionary = WeakKeyDictionary()
-        self.hookables: Dict[Type, Set[Any]] = {}
+        self.hookables: dict[type, set[Any]] = {}
         self.hooks: Registry = Registry()
         self.flags: HookFlag = HookFlag.NONE
     def _update_flags(self, event: Any, cls: Any, obj: Any) -> None:
@@ -86,11 +90,8 @@ class HookManager(Singleton):
         if cls is not ANY:
             self.flags |= HookFlag.CLASS
         if obj is not ANY:
-            if isinstance(obj, str):
-                self.flags |= HookFlag.NAME
-            else:
-                self.flags |= HookFlag.INSTANCE
-    def register_class(self, cls: Type, events: Union[Type[Enum], Set]=None) -> None:
+            self.flags |= HookFlag.NAME if isinstance(obj, str) else HookFlag.INSTANCE
+    def register_class(self, cls: type, events: type[Enum] | set | None=None) -> None:
         """Register hookable class.
 
         Arguments:
@@ -199,7 +200,7 @@ class HookManager(Singleton):
         self.remove_all_hooks()
         self.hookables.clear()
         self.obj_map.clear()
-    def get_callbacks(self, event: Any, source: Any) -> List:
+    def get_callbacks(self, event: Any, source: Any) -> list:
         """Returns list of all callbacks installed for specified event and hookable subject.
 
         Arguments:

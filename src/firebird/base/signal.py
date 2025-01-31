@@ -32,9 +32,10 @@
 # Copyright (c) 2020 Firebird Project (www.firebirdsql.org), after fork
 # All Rights Reserved.
 #
-# Contributor(s): PySignal 1.1.4 contributors: John Hood, Jason Viloria, Adric Worley,
-#                 Alex Widener
-#                 Pavel Císař - fork and reduction & adaptation for firebird-base and Python 3.8
+# Contributor(s): Based on PySignal 1.1.4 contributors: John Hood, Jason Viloria,
+#                 Adric Worley, Alex Widener
+#                 Pavel Císař - fork and reduction & adaptation for firebird-base and
+#                               Python 3.8, added Delphi events
 #                 ______________________________________
 
 """firebird-base - Callback system based on Signals and Slots, and "Delphi events"
@@ -43,10 +44,12 @@
 """
 
 from __future__ import annotations
-from typing import Callable, List
-from inspect import Signature, ismethod
-from weakref import ref, WeakKeyDictionary
+
+from collections.abc import Callable
 from functools import partial
+from inspect import Signature, ismethod
+from weakref import WeakKeyDictionary, ref
+
 
 class Signal:
     """The Signal is the core object that handles connection with slots and emission.
@@ -79,7 +82,7 @@ class Signal:
                                                  return_annotation=Signature.empty)
         #: Toggle to block / unblock signal transmission
         self.block: bool = False
-        self._slots: List[Callable] = []
+        self._slots: list[Callable] = []
         self._islots: WeakKeyDictionary = WeakKeyDictionary()
     def __call__(self, *args, **kwargs):
         self.emit(*args, **kwargs)
@@ -98,14 +101,8 @@ class Signal:
         if self.block:
             return
         for slot in self._slots:
-            if not slot:
-                continue
             if isinstance(slot, partial):
                 slot(*args, **kwargs)
-            elif isinstance(slot, WeakKeyDictionary):
-                # For class methods, get the class object and call the method accordingly.
-                for obj, method in slot.items():
-                    method(obj, *args, **kwargs)
             elif isinstance(slot, ref):
                 # If it's a weakref, call the ref to get the instance and then call the func
                 # Don't wrap in try/except so we don't risk masking exceptions from the actual func call
@@ -134,7 +131,7 @@ class Signal:
             if not self._kw_test(sig):
                 raise ValueError("Callable signature does not match the signal signature")
         if isinstance(slot, partial) or slot.__name__ == '<lambda>':
-            # If it's a partial, a Signal or a lambda.
+            # If it's a partial or a lambda.
             if slot not in self._slots:
                 self._slots.append(slot)
         elif ismethod(slot):
@@ -142,9 +139,9 @@ class Signal:
             self._islots[slot.__self__] = slot.__func__
         else:
             # If it's just a function then just store it as a weakref.
-            newSlotRef = ref(slot)
-            if newSlotRef not in self._slots:
-                self._slots.append(newSlotRef)
+            new_slot_ref = ref(slot)
+            if new_slot_ref not in self._slots:
+                self._slots.append(new_slot_ref)
     def disconnect(self, slot) -> None:
         """Disconnects the slot from the signal.
         """
@@ -170,9 +167,10 @@ class Signal:
         """Clears the signal of all connected slots.
         """
         self._slots.clear()
+        self._islots.clear()
 
 
-class signal:
+class signal: # noqa: N801
     """Decorator that defines signal as read-only property. The decorated function/method
     is used to define the signature required for slots to successfuly register to signal,
     and does not need to have a body as it's never executed.
@@ -193,14 +191,14 @@ class signal:
             self._map[obj] = Signal(self._sig_)
         return self._map[obj]
     def __set__(self, obj, val):
-        raise AttributeError("can't set signal")
+        raise AttributeError("Can't assign to signal")
     def __delete__(self, obj):
-        raise AttributeError("can't delete signal")
+        raise AttributeError("Can't delete signal")
 
 class _EventSocket:
     """Internal EventSocket handler.
     """
-    def __init__(self, slot: Callable=None):
+    def __init__(self, slot: Callable | None=None):
         self._slot: Callable = None
         self._weak = False
         if slot is not None:
@@ -213,7 +211,7 @@ class _EventSocket:
             else:
                 self._slot = ref(slot)
                 self._weak = True
-    def __call__(self, *args, **kwargs): # pylint: disable=[R1710]
+    def __call__(self, *args, **kwargs):
         if self._slot is not None:
             if isinstance(self._weak, ref):
                 if (obj := self._weak()):
@@ -231,7 +229,7 @@ class _EventSocket:
             return self._slot() is not None
         return self._slot is not None
 
-class eventsocket:
+class eventsocket: # noqa: N801
     """The `eventsocket` is like read/write property that handles connection and call
     delegation to single slot. It basically works like Delphi event.
 
@@ -259,7 +257,8 @@ class eventsocket:
     def __init__(self, fget, doc=None):
         s = Signature.from_callable(fget)
         # Remove 'self' from list of parameters
-        self._sig: Signature = s.replace(parameters=[v for k,v in s.parameters.items() if k.lower() != 'self'])
+        self._sig: Signature = s.replace(parameters=[v for k,v in s.parameters.items()
+                                                     if k.lower() != 'self'])
         # Key: instance of class where this eventsocket instance is used to define a property
         # Value: _EventSocket
         self._map = WeakKeyDictionary()
@@ -267,15 +266,13 @@ class eventsocket:
             doc = fget.__doc__
         self.__doc__ = doc
     def _kw_test(self, sig: Signature) -> bool:
-        set_p = set(sig.parameters)
-        set_t = set(self._sig.parameters)
-        for k in set_p.difference(set_t):
-            if sig.parameters[k].default is Signature.empty:
+        p = sig.parameters
+        result = False
+        for k in set(p).difference(set(self._sig.parameters)):
+            result = True
+            if p[k].default is Signature.empty:
                 return False
-        for k in set_t.difference(set_p):
-            if self._sig.parameters[k].default is Signature.empty:
-                return False
-        return sig.return_annotation == self._sig.return_annotation
+        return result
     def __get__(self, obj, objtype):
         if obj is None:
             return self
@@ -295,4 +292,4 @@ class eventsocket:
                 raise ValueError("Callable signature does not match the event signature")
         self._map[obj] = _EventSocket(value)
     def __delete__(self, obj):
-        raise AttributeError("can't delete eventsocket")
+        raise AttributeError("Can't delete eventsocket")

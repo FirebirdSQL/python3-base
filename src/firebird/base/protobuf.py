@@ -37,16 +37,19 @@
 """
 
 from __future__ import annotations
-from typing import Dict, Any, Callable, cast
+
+from collections.abc import Callable
 from dataclasses import dataclass
 from importlib.metadata import entry_points
-from google.protobuf.message import Message as ProtoMessage
+from typing import Any, cast
+
+from google.protobuf import any_pb2, duration_pb2, empty_pb2, field_mask_pb2, json_format, struct_pb2, timestamp_pb2
 from google.protobuf.descriptor import EnumDescriptor
-from google.protobuf.struct_pb2 import Struct as StructProto # pylint: disable=[E0611]
-from google.protobuf import json_format, struct_pb2, any_pb2, duration_pb2, empty_pb2, \
-     timestamp_pb2, field_mask_pb2
-from .types import Distinct
+from google.protobuf.message import Message as ProtoMessage
+from google.protobuf.struct_pb2 import Struct as StructProto
+
 from .collections import Registry
+from .types import Distinct
 
 #: Name of well-known EMPTY protobuf message (for use with `.create_message()`)
 PROTO_EMPTY = 'google.protobuf.Empty'
@@ -128,19 +131,19 @@ class ProtoEnumType(Distinct):
 _msgreg: Registry = Registry()
 _enumreg: Registry = Registry()
 
-def struct2dict(struct: StructProto) -> Dict:
+def struct2dict(struct: StructProto) -> dict:
     """Unpacks `google.protobuf.Struct` message to Python dict value.
     """
     return json_format.MessageToDict(struct)
 
-def dict2struct(value: Dict) -> StructProto:
+def dict2struct(value: dict) -> StructProto:
     """Returns dict packed into `google.protobuf.Struct` message.
     """
     struct = StructProto()
     struct.update(value)
     return struct
 
-def create_message(name: str, serialized: bytes = None) -> ProtoMessage:
+def create_message(name: str, serialized: bytes | None=None) -> ProtoMessage:
     """Returns new protobuf message instance.
 
     Arguments:
@@ -210,10 +213,10 @@ def register_decriptor(file_descriptor) -> None:
     """Registers enums and messages defined by protobuf file DESCRIPTOR.
     """
     for msg_desc in file_descriptor.message_types_by_name.values():
-        if not msg_desc.full_name in _msgreg:
+        if msg_desc.full_name not in _msgreg:
             _msgreg.store(ProtoMessageType(msg_desc.full_name, msg_desc._concrete_class))
     for enum_desc in file_descriptor.enum_types_by_name.values():
-        if not enum_desc.full_name in _enumreg:
+        if enum_desc.full_name not in _enumreg:
             _enumreg.store(ProtoEnumType(enum_desc))
 
 def load_registered(group: str) -> None: # pragma: no cover

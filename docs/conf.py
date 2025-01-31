@@ -15,13 +15,14 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import sphinx_bootstrap_theme
+
 from firebird.base.__about__ import __version__
 
 # -- Project information -----------------------------------------------------
 
-project = 'Firebird-base'
-copyright = '2020-2024, The Firebird Project'
-author = 'Pavel Císař'
+project = "Firebird-base"
+copyright = "2020-2025, The Firebird Project"
+author = "Pavel Císař"
 
 # The short X.Y version
 version = __version__
@@ -36,47 +37,47 @@ release = __version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.autosectionlabel',
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autosectionlabel",
     #'sphinx_autodoc_typehints',
-    'sphinx.ext.todo',
+    "sphinx.ext.todo",
     #'sphinx.ext.coverage',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.txt'
+source_suffix = ".txt"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'requirements.txt']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "requirements.txt"]
 
-default_role = 'py:obj'
+default_role = "py:obj"
 
 # -- Options for HTML output -------------------------------------------------
 
-html_favicon = '_static/fb-favicon.png'
+html_favicon = "_static/fb-favicon.png"
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
 #html_theme = 'alabaster'
-html_theme = 'bootstrap'
+html_theme = "bootstrap"
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # bootstrap theme config
 
@@ -91,7 +92,7 @@ html_theme_options = {
     #'navbar_title': "Firebird-base",
 
     # Tab name for entire site. (Default: "Site")
-    'navbar_site_name': "Site",
+    "navbar_site_name": "Site",
 
     # A list of tuples containing pages or urls to link to.
     # Valid tuples should be in the following forms:
@@ -100,7 +101,7 @@ html_theme_options = {
     #    (name, "http://example.com", True) # arbitrary absolute url
     # Note the "1" or "True" value above as the third argument to indicate
     # an arbitrary url.
-    'navbar_links': [
+    "navbar_links": [
         ("Introduction", "introduction"),
         ("Modules", "modules"),
         ("Index", "genindex"),
@@ -109,7 +110,7 @@ html_theme_options = {
     ],
 
     # Render the next and previous page links in navbar. (Default: true)
-    'navbar_sidebarrel': False,
+    "navbar_sidebarrel": False,
 
     # Render the current pages TOC in the navbar. (Default: true)
     #'navbar_pagenav': True,
@@ -119,7 +120,7 @@ html_theme_options = {
 
     # Global TOC depth for "site" navbar tab. (Default: 1)
     # Switching to -1 shows all levels.
-    'globaltoc_depth': 3,
+    "globaltoc_depth": 3,
 
     # Include hidden TOCs in Site navbar?
     #
@@ -128,19 +129,19 @@ html_theme_options = {
     # will break.
     #
     # Values: "true" (default) or "false"
-    'globaltoc_includehidden': "false",
+    "globaltoc_includehidden": "false",
 
     # HTML navbar class (Default: "navbar") to attach to <div> element.
     # For black navbar, do "navbar navbar-inverse"
-    'navbar_class': "navbar navbar-inverse",
+    "navbar_class": "navbar navbar-inverse",
 
     # Fix navigation bar to top of page?
     # Values: "true" (default) or "false"
-    'navbar_fixed_top': "true",
+    "navbar_fixed_top": "true",
 
     # Location of link to source.
     # Options are "nav" (default), "footer" or anything else to exclude.
-    'source_link_position': "none",
+    "source_link_position": "none",
 
     # Bootswatch (http://bootswatch.com/) theme.
     #
@@ -154,11 +155,11 @@ html_theme_options = {
     # - Bootstrap 2: https://bootswatch.com/2
     # - Bootstrap 3: https://bootswatch.com/3
     #'bootswatch_theme': "united", # cerulean, flatly, lumen, materia, united, yeti
-    'bootswatch_theme': "cerulean",
+    "bootswatch_theme": "cerulean",
 
     # Choose Bootstrap version.
     # Values: "3" (default) or "2" (in quotes)
-    'bootstrap_version': "2",
+    "bootstrap_version": "2",
 }
 
 # -- Extension configuration -------------------------------------------------
@@ -168,26 +169,26 @@ autosectionlabel_prefix_document = True
 # Autodoc options
 # ---------------
 autodoc_default_options = {
-    'content': 'both',
-    'members': True,
-    'member-order': 'groupwise',
-    'undoc-members': True,
-    'exclude-members': '__weakref__',
-    'show-inheritance': True,
-    'no-inherited-members': True,
+    "content": "both",
+    "members": True,
+    "member-order": "groupwise",
+    "undoc-members": True,
+    "exclude-members": "__weakref__",
+    "show-inheritance": True,
+    "no-inherited-members": True,
 }
 set_type_checking_flag = True
-autodoc_class_signature = 'mixed'
+autodoc_class_signature = "mixed"
 always_document_param_types = True
-autodoc_typehints = 'both' # default 'signature'
-autodoc_typehints_format = 'short'
-autodoc_typehints_description_target = 'all'
+autodoc_typehints = "both" # default 'signature'
+autodoc_typehints_format = "short"
+autodoc_typehints_description_target = "all"
 
-autodoc_type_aliases = {'Item': '~firebird.base.collections.Item',
-                        'TypeSpec': '~firebird.base.collections.TypeSpec',
-                        'ItemExpr': '~firebird.base.collections.ItemExpr',
-                        'FilterExpr': '~firebird.base.collections.FilterExpr',
-                        'CheckExpr': '~firebird.base.collections.CheckExpr',
+autodoc_type_aliases = {"Item": "~firebird.base.collections.Item",
+                        "TypeSpec": "~firebird.base.collections.TypeSpec",
+                        "ItemExpr": "~firebird.base.collections.ItemExpr",
+                        "FilterExpr": "~firebird.base.collections.FilterExpr",
+                        "CheckExpr": "~firebird.base.collections.CheckExpr",
                         }
 
 # Napoleon options
@@ -208,7 +209,7 @@ napoleon_preprocess_types = True
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 # -- Options for todo extension ----------------------------------------------
 

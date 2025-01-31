@@ -37,18 +37,24 @@
 
 This module provides a raw memory buffer manager with convenient methods to read/write
 data of various data type.
+
+The memory buffer is "abstracted" via `BufferFactory`, with two options provided:
+buffer based on `bytearray` or `ctypes.create_string_buffer`.
 """
 
 from __future__ import annotations
-from typing import runtime_checkable, Protocol, Type, Union, Any
-from ctypes import memset, create_string_buffer
-from .types import Sentinel, UNLIMITED, ByteOrder
+
+from ctypes import create_string_buffer, memset
+from typing import Any, Protocol, runtime_checkable
+
+from .types import UNLIMITED, ByteOrder, Sentinel
+
 
 @runtime_checkable
 class BufferFactory(Protocol): # pragma: no cover
     """BufferFactory Protocol definition.
     """
-    def create(self, init_or_size: Union[int, bytes], size: int=None) -> Any:
+    def create(self, init_or_size: int | bytes, size: int | None=None) -> Any:
         """This function must create and return a mutable character buffer.
 
     Arguments:
@@ -62,11 +68,15 @@ class BufferFactory(Protocol): # pragma: no cover
     Argument:
         buffer: A memory buffer previously created by `BufferFactory.create()` method.
     """
+    def get_raw(self, buffer: Any) -> bytes | bytearray:
+        """Returns bytes or bytearray for buffer. This method is necessary because ctypes
+        buffers are of different type.
+        """
 
 class BytesBufferFactory:
     """Buffer factory for `bytearray` buffers.
     """
-    def create(self, init_or_size: Union[int, bytes], size: int=None) -> bytearray:
+    def create(self, init_or_size: int | bytes, size: int | None=None) -> bytearray:
         """This function creates a mutable character buffer. The returned object is a
         `bytearray`.
 
@@ -97,11 +107,15 @@ class BytesBufferFactory:
         """Fills the buffer with zero.
         """
         buffer[:] = b'\x00' * len(buffer)
+    def get_raw(self, buffer: Any) -> bytes | bytearray:
+        """Returns bytearray for buffer. In this buffer type, it's the buffer itself.
+        """
+        return buffer
 
 class CTypesBufferFactory:
     """Buffer factory for `ctypes` array of `~ctypes.c_char` buffers.
     """
-    def create(self, init_or_size: Union[int, bytes], size: int=None) -> bytearray:
+    def create(self, init_or_size: int | bytes, size: int | None=None) -> bytearray:
         """This function creates a `ctypes` mutable character buffer. The returned object
         is an array of `ctypes.c_char`.
 
@@ -132,8 +146,12 @@ class CTypesBufferFactory:
         """Fills the buffer with specified value (default).
         """
         memset(buffer, init, len(buffer))
+    def get_raw(self, buffer: Any) -> bytes | bytearray:
+        """Returns bytes for buffer. In this buffer type, it's the `buffer.raw` attribute.
+        """
+        return buffer.raw
 
-def safe_ord(byte: Union[bytes, int]) -> int:
+def safe_ord(byte: bytes | int) -> int:
     """If `byte` argument is byte character, returns ord(byte), otherwise returns argument.
     """
     return byte if isinstance(byte, int) else ord(byte)
@@ -141,9 +159,9 @@ def safe_ord(byte: Union[bytes, int]) -> int:
 class MemoryBuffer:
     """Generic memory buffer manager.
     """
-    def __init__(self, init: Union[int, bytes], size: int = None, *,
-                 factory: Type[BufferFactory]=BytesBufferFactory, eof_marker: int = None,
-                 max_size: Union[int, Sentinel]=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
+    def __init__(self, init: int | bytes, size: int | None=None, *,
+                 factory: type[BufferFactory]=BytesBufferFactory, eof_marker: int | None=None,
+                 max_size: int | Sentinel=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
         """
         Arguments:
             init: Must be an integer which specifies the size of the array, or a `bytes` object
@@ -164,7 +182,7 @@ class MemoryBuffer:
         #: Value that indicates the end of data. Could be None.
         self.eof_marker: int = eof_marker
         #: The buffer couldn't grow beyond specified number of bytes [default: `.UNLIMITED`].
-        self.max_size: Union[int, Sentinel] = max_size
+        self.max_size: int | Sentinel = max_size
         #: The byte order used to read/write numbers [default: `.LITTLE`].
         self.byteorder: ByteOrder = byteorder
     def _ensure_space(self, size: int) -> None:
@@ -172,7 +190,7 @@ class MemoryBuffer:
             self.resize(self.pos + size)
     def _check_space(self, size: int):
         if len(self.raw) < self.pos + size:
-            raise IOError("Insufficient buffer size")
+            raise BufferError("Insufficient buffer size")
     def clear(self) -> None:
         """Fills the buffer with zeros and resets the position in buffer to zero.
         """
@@ -180,9 +198,12 @@ class MemoryBuffer:
         self.pos = 0
     def resize(self, size: int) -> None:
         """Resize buffer to specified length.
+
+        Raises:
+            BufferError: On attempt to exceed buffer size limit.
         """
         if self.max_size is not UNLIMITED and self.max_size < size:
-            raise IOError(f"Cannot resize buffer past max. size {self.max_size} bytes")
+            raise BufferError(f"Cannot resize buffer past max. size {self.max_size} bytes")
         self.raw = self.factory.create(self.raw, size)
     def is_eof(self) -> bool:
         """Return True when positioned past the end of buffer or on `.eof_marker`
@@ -193,6 +214,12 @@ class MemoryBuffer:
         if self.eof_marker is not None and safe_ord(self.raw[self.pos]) == self.eof_marker:
             return True
         return False
+    def get_raw(self) -> bytes | bytearray:
+        """Returns bytes or bytearray for buffer. If you want generic access to raw buffer
+        content, you should use this function instead accessing `raw` attribute, as this
+        attribute could be of different type (for example for `ctypes` buffers.)
+        """
+        return self.factory.get_raw(self.raw)
     def write(self, data: bytes) -> None:
         """Write bytes.
         """
@@ -241,6 +268,9 @@ class MemoryBuffer:
         self.write(value)
     def read(self, size: int=-1) -> bytes:
         """Reads specified number of bytes, or all remaining data.
+
+        Raises:
+            BufferError: When `size` is specified, but there is not enough bytes to read.
         """
         if size < 0:
             size = self.buffer_size - self.pos
@@ -250,6 +280,9 @@ class MemoryBuffer:
         return result
     def read_number(self, size: int, *, signed=False) -> int:
         """Read number with specified size in bytes.
+
+        Raises:
+            BufferError: When `size` is specified, but there is not enough bytes to read.
         """
         self._check_space(size)
         result = (0).from_bytes(self.raw[self.pos: self.pos + size], self.byteorder.value, signed=signed)

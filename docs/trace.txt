@@ -126,9 +126,6 @@ the code by embedded comments.
            self.greeting(other)
        def interact(self, other: Person, message: str) -> Mood:
            print(f"[{other.name}] {message}")
-           # >>> LOGGING
-           get_logger(self, topic='Person').debug(f'Processing "{message}" from [{other.name}]')
-           # <<< LOGGING
            self.process(message)
            return self.mood
        def greeting(self, other: Person) -> None:
@@ -180,7 +177,8 @@ the code by embedded comments.
                result = "What a wonderful meeting!"
            return result
        def __repr__(self) -> str:
-           return f"{self.name} [{self.mood.name}]"
+           # Replace "..Person object at .." with something more suitable for trace
+           return f"Person('{self.name}', {self.mood.name})"
 
    def meeting(name: str, persons: List[Person]):
        "Simulation of virtual agents meeting"
@@ -209,17 +207,17 @@ the code by embedded comments.
 
 
    def test_trace(name: str, first: Mood, second: Mood) -> None:
-       print(f"- without trace ----------")
+       print("- without trace ----------")
        meeting(name, [Person('Alex', first), Person('David', second)])
 
-       print(f"- trace ------------------")
+       print("- trace ------------------")
        # >>> TRACE
-       add_trace(Person, 'greeting', traced)
-       add_trace(Person, 'bye', traced)
-       add_trace(Person, 'chat', traced)
-       add_trace(Person, 'change_mood', traced)
-       add_trace(Person, 'process', traced, with_args=False)
-       add_trace(Person, 'process_response', traced)
+       add_trace(Person, 'greeting')
+       add_trace(Person, 'bye')
+       add_trace(Person, 'chat')
+       add_trace(Person, 'change_mood')
+       add_trace(Person, 'process', with_args=False)
+       add_trace(Person, 'process_response')
        # <<< TRACE
        meeting(name, [Person('Alex', first), Person('David', second)])
 
@@ -232,8 +230,8 @@ the code by embedded comments.
        logger.addHandler(sh)
        # <<< LOGGING
        # >>> TRACE
-       trace_manager.trace |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
-       trace_manager.trace_active = True
+       trace_manager.flags |= TraceFlag.ACTIVE
+       trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
        # <<< TRACE
        test_trace('TEST-1', Mood.SAD, Mood.PLEASED)
 
@@ -246,81 +244,81 @@ the code by embedded comments.
    Meeting started...
    Attendees: Alex [SAD], David [PLEASED]
    [Alex] Hi David
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "Hi David" from [Alex]
    [David] Hi Alex, I'm David. I'm PLEASED to meet you.
-   DEBUG     : [Person][SAD Alex][TEST-1] Processing "Hi Alex, I'm David. I'm PLEASED to meet you." from [David]
    [Alex] It's a fine day, don't you think?
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "It's a fine day, don't you think?" from [Alex]
    [David] It's a very nice day, don't you think?
-   DEBUG     : [Person][NEUTRAL Alex][TEST-1] Processing "It's a very nice day, don't you think?" from [David]
    [Alex] Bye, David. Have a nice day!
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "Bye, David. Have a nice day!" from [Alex]
    [David] Bye, Alex. Have a nice day!
-   DEBUG     : [Person][HAPPY Alex][TEST-1] Processing "Bye, Alex. Have a nice day!" from [David]
-   Meeting closed in 0.00071 sec.
+   Meeting closed in 0.00014 sec.
    Outcome: Alex [HAPPY], David [HAPPY]
    - trace ------------------
    Meeting started...
    Attendees: Alex [SAD], David [PLEASED]
-   DEBUG     : [trace][SAD Alex][TEST-1] >>> greeting(other=David [PLEASED])
+   DEBUG     : [trace][SAD Alex][TEST-1] >>> greeting(other=Person('David', PLEASED))
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> interact(other=Person('Alex', SAD), message='Hi David')
    [Alex] Hi David
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "Hi David" from [Alex]
    DEBUG     : [trace][PLEASED David][TEST-1] >>> process
    DEBUG     : [trace][PLEASED David][TEST-1] <<< process[0.00002]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< interact[0.00020] Result: <Mood.PLEASED: 4>
    DEBUG     : [trace][SAD Alex][TEST-1] >>> process_response(to='greeting', mood=<Mood.PLEASED: 4>)
    DEBUG     : [trace][SAD Alex][TEST-1] <<< process_response[0.00000]
-   DEBUG     : [trace][SAD Alex][TEST-1] <<< greeting[0.00050]
-   DEBUG     : [trace][PLEASED David][TEST-1] >>> greeting(other=Alex [SAD])
+   DEBUG     : [trace][SAD Alex][TEST-1] <<< greeting[0.00060]
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> greeting(other=Person('Alex', SAD))
+   DEBUG     : [trace][SAD Alex][TEST-1] >>> interact(other=Person('David', PLEASED), message="Hi Alex, I'm David. I'm PLEASED to meet you.")
    [David] Hi Alex, I'm David. I'm PLEASED to meet you.
-   DEBUG     : [Person][SAD Alex][TEST-1] Processing "Hi Alex, I'm David. I'm PLEASED to meet you." from [David]
    DEBUG     : [trace][SAD Alex][TEST-1] >>> process
    DEBUG     : [trace][SAD Alex][TEST-1] >>> change_mood(offset=1)
    DEBUG     : [trace][SAD Alex][TEST-1] <<< change_mood[0.00000]
-   DEBUG     : [trace][SAD Alex][TEST-1] <<< process[0.00018]
+   DEBUG     : [trace][SAD Alex][TEST-1] <<< process[0.00016]
+   DEBUG     : [trace][SAD Alex][TEST-1] <<< interact[0.00030] Result: <Mood.NEUTRAL: 3>
    DEBUG     : [trace][PLEASED David][TEST-1] >>> process_response(to='greeting', mood=<Mood.NEUTRAL: 3>)
    DEBUG     : [trace][PLEASED David][TEST-1] <<< process_response[0.00000]
    DEBUG     : [trace][PLEASED David][TEST-1] <<< greeting[0.00061]
    DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> chat()
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> interact(other=Person('Alex', NEUTRAL), message="It's a fine day, don't you think?")
    [Alex] It's a fine day, don't you think?
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "It's a fine day, don't you think?" from [Alex]
    DEBUG     : [trace][PLEASED David][TEST-1] >>> process
    DEBUG     : [trace][PLEASED David][TEST-1] <<< process[0.00000]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< interact[0.00013] Result: <Mood.PLEASED: 4>
    DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> process_response(to='chat', mood=<Mood.PLEASED: 4>)
    DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< process_response[0.00000]
-   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< chat[0.00045]
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< chat[0.00042]
    DEBUG     : [trace][PLEASED David][TEST-1] >>> chat()
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> interact(other=Person('David', PLEASED), message="It's a very nice day, don't you think?")
    [David] It's a very nice day, don't you think?
-   DEBUG     : [Person][NEUTRAL Alex][TEST-1] Processing "It's a very nice day, don't you think?" from [David]
    DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> process
    DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> change_mood(offset=1)
    DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< change_mood[0.00000]
    DEBUG     : [trace][PLEASED Alex][TEST-1] >>> change_mood(offset=1)
    DEBUG     : [trace][PLEASED Alex][TEST-1] <<< change_mood[0.00000]
-   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< process[0.00035]
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< process[0.00027]
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< interact[0.00039] Result: <Mood.HAPPY: 5>
    DEBUG     : [trace][PLEASED David][TEST-1] >>> process_response(to='chat', mood=<Mood.HAPPY: 5>)
    DEBUG     : [trace][PLEASED David][TEST-1] <<< process_response[0.00000]
-   DEBUG     : [trace][PLEASED David][TEST-1] <<< chat[0.00077]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< chat[0.00068]
    DEBUG     : [trace][HAPPY Alex][TEST-1] >>> bye()
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> interact(other=Person('Alex', HAPPY), message='Bye, David. Have a nice day!')
    [Alex] Bye, David. Have a nice day!
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "Bye, David. Have a nice day!" from [Alex]
    DEBUG     : [trace][PLEASED David][TEST-1] >>> process
    DEBUG     : [trace][PLEASED David][TEST-1] >>> change_mood(offset=1)
    DEBUG     : [trace][PLEASED David][TEST-1] <<< change_mood[0.00000]
-   DEBUG     : [trace][PLEASED David][TEST-1] <<< process[0.00017]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< process[0.00013]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< interact[0.00024] Result: <Mood.HAPPY: 5>
    DEBUG     : [trace][HAPPY Alex][TEST-1] >>> process_response(to='bye', mood=<Mood.HAPPY: 5>)
    DEBUG     : [trace][HAPPY Alex][TEST-1] <<< process_response[0.00000]
-   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< bye[0.00060] Result: What a wonderful meeting!
+   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< bye[0.00052] Result: 'What a wonderful meeting!'
    DEBUG     : [trace][HAPPY David][TEST-1] >>> bye()
+   DEBUG     : [trace][HAPPY Alex][TEST-1] >>> interact(other=Person('David', HAPPY), message='Bye, Alex. Have a nice day!')
    [David] Bye, Alex. Have a nice day!
-   DEBUG     : [Person][HAPPY Alex][TEST-1] Processing "Bye, Alex. Have a nice day!" from [David]
    DEBUG     : [trace][HAPPY Alex][TEST-1] >>> process
    DEBUG     : [trace][HAPPY Alex][TEST-1] >>> change_mood(offset=1)
    DEBUG     : [trace][HAPPY Alex][TEST-1] <<< change_mood[0.00000]
-   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< process[0.00018]
+   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< process[0.00013]
+   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< interact[0.00024] Result: <Mood.HAPPY: 5>
    DEBUG     : [trace][HAPPY David][TEST-1] >>> process_response(to='bye', mood=<Mood.HAPPY: 5>)
    DEBUG     : [trace][HAPPY David][TEST-1] <<< process_response[0.00000]
-   DEBUG     : [trace][HAPPY David][TEST-1] <<< bye[0.00059] Result: What a wonderful meeting!
-   Meeting closed in 0.00466 sec.
+   DEBUG     : [trace][HAPPY David][TEST-1] <<< bye[0.00052] Result: 'What a wonderful meeting!'
+   Meeting closed in 0.00432 sec.
    Outcome: Alex [HAPPY], David [HAPPY]
 
 Trace configuration

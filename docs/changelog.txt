@@ -2,6 +2,51 @@
 Changelog
 #########
 
+Version 2.0.0 (unreleased)
+==========================
+
+* Change tests from `unittest` to `pytest`, almost complete code coverage.
+* Minimal Python version raised to 3.11.
+* Code cleanup and optimization for Python 3.11 features.
+* `~firebird.base.types` module:
+
+  - Change: Function `Conjunctive` renamed to `.conjunctive`.
+
+* `~firebird.base.buffer` module:
+
+  - Added `.MemoryBuffer.get_raw` method.
+  - Added `get_raw` method to `.BufferFactory`, `.BytesBufferFactory` and `.CTypesBufferFactory`.
+  - Fix: `resize`, `read` and `read_number` now raise `BufferError` istead `IOError`.
+
+* `~firebird.base.collections` module:
+
+  - `.DataList.__init__` parameter `frozen` is now keyword-only.
+  - `.DataList.extract` parameter `copy` is now keyword-only.
+  - `.DataList.sort` parameter `reverse` is now keyword-only.
+  - `.DataList.split` parameter `frozen` is now keyword-only.
+  - `.Registry.popitem` parameter `last` is now keyword-only.
+
+* `~firebird.base.config` module:
+
+  - Deprecated `.create_config` function was removed.
+  - Change: `DirectoryScheme` parameter `force_home` is now keyword only.
+  - Change: `Option` parameters `required` and `default` are now keyword only.
+  - Fix: Problem with name handling in `.ConfigOption.clear` and `set_value`.
+
+* `~firebird.base.strconv` module:
+
+  - Fix: Problem with conversion of flags from string.
+
+* Changed: The `~firebird.base.logging` module was completelly reworked.
+
+* `~firebird.base.trace` module:
+
+  - Change: Parameter `context` was removed from `.traced` decorator
+  - Change: Option `context` was removed from `.BaseTraceConfig`.
+  - Change: Log function return value as `repr` rather than `str`.
+
+
+
 Version 1.8.0
 =============
 

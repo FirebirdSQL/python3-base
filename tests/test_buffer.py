@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 #
 #   PROGRAM/MODULE: firebird-base
-#   FILE:           test/test_buffer.py
-#   DESCRIPTION:    Unit tests for firebird.base.buffer
+#   FILE:           tests/test_buffer.py
+#   DESCRIPTION:    Tests for firebird.base.buffer
 #   CREATED:        14.5.2020
 #
 # The contents of this file are subject to the MIT License
@@ -34,282 +34,365 @@
 #                 ______________________________________.
 
 from __future__ import annotations
-import unittest
+
+import pytest
+
 from firebird.base.buffer import *
 
-class TestBuffer(unittest.TestCase):
-    """Unit tests for firebird.base.buffer with BytesBufferFactory"""
-    def __init__(self, methodName='runTest'):
-        super().__init__(methodName)
-        self.factory = BytesBufferFactory
-    def setUp(self) -> None:
-        pass
-    def tearDown(self):
-        pass
-    def assertBuffer(self, buffer, content):
-        self.assertEqual(buffer.raw, content)
-    def test_create(self):
-        # Empty buffer
-        buf = MemoryBuffer(0, factory=self.factory)
-        self.assertEqual(buf.pos, 0)
-        self.assertEqual(len(buf.raw), 0)
-        self.assertIsNone(buf.eof_marker)
-        self.assertIs(buf.max_size, UNLIMITED)
-        self.assertIs(buf.byteorder, ByteOrder.LITTLE)
-        self.assertTrue(buf.is_eof())
-        self.assertEqual(buf.buffer_size, 0)
-        self.assertEqual(buf.last_data, -1)
-        # Sized
-        buf = MemoryBuffer(10, factory=self.factory)
-        self.assertEqual(buf.pos, 0)
-        self.assertEqual(len(buf.raw), 10)
-        self.assertBuffer(buf, b'\x00' * 10)
-        #self.assertEqual(buf.raw, b'\x00' * 10)
-        self.assertIsNone(buf.eof_marker)
-        self.assertIs(buf.max_size, UNLIMITED)
-        self.assertIs(buf.byteorder, ByteOrder.LITTLE)
-        self.assertFalse(buf.is_eof())
-        self.assertEqual(buf.buffer_size, 10)
-        self.assertEqual(buf.last_data, -1)
-        # Initialized
-        buf = MemoryBuffer(b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x00\x00', factory=self.factory)
-        self.assertEqual(buf.pos, 0)
-        self.assertEqual(len(buf.raw), 12)
-        self.assertBuffer(buf, b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x00\x00')
-        self.assertIsNone(buf.eof_marker)
-        self.assertIs(buf.max_size, UNLIMITED)
-        self.assertIs(buf.byteorder, ByteOrder.LITTLE)
-        self.assertFalse(buf.is_eof())
-        self.assertEqual(buf.buffer_size, 12)
-        self.assertEqual(buf.last_data, 9)
-        # Max. Size
-        buf = MemoryBuffer(10, max_size=20, factory=self.factory)
-        self.assertEqual(buf.buffer_size, 10)
-        self.assertIs(buf.max_size, 20)
-        # Byte order
-        buf = MemoryBuffer(10, byteorder=ByteOrder.BIG, factory=self.factory)
-        self.assertIs(buf.byteorder, ByteOrder.BIG)
-    def test_clear(self):
-        # Empty
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write(b'0123456789')
-        buf.clear()
-        self.assertEqual(buf.pos, 0)
-        self.assertEqual(len(buf.raw), 10)
-        self.assertBuffer(buf, b'\x00' * 10)
-        self.assertFalse(buf.is_eof())
-        self.assertEqual(buf.buffer_size, 10)
-        self.assertEqual(buf.last_data, -1)
-        # Sized
-        buf = MemoryBuffer(10, factory=self.factory)
-        for i in range(buf.buffer_size):
-            buf.raw[i] = 255
-        self.assertBuffer(buf, b'\xff' * 10)
-        buf.clear()
-        self.assertEqual(buf.pos, 0)
-        self.assertEqual(len(buf.raw), 10)
-        self.assertBuffer(buf, b'\x00' * 10)
-        self.assertFalse(buf.is_eof())
-        self.assertEqual(buf.buffer_size, 10)
-        self.assertEqual(buf.last_data, -1)
-    def test_write(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write(b'ABCDE')
-        self.assertEqual(buf.pos, 5)
-        self.assertBuffer(buf, b'ABCDE')
-        self.assertTrue(buf.is_eof())
-    def test_write_byte(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_byte(1)
-        self.assertEqual(buf.pos, 1)
-        self.assertBuffer(buf, b'\x01')
-        self.assertTrue(buf.is_eof())
-    def test_write_short(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_short(2)
-        self.assertEqual(buf.pos, 2)
-        self.assertBuffer(buf, b'\x02\x00')
-        self.assertTrue(buf.is_eof())
-    def test_write_int(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_int(3)
-        self.assertEqual(buf.pos, 4)
-        self.assertBuffer(buf, b'\x03\x00\x00\x00')
-        self.assertTrue(buf.is_eof())
-    def test_write_bigint(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_bigint(4)
-        self.assertEqual(buf.pos, 8)
-        self.assertBuffer(buf, b'\x04\x00\x00\x00\x00\x00\x00\x00')
-        self.assertTrue(buf.is_eof())
-    def test_write_number(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_number(255, 1)
-        self.assertEqual(buf.pos, 1)
-        self.assertBuffer(buf, b'\xff')
-        self.assertTrue(buf.is_eof())
-        #
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_number(255, 2)
-        self.assertEqual(buf.pos, 2)
-        self.assertBuffer(buf, b'\xff\x00')
-        self.assertTrue(buf.is_eof())
-        #
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_number(255, 4)
-        self.assertEqual(buf.pos, 4)
-        self.assertBuffer(buf, b'\xff\x00\x00\x00')
-        self.assertTrue(buf.is_eof())
-        #
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_number(255, 8)
-        self.assertEqual(buf.pos, 8)
-        self.assertBuffer(buf, b'\xff\x00\x00\x00\x00\x00\x00\x00')
-        self.assertTrue(buf.is_eof())
-        # Atypical sizes
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_number(255, 3)
-        self.assertEqual(buf.pos, 3)
-        self.assertBuffer(buf, b'\xff\x00\x00')
-        self.assertTrue(buf.is_eof())
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_number(255, 12)
-        self.assertEqual(buf.pos, 12)
-        self.assertBuffer(buf, b'\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-        self.assertTrue(buf.is_eof())
-    def test_write_string(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_string('string')
-        self.assertEqual(buf.pos, 7)
-        self.assertBuffer(buf, b'string\x00')
-        self.assertTrue(buf.is_eof())
-    def test_write_pascal_string(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_pascal_string('string')
-        self.assertEqual(buf.pos, 7)
-        self.assertBuffer(buf, b'\x06string')
-        self.assertTrue(buf.is_eof())
-    def test_write_sized_string(self):
-        buf = MemoryBuffer(0, factory=self.factory)
-        buf.write_sized_string('string')
-        self.assertEqual(buf.pos, 8)
-        self.assertBuffer(buf, b'\x06\x00string')
-        self.assertTrue(buf.is_eof())
-    def test_write_past_size(self):
-        buf = MemoryBuffer(0, max_size=5, factory=self.factory)
-        buf.write(b'ABCDE')
-        with self.assertRaises(IOError) as cm:
-            buf.write(b'exceeds size')
-        self.assertEqual(cm.exception.args, ("Cannot resize buffer past max. size 5 bytes",))
-    def test_read(self):
-        buf = MemoryBuffer(b'ABCDE', factory=self.factory)
-        self.assertEqual(buf.read(3), b'ABC')
-        self.assertEqual(buf.pos, 3)
-        self.assertFalse(buf.is_eof())
-        self.assertEqual(buf.read(), b'DE')
-        self.assertEqual(buf.pos, 5)
-        self.assertTrue(buf.is_eof())
-    def test_read_byte(self):
-        buf = MemoryBuffer(b'\x01', factory=self.factory)
-        self.assertEqual(buf.read_byte(), 1)
-        self.assertEqual(buf.pos, 1)
-        self.assertTrue(buf.is_eof())
-    def test_read_short(self):
-        buf = MemoryBuffer(b'\x02\x00', factory=self.factory)
-        self.assertEqual(buf.read_short(), 2)
-        self.assertEqual(buf.pos, 2)
-        self.assertTrue(buf.is_eof())
-    def test_read_int(self):
-        buf = MemoryBuffer(b'\x03\x00\x00\x00', factory=self.factory)
-        self.assertEqual(buf.read_int(), 3)
-        self.assertEqual(buf.pos, 4)
-        self.assertTrue(buf.is_eof())
-    def test_read_bigint(self):
-        buf = MemoryBuffer(b'\x04\x00\x00\x00\x00\x00\x00\x00', factory=self.factory)
-        self.assertEqual(buf.read_bigint(), 4)
-        self.assertEqual(buf.pos, 8)
-        self.assertBuffer(buf, b'\x04\x00\x00\x00\x00\x00\x00\x00')
-        self.assertTrue(buf.is_eof())
-    def test_read_number(self):
-        buf = MemoryBuffer(b'\xff', factory=self.factory)
-        self.assertEqual(buf.read_number(1), 255)
-        self.assertEqual(buf.pos, 1)
-        self.assertTrue(buf.is_eof())
-        #
-        buf = MemoryBuffer(b'\xff\x00', factory=self.factory)
-        self.assertEqual(buf.read_number(2), 255)
-        self.assertEqual(buf.pos, 2)
-        self.assertTrue(buf.is_eof())
-        #
-        buf = MemoryBuffer(b'\xff\x00\x00\x00', factory=self.factory)
-        self.assertEqual(buf.read_number(4), 255)
-        self.assertEqual(buf.pos, 4)
-        self.assertTrue(buf.is_eof())
-        #
-        buf = MemoryBuffer(b'\xff\x00\x00\x00\x00\x00\x00\x00', factory=self.factory)
-        self.assertEqual(buf.read_number(8), 255)
-        self.assertEqual(buf.pos, 8)
-        self.assertTrue(buf.is_eof())
-        # Atypical sizes
-        buf = MemoryBuffer(b'\xff\x00\x00', factory=self.factory)
-        self.assertEqual(buf.read_number(3), 255)
-        self.assertEqual(buf.pos, 3)
-        self.assertTrue(buf.is_eof())
-        buf = MemoryBuffer(b'\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', factory=self.factory)
-        self.assertEqual(buf.read_number(12), 255)
-        self.assertEqual(buf.pos, 12)
-        self.assertTrue(buf.is_eof())
-    def test_read_sized_int(self):
-        buf = MemoryBuffer(b'\x04\x00\x03\x00\x00\x00', factory=self.factory)
-        self.assertEqual(buf.read_sized_int(), 3)
-        self.assertEqual(buf.pos, 6)
-        self.assertTrue(buf.is_eof())
-    def test_read_string(self):
-        buf = MemoryBuffer(b'string 1\x00string 2\x00', factory=self.factory)
-        self.assertEqual(buf.read_string(), 'string 1')
-        self.assertEqual(buf.pos, 9)
-        self.assertFalse(buf.is_eof())
-        #  No zero-terminator
-        buf = MemoryBuffer(b'string', factory=self.factory)
-        self.assertEqual(buf.read_string(), 'string')
-        self.assertEqual(buf.pos, 7)
-        self.assertTrue(buf.is_eof())
-    def test_read_pascal_string(self):
-        buf = MemoryBuffer(b'\x06string', factory=self.factory)
-        self.assertEqual(buf.read_pascal_string(), 'string')
-        self.assertEqual(buf.pos, 7)
-        self.assertTrue(buf.is_eof())
-    def test_read_sized_string(self):
-        buf = MemoryBuffer(b'\x08\x00string 1\x08\x00string 2', factory=self.factory)
-        self.assertEqual(buf.read_sized_string(), 'string 1')
-        self.assertEqual(buf.pos, 10)
-        self.assertFalse(buf.is_eof())
-    def test_read_bytes(self):
-        buf = MemoryBuffer(b'\x08\x00ABCDEFGH\x08\x00string 2', factory=self.factory)
-        self.assertEqual(buf.read_bytes(), b'ABCDEFGH')
-        self.assertEqual(buf.pos, 10)
-        self.assertFalse(buf.is_eof())
-    def test_read_past_size(self):
-        buf = MemoryBuffer(b'ABCDE', factory=self.factory)
-        with self.assertRaises(IOError) as cm:
-            buf.read_bigint()
-        self.assertEqual(cm.exception.args, ("Insufficient buffer size",))
-    def test_eof_marker(self):
-        buf = MemoryBuffer(b'\x08\x00ABCDEFGH\xFF\x00\x00\x00\x00\x00\x00', eof_marker=255,
-                           factory=self.factory)
-        while not buf.is_eof():
-            buf.pos += 1
-        self.assertLess(buf.pos, buf.buffer_size)
-        self.assertEqual(buf.pos, 10)
-        self.assertEqual(safe_ord(buf.raw[buf.pos]), buf.eof_marker)
+factories = [BytesBufferFactory, CTypesBufferFactory]
 
-class TestCBuffer(TestBuffer):
-    """Unit tests for firebird.base.buffer with CTypesBufferFactory"""
-    def __init__(self, methodName='runTest'):
-        super().__init__(methodName)
-        self.factory = CTypesBufferFactory
-    def assertBuffer(self, buffer, content):
-        self.assertEqual(buffer.raw.raw, content)
+@pytest.fixture(params=factories)
+def factory(request):
+    return request.param
 
-if __name__ == '__main__':
-    unittest.main()
+def test_create_empty(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    assert buf.pos == 0
+    assert len(buf.raw) == 0
+    assert buf.eof_marker is None
+    assert buf.max_size is UNLIMITED
+    assert buf.byteorder is ByteOrder.LITTLE
+    assert buf.is_eof()
+    assert buf.buffer_size == 0
+    assert buf.last_data == -1
+
+def test_create_sized(factory):
+    buf = MemoryBuffer(10, factory=factory)
+    assert buf.pos == 0
+    assert len(buf.raw) == 10
+    assert buf.get_raw() == b"\x00" * 10
+    assert buf.eof_marker is None
+    assert buf.max_size is UNLIMITED
+    assert buf.byteorder is ByteOrder.LITTLE
+    assert not buf.is_eof()
+    assert buf.buffer_size == 10
+    assert buf.last_data == -1
+
+def test_create_initialized(factory):
+    buf = MemoryBuffer(b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x00\x00", factory=factory)
+    assert buf.pos == 0
+    assert len(buf.raw) == 12
+    assert buf.get_raw() == b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x00\x00"
+    assert buf.eof_marker is None
+    assert buf.max_size is UNLIMITED
+    assert buf.byteorder is ByteOrder.LITTLE
+    assert not buf.is_eof()
+    assert buf.buffer_size == 12
+    assert buf.last_data == 9
+
+def test_create_max_size(factory):
+    buf = MemoryBuffer(10, max_size=20, factory=factory)
+    assert buf.buffer_size == 10
+    assert buf.max_size == 20
+
+def test_create_byte_order(factory):
+    buf = MemoryBuffer(10, byteorder=ByteOrder.BIG, factory=factory)
+    assert buf.byteorder == ByteOrder.BIG
+
+def test_clear_empty(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write(b"0123456789")
+    buf.clear()
+    assert buf.pos == 0
+    assert len(buf.raw) == 10
+    assert buf.get_raw() == b"\x00" * 10
+    assert not buf.is_eof()
+    assert buf.buffer_size == 10
+    assert buf.last_data == -1
+
+def test_clear_sized(factory):
+    buf = MemoryBuffer(10, factory=factory)
+    for i in range(buf.buffer_size):
+        buf.raw[i] = 255
+    assert buf.get_raw() == b"\xff" * 10
+    buf.clear()
+    assert buf.pos == 0
+    assert len(buf.raw) == 10
+    assert buf.get_raw() == b"\x00" * 10
+    assert not buf.is_eof()
+    assert buf.buffer_size == 10
+    assert buf.last_data == -1
+
+def test_write(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write(b"ABCDE")
+    assert buf.pos == 5
+    assert buf.get_raw() == b"ABCDE"
+    assert buf.is_eof()
+
+def test_write_byte(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_byte(1)
+    assert buf.pos == 1
+    assert buf.get_raw() == b"\x01"
+    assert buf.is_eof()
+
+def test_write_short(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_short(2)
+    assert buf.pos == 2
+    assert buf.get_raw() == b"\x02\x00"
+    assert buf.is_eof()
+
+def test_write_int(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_int(3)
+    assert buf.pos == 4
+    assert buf.get_raw() == b"\x03\x00\x00\x00"
+    assert buf.is_eof()
+
+def test_write_bigint(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_bigint(4)
+    assert buf.pos == 8
+    assert buf.get_raw() == b"\x04\x00\x00\x00\x00\x00\x00\x00"
+    assert buf.is_eof()
+
+def test_write_number(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_number(255, 1)
+    assert buf.pos == 1
+    assert buf.get_raw() == b"\xff"
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_number(255, 2)
+    assert buf.pos == 2
+    assert buf.get_raw() == b"\xff\x00"
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_number(255, 4)
+    assert buf.pos == 4
+    assert buf.get_raw() == b"\xff\x00\x00\x00"
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_number(255, 8)
+    assert buf.pos == 8
+    assert buf.get_raw() == b"\xff\x00\x00\x00\x00\x00\x00\x00"
+    assert buf.is_eof()
+    # Atypical sizes
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_number(255, 3)
+    assert buf.pos == 3
+    assert buf.get_raw() == b"\xff\x00\x00"
+    assert buf.is_eof()
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_number(255, 12)
+    assert buf.pos == 12
+    assert buf.get_raw() == b"\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+    assert buf.is_eof()
+
+def test_write_number_big_endian(factory):
+    buf = MemoryBuffer(0, factory=factory, byteorder=ByteOrder.BIG)
+    buf.write_number(255, 1)
+    assert buf.pos == 1
+    assert buf.get_raw() == b"\xff"
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(0, factory=factory, byteorder=ByteOrder.BIG)
+    buf.write_number(255, 2)
+    assert buf.pos == 2
+    assert buf.get_raw() == b"\x00\xff"
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(0, factory=factory, byteorder=ByteOrder.BIG)
+    buf.write_number(255, 4)
+    assert buf.pos == 4
+    assert buf.get_raw() == b"\x00\x00\x00\xff"
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(0, factory=factory, byteorder=ByteOrder.BIG)
+    buf.write_number(255, 8)
+    assert buf.pos == 8
+    assert buf.get_raw() == b"\x00\x00\x00\x00\x00\x00\x00\xff"
+    assert buf.is_eof()
+    # Atypical sizes
+    buf = MemoryBuffer(0, factory=factory, byteorder=ByteOrder.BIG)
+    buf.write_number(255, 3)
+    assert buf.pos == 3
+    assert buf.get_raw() == b"\x00\x00\xff"
+    assert buf.is_eof()
+    buf = MemoryBuffer(0, factory=factory, byteorder=ByteOrder.BIG)
+    buf.write_number(255, 12)
+    assert buf.pos == 12
+    assert buf.get_raw() == b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff"
+    assert buf.is_eof()
+
+def test_write_string(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_string("string")
+    assert buf.pos == 7
+    assert buf.get_raw() == b"string\x00"
+    assert buf.is_eof()
+
+def test_write_pascal_string(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_pascal_string("string")
+    assert buf.pos == 7
+    assert buf.get_raw() == b"\x06string"
+    assert buf.is_eof()
+
+def test_write_sized_string(factory):
+    buf = MemoryBuffer(0, factory=factory)
+    buf.write_sized_string("string")
+    assert buf.pos == 8
+    assert buf.get_raw() == b"\x06\x00string"
+    assert buf.is_eof()
+
+def test_write_past_size(factory):
+    buf = MemoryBuffer(0, max_size=5, factory=factory)
+    buf.write(b"ABCDE")
+    with pytest.raises(BufferError) as cm:
+        buf.write(b"exceeds size")
+    assert cm.value.args == ("Cannot resize buffer past max. size 5 bytes",)
+
+def test_read(factory):
+    buf = MemoryBuffer(b"ABCDE", factory=factory)
+    assert buf.read(3) == b"ABC"
+    assert buf.pos == 3
+    assert not buf.is_eof()
+    assert buf.read() == b"DE"
+    assert buf.pos == 5
+    assert buf.is_eof()
+
+def test_read_byte(factory):
+    buf = MemoryBuffer(b"\x01", factory=factory)
+    assert buf.read_byte() == 1
+    assert buf.pos == 1
+    assert buf.is_eof()
+
+def test_read_short(factory):
+    buf = MemoryBuffer(b"\x02\x00", factory=factory)
+    assert buf.read_short() == 2
+    assert buf.pos == 2
+    assert buf.is_eof()
+
+def test_read_int(factory):
+    buf = MemoryBuffer(b"\x03\x00\x00\x00", factory=factory)
+    assert buf.read_int() == 3
+    assert buf.pos == 4
+    assert buf.is_eof()
+
+def test_read_bigint(factory):
+    buf = MemoryBuffer(b"\x04\x00\x00\x00\x00\x00\x00\x00", factory=factory)
+    assert buf.read_bigint() == 4
+    assert buf.pos == 8
+    assert buf.get_raw() == b"\x04\x00\x00\x00\x00\x00\x00\x00"
+    assert buf.is_eof()
+
+def test_read_number(factory):
+    buf = MemoryBuffer(b"\xff", factory=factory)
+    assert buf.read_number(1) == 255
+    assert buf.pos == 1
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(b"\xff\x00", factory=factory)
+    assert buf.read_number(2) == 255
+    assert buf.pos == 2
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(b"\xff\x00\x00\x00", factory=factory)
+    assert buf.read_number(4) == 255
+    assert buf.pos == 4
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(b"\xff\x00\x00\x00\x00\x00\x00\x00", factory=factory)
+    assert buf.read_number(8) == 255
+    assert buf.pos == 8
+    assert buf.is_eof()
+    # Atypical sizes
+    buf = MemoryBuffer(b"\xff\x00\x00", factory=factory)
+    assert buf.read_number(3) == 255
+    assert buf.pos == 3
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(b"\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", factory=factory)
+    assert buf.read_number(12) == 255
+    assert buf.pos == 12
+    assert buf.is_eof()
+
+def test_read_number_big_endian(factory):
+    buf = MemoryBuffer(b"\xff", factory=factory, byteorder=ByteOrder.BIG)
+    assert buf.read_number(1) == 255
+    assert buf.pos == 1
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(b"\x00\xff", factory=factory, byteorder=ByteOrder.BIG)
+    assert buf.read_number(2) == 255
+    assert buf.pos == 2
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(b"\x00\x00\x00\xff", factory=factory, byteorder=ByteOrder.BIG)
+    assert buf.read_number(4) == 255
+    assert buf.pos == 4
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(b"\x00\x00\x00\x00\x00\x00\x00\xff", factory=factory,
+                       byteorder=ByteOrder.BIG)
+    assert buf.read_number(8) == 255
+    assert buf.pos == 8
+    assert buf.is_eof()
+    # Atypical sizes
+    buf = MemoryBuffer(b"\x00\x00\xff", factory=factory, byteorder=ByteOrder.BIG)
+    assert buf.read_number(3) == 255
+    assert buf.pos == 3
+    assert buf.is_eof()
+    #
+    buf = MemoryBuffer(b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff", factory=factory,
+                       byteorder=ByteOrder.BIG)
+    assert buf.read_number(12) == 255
+    assert buf.pos == 12
+    assert buf.is_eof()
+
+def test_read_sized_int(factory):
+    buf = MemoryBuffer(b"\x04\x00\x03\x00\x00\x00", factory=factory)
+    assert buf.read_sized_int() == 3
+    assert buf.pos == 6
+    assert buf.is_eof()
+
+def test_read_string(factory):
+    buf = MemoryBuffer(b"string 1\x00string 2\x00", factory=factory)
+    assert buf.read_string() == "string 1"
+    assert buf.pos == 9
+    assert not buf.is_eof()
+    #  No zero-terminator
+    buf = MemoryBuffer(b"string", factory=factory)
+    assert buf.read_string() == "string"
+    assert buf.pos == 7
+    assert buf.is_eof()
+
+def test_read_pascal_string(factory):
+    buf = MemoryBuffer(b"\x06stringand another data", factory=factory)
+    assert buf.read_pascal_string() == "string"
+    assert buf.pos == 7
+    assert not buf.is_eof()
+
+def test_read_sized_string(factory):
+    buf = MemoryBuffer(b"\x08\x00string 1\x08\x00string 2", factory=factory)
+    assert buf.read_sized_string() == "string 1"
+    assert buf.pos == 10
+    assert not buf.is_eof()
+
+def test_read_bytes(factory):
+    buf = MemoryBuffer(b"\x08\x00ABCDEFGH\x08\x00string 2", factory=factory)
+    assert buf.read_bytes() == b"ABCDEFGH"
+    assert buf.pos == 10
+    assert not buf.is_eof()
+
+def test_read_past_size(factory):
+    buf = MemoryBuffer(b"ABCDE", factory=factory)
+    with pytest.raises(BufferError) as cm:
+        buf.read_bigint()
+    assert cm.value.args == ("Insufficient buffer size",)
+
+def test_eof_marker(factory):
+    buf = MemoryBuffer(b"\x08\x00ABCDEFGH\xFF\x00\x00\x00\x00\x00\x00", eof_marker=255,
+                       factory=factory)
+    while not buf.is_eof():
+        buf.pos += 1
+    assert buf.pos < buf.buffer_size
+    assert buf.pos == 10
+    assert safe_ord(buf.raw[buf.pos]) == buf.eof_marker
+

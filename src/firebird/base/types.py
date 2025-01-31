@@ -37,11 +37,13 @@
 """
 
 from __future__ import annotations
-from typing import Any, Dict, Hashable, Callable, AnyStr, cast, Type
-from abc import ABC, ABCMeta, abstractmethod
+
 import sys
-from importlib import import_module
+from abc import ABC, ABCMeta, abstractmethod
+from collections.abc import Callable, Hashable
 from enum import Enum, IntEnum
+from importlib import import_module
+from typing import Any, AnyStr, ClassVar, cast
 from weakref import WeakValueDictionary
 
 # Exceptions
@@ -78,7 +80,6 @@ class Error(Exception):
     def __getattr__(self, name):
         if name == '__notes__':
             raise AttributeError
-        return None
 
 # Singletons
 
@@ -129,7 +130,7 @@ class Sentinel(metaclass=SentinelMeta):
       the same name are singletons.
     """
     #: Class attribute with defined sentinels. There is no need to access or manipulate it.
-    instances = {}
+    instances: ClassVar[dict[str, Sentinel]] = {}
     def __init__(self, name: str):
         """
         Arguments:
@@ -184,7 +185,9 @@ class Distinct(ABC):
             function. If the key is not suitable argument for `hash`, you must provide your
             own `__hash__` implementation as well!
         """
-    __hash__ = lambda self: hash(self.get_key()) # pylint: disable=[C3001]
+    def __hash(self):
+        return hash(self.get_key())
+    __hash__ = __hash
 
 class CachedDistinctMeta(ABCMeta):
     """Metaclass for CachedDistinct.
@@ -202,9 +205,9 @@ class CachedDistinct(Distinct, metaclass=CachedDistinctMeta):
 
     All created instances are cached in `~weakref.WeakValueDictionary`.
     """
-    def __init_subclass__(cls: Type, /, **kwargs) -> None:
+    def __init_subclass__(cls: type, /, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
-        setattr(cls, '_instances_', WeakValueDictionary())
+        cls._instances_ = WeakValueDictionary()
     @classmethod
     @abstractmethod
     def extract_key(cls, *args, **kwargs) -> Hashable:
@@ -301,7 +304,7 @@ class MIME(str):
 
     """
     #: Supported MIME types
-    MIME_TYPES = ['text', 'image', 'audio', 'video', 'application', 'multipart', 'message']
+    MIME_TYPES: ClassVar[list[str]] = ['text', 'image', 'audio', 'video', 'application', 'multipart', 'message']
     def __new__(cls, value: AnyStr):
         dfm = list(value.split(';'))
         mime_type: str = dfm.pop(0)
@@ -337,7 +340,7 @@ class MIME(str):
             return self[self._bs_ + 1:self._fp_]
         return self[self._bs_ + 1:]
     @property
-    def params(self) -> Dict[str, str]:
+    def params(self) -> dict[str, str]:
         """MIME parameters.
         """
         if self._fp_ != -1:
@@ -356,13 +359,12 @@ class PyExpr(str):
     """
     _expr_ = None
     def __new__(cls, value: str):
-        expr = compile(value, "PyExpr", 'eval')
         new = str.__new__(cls, value)
-        new._expr_ = expr
+        new._expr_ = compile(value, 'PyExpr', 'eval')
         return new
     def __repr__(self):
         return f"PyExpr('{self}')"
-    def get_callable(self, arguments: str='', namespace: Dict[str, Any]=None) -> Callable:
+    def get_callable(self, arguments: str='', namespace: dict[str, Any] | None=None) -> Callable:
         """Returns expression as callable function ready for execution.
 
         Arguments:
@@ -373,8 +375,8 @@ class PyExpr(str):
         if namespace:
             ns.update(namespace)
         code = compile(f"def expr({arguments}):\n    return {self}",
-                       "PyExpr", 'exec')
-        eval(code, ns) # pylint: disable=[W0123]
+                       'PyExpr', 'exec')
+        eval(code, ns) # noqa: S307
         return ns['expr']
     @property
     def expr(self):
@@ -392,7 +394,7 @@ class PyCode(str):
     """
     _code_ = None
     def __new__(cls, value: str):
-        code = compile(value, "PyCode", 'exec')
+        code = compile(value, 'PyCode', 'exec')
         new = str.__new__(cls, value)
         new._code_ = code
         return new
@@ -429,7 +431,7 @@ class PyCallable(str):
         if callable_name is None:
             raise ValueError("Python function or class definition not found")
         ns = {}
-        eval(compile(value, "PyCallable", 'exec'), ns) # pylint: disable=[W0123]
+        eval(compile(value, 'PyCallable', 'exec'), ns) # noqa: S307
         new = str.__new__(cls, value)
         new._callable_ = ns[callable_name]
         new.name = callable_name
@@ -438,7 +440,7 @@ class PyCallable(str):
         return self._callable_(*args, **kwargs)
 
 # Metaclasses
-def Conjunctive(name, bases, attrs):
+def conjunctive(name, bases, attrs):
     """Returns a metaclass that is conjunctive descendant of all metaclasses used by parent
     classes. It's necessary to create a class with multiple inheritance, where multiple
     parent classes use different metaclasses.
@@ -458,7 +460,7 @@ def Conjunctive(name, bases, attrs):
     basemetaclasses = []
     for base in bases:
         metacls = type(base)
-        if isinstance(metacls, type) and metacls is not type and not metacls in basemetaclasses:
+        if isinstance(metacls, type) and metacls is not type and metacls not in basemetaclasses:
             basemetaclasses.append(metacls)
     dynamic = type(''.join(b.__name__ for b in basemetaclasses), tuple(basemetaclasses), {})
     return dynamic(name, bases, attrs)

@@ -37,21 +37,33 @@
 """
 
 from __future__ import annotations
-from typing import Any, Type, Hashable, List, Dict, Callable
+
 import os
-from inspect import signature, Signature, isfunction
-from dataclasses import dataclass, field
-from enum import IntFlag, auto
-from functools import wraps, partial
-from time import monotonic
-from decimal import Decimal
+from collections.abc import Callable, Hashable
 from configparser import ConfigParser
-from .types import Error, Distinct, DEFAULT, UNLIMITED, load
-from .collections import Registry
-from .strconv import convert_from_str
-from .config import StrOption, IntOption, BoolOption, ListOption, FlagOption, EnumOption, \
-     ConfigListOption, Config
-from .logging import LogLevel, FBLoggerAdapter, get_logger
+from dataclasses import dataclass, field
+from decimal import Decimal
+from enum import IntFlag, auto
+from functools import partial, wraps
+from inspect import Signature, isfunction, signature
+from time import monotonic
+from typing import Any
+
+from firebird.base.collections import Registry
+from firebird.base.config import (
+    BoolOption,
+    Config,
+    ConfigListOption,
+    EnumOption,
+    FlagOption,
+    IntOption,
+    ListOption,
+    StrOption,
+)
+from firebird.base.logging import ContextLoggerAdapter, FStrMessage, LogLevel, get_logger
+from firebird.base.strconv import convert_from_str
+from firebird.base.types import DEFAULT, UNLIMITED, Distinct, Error, load
+
 
 class TraceFlag(IntFlag):
     """`LoggingManager` trace/audit flags.
@@ -68,8 +80,8 @@ class TracedItem(Distinct):
     """
     method: str
     decorator: Callable
-    args: List = field(default_factory=list)
-    kwargs: Dict = field(default_factory=dict)
+    args: list = field(default_factory=list)
+    kwargs: dict = field(default_factory=dict)
     def get_key(self) -> Hashable:
         """Returns Distinct key for traced item [method]."""
         return self.method
@@ -78,29 +90,28 @@ class TracedItem(Distinct):
 class TracedClass(Distinct):
     """Traced class registry entry.
     """
-    cls: Type
+    cls: type
     traced: Registry = field(default_factory=Registry)
     def get_key(self) -> Hashable:
         """Returns Distinct key for traced item [cls]."""
         return self.cls
 
-_traced: Registry = Registry()
 
 class TracedMeta(type):
     """Metaclass that instruments instances on creation.
     """
-    def __call__(cls: Type, *args, **kwargs):
+    def __call__(cls: type, *args, **kwargs):
         return trace_object(super().__call__(*args, **kwargs), strict=True)
 
 class TracedMixin(metaclass=TracedMeta):
     """Mixin class that automatically registers descendants for trace and instruments
     instances on creation.
     """
-    def __init_subclass__(cls: Type, /, **kwargs) -> None:
+    def __init_subclass__(cls: type, /, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         trace_manager.register(cls)
 
-class traced: # pylint: disable=[R0902]
+class traced: # noqa: N801
     """Base decorator for logging of callables, suitable for trace/audit.
 
     It's not applied on decorated function/method if `FBASE_TRACE` environment variable is
@@ -108,18 +119,17 @@ class traced: # pylint: disable=[R0902]
     Python code).
 
     Both positional and keyword arguments of decorated callable are available by name for
-    f-string type message interpolation as `dict` passed to logger as positional argument.
+    f-string type message interpolation.
     """
-    def __init__(self, *, agent: Any=DEFAULT, context: Any=DEFAULT, topic: str='trace',
+    def __init__(self, *, agent: Any=DEFAULT, topic: str='trace',
                  msg_before: str=DEFAULT, msg_after: str=DEFAULT, msg_failed: str=DEFAULT,
-                 flags: TraceFlag=TraceFlag(0), level: LogLevel=LogLevel.DEBUG,
-                 max_param_length: int=UNLIMITED, extra: Dict=None,
-                 callback: Callable[[Any], bool]=None, has_result: bool=DEFAULT,
+                 flags: TraceFlag=TraceFlag.NONE, level: LogLevel=LogLevel.DEBUG,
+                 max_param_length: int=UNLIMITED, extra: dict | None=None,
+                 callback: Callable[[Any], bool] | None=None, has_result: bool=DEFAULT,
                  with_args: bool=True):
         """
         Arguments:
             agent: Agent identification
-            context: Context identification
             topic: Trace/audit logging topic
             msg_before: Trace/audit message logged before decorated function
             msg_after: Trace/audit message logged after decorated function
@@ -145,8 +155,6 @@ class traced: # pylint: disable=[R0902]
         self.msg_failed: str = msg_failed
         #: Agent identification
         self.agent: Any = agent
-        #: Context identification
-        self.context: Any = context
         #: Trace/audit logging topic
         self.topic: str = topic
         #: Trace flags override
@@ -156,7 +164,7 @@ class traced: # pylint: disable=[R0902]
         #: Max. length of parameters (longer will be trimmed)
         self.max_len: int = max_param_length
         #: Extra data for `LogRecord`
-        self.extra: Dict = extra
+        self.extra: dict = extra
         #: Callback function that gets the agent identification as argument,
         #: and must return True/False indicating whether trace is allowed.
         self.callback: Callable[[Any], bool] = self.__callback if callback is None else callback
@@ -165,7 +173,7 @@ class traced: # pylint: disable=[R0902]
         self.has_result: bool = has_result
         #: If True, function arguments are available for interpolation in `msg_before`
         self.with_args: bool = with_args
-    def __callback(self, agent: Any) -> bool: # pylint: disable=[W0613]
+    def __callback(self, agent: Any) -> bool: # noqa: ARG002
         """Default callback, does nothing.
         """
         return True
@@ -176,37 +184,37 @@ class traced: # pylint: disable=[R0902]
             self.msg_before = f">>> {fn.__name__}({', '.join(f'{{{x}=}}' for x in sig.parameters if x != 'self')})"
         else:
             self.msg_before = f">>> {fn.__name__}"
-    def set_after_msg(self, fn: Callable, sig: Signature) -> None: # pylint: disable=[W0613]
+    def set_after_msg(self, fn: Callable, sig: Signature) -> None: # noqa: ARG002
         """Sets the DEFAULT after message f-string template.
         """
-        self.msg_after = f"<<< {fn.__name__}[{{_etime_}}] Result: {{_result_}}" \
+        self.msg_after = f"<<< {fn.__name__}[{{_etime_}}] Result: {{_result_!r}}" \
             if self.has_result else f"<<< {fn.__name__}[{{_etime_}}]"
-    def set_fail_msg(self, fn: Callable, sig: Signature) -> None: # pylint: disable=[W0613]
+    def set_fail_msg(self, fn: Callable, sig: Signature) -> None: # noqa: ARG002
         """Sets the DEFAULT fail message f-string template.
         """
         self.msg_failed = f"<-- {fn.__name__}[{{_etime_}}] {{_exc_}}"
-    def log_before(self, logger: FBLoggerAdapter, params: Dict) -> None:
+    def log_before(self, logger: ContextLoggerAdapter, params: dict) -> None:
         """Executed before decorated callable.
         """
-        logger.log(self.level, self.msg_before, params, stacklevel=2)
-    def log_after(self, logger: FBLoggerAdapter, params: Dict) -> None:
+        logger.log(self.level, FStrMessage(self.msg_before, params))
+    def log_after(self, logger: ContextLoggerAdapter, params: dict) -> None:
         """Executed after decorated callable.
         """
-        logger.log(self.level, self.msg_after, params, stacklevel=2)
-    def log_failed(self, logger: FBLoggerAdapter, params: Dict) -> None:
+        logger.log(self.level, FStrMessage(self.msg_after, params))
+    def log_failed(self, logger: ContextLoggerAdapter, params: dict) -> None:
         """Executed when decorated callable raises an exception.
         """
-        logger.log(self.level, self.msg_failed, params, stacklevel=2)
-    def __call__(self, fn: Callable): # pylint: disable=[R0915]
+        logger.log(self.level, FStrMessage(self.msg_failed, params))
+    def __call__(self, fn: Callable):
         @wraps(fn)
-        def wrapper(*args, **kwargs): # pylint: disable=[R0912]
+        def wrapper(*args, **kwargs):
             flags = trace_manager.flags | self.flags
-            if enabled := ((TraceFlag.ACTIVE in flags) and int(flags) > 1): # pylint: disable=[R1702]
+            if enabled := ((TraceFlag.ACTIVE in flags) and int(flags) > 1):
                 params = {}
                 bound = sig.bind_partial(*args, **kwargs)
                 # If it's not a bound method, look for 'self'
                 log = get_logger(bound.arguments.get('self', 'function') if self.agent is None
-                                 else self.agent, self.context, self.topic)
+                                 else self.agent, self.topic)
                 if enabled := (log.isEnabledFor(self.level) and self.callback(self.agent)):
                     if self.with_args:
                         bound.apply_defaults()
@@ -265,8 +273,7 @@ class traced: # pylint: disable=[R0902]
             self.set_fail_msg(fn, sig)
         return wrapper
 
-
-class BaseTraceConfig(Config): # pylint: disable=[R0902]
+class BaseTraceConfig(Config):
     """Base configuration for trace.
     """
     def __init__(self, name: str):
@@ -274,9 +281,6 @@ class BaseTraceConfig(Config): # pylint: disable=[R0902]
         #: Agent identification
         self.agent: StrOption = \
             StrOption('agent', "Agent identification")
-        #: Context identification
-        self.context: StrOption = \
-            StrOption('context', "Context identification")
         #: Trace/audit logging topic
         self.topic: StrOption = \
             StrOption('topic', "Trace/audit logging topic")
@@ -369,7 +373,7 @@ class TraceManager:
             self.set_flag(TraceFlag.AFTER)
         if convert_from_str(bool, os.getenv('FBASE_TRACE_FAIL', 'yes')):
             self.set_flag(TraceFlag.FAIL)
-    def is_registered(self, cls: Type) -> bool:
+    def is_registered(self, cls: type) -> bool:
         """Return True if class is registered.
         """
         return cls in self._traced
@@ -378,7 +382,7 @@ class TraceManager:
         """
         for cls in self._traced:
             cls.traced.clear()
-    def register(self, cls: Type) -> None:
+    def register(self, cls: type) -> None:
         """Register class for trace.
 
         Arguments:
@@ -388,17 +392,17 @@ class TraceManager:
         """
         if cls not in self._traced:
             self._traced.store(TracedClass(cls))
-    def add_trace(self, cls: Type, method: str, / , *args, **kwargs) -> None:
+    def add_trace(self, cls: type, method: str, / , *args, **kwargs) -> None:
         """Add/update trace specification for class method.
 
         Arguments:
             cls: Registered traced class
-            method: Name of class method that should be instrumented for trace
+            method: Method name
             args: Positional arguments for decorator
             kwargs: Keyword arguments for decorator
         """
         self._traced[cls].traced.update(TracedItem(method, self.decorator, args, kwargs))
-    def remove_trace(self, cls: Type, method: str) -> None:
+    def remove_trace(self, cls: type, method: str) -> None:
         """Remove trace specification for class method.
 
         Arguments:
@@ -407,7 +411,7 @@ class TraceManager:
         """
         del self._traced[cls].traced[method]
     def trace_object(self, obj: Any, *, strict: bool=False) -> Any:
-        """Instruments object's methods with decorator according to trace configuration.
+        """Instruments object's methods with decorators according to trace configuration.
 
         Arguments:
             strict: Determines the response if the object class is not registered for trace.
@@ -448,9 +452,9 @@ class TraceManager:
         Note:
             Does not `.clear()` existing trace specifications.
         """
-        def build_kwargs(from_cfg: BaseTraceConfig) -> Dict[str, Any]:
+        def build_kwargs(from_cfg: BaseTraceConfig) -> dict[str, Any]:
             result = {}
-            for item in ['agent', 'context', 'topic', 'msg_before', 'msg_after',
+            for item in ['agent', 'topic', 'msg_before', 'msg_after',
                          'msg_failed', 'flags', 'level', 'max_param_length',
                          'has_result', 'with_args']:
                 if (value := getattr(from_cfg, item).value) is not None:

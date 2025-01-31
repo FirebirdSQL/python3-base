@@ -4,7 +4,7 @@
 #
 # PROGRAM/MODULE: firebird-base
 # FILE:           test/test_logging.py
-# DESCRIPTION:    Unit tests for firebird.base.logging
+# DESCRIPTION:    Tests for firebird.base.logging
 # CREATED:        21.5.2020
 #
 # The contents of this file are subject to the MIT License
@@ -37,269 +37,532 @@
 """
 
 from __future__ import annotations
-import unittest
-import platform
-from logging import getLogger, Formatter, lastResort, LogRecord
+
+import logging
+from contextlib import contextmanager
+
+import pytest
+
+import firebird.base.logging as fblog
+
+#import (FStrMessage, BraceMessage, DollarMessage, manager,get_logger)
 from firebird.base.types import *
-from firebird.base.logging import logging_manager, get_logger, bind_logger, \
-     LogLevel, BindFlag, install_null_logger
+
 
 class Namespace:
     "Simple Namespace"
 
-DECORATED = Namespace()
-DECORATED.name = 'DECORATED'
+class NaiveAgent:
+    "Naive agent"
+    @property
+    def name(self):
+        return fblog.get_agent_name(self)
 
-class BaseLoggingTest(unittest.TestCase):
-    "Base class for logging unit tests"
-    def __init__(self, methodName='runTest'):
-        super().__init__(methodName)
-        self.logger = getLogger()
-        self.logger.setLevel(LogLevel.NOTSET)
-        self.fmt: Formatter = Formatter("%(levelname)10s: [%(name)s] topic='%(topic)s' agent=%(agent)s context=%(context)s %(message)s")
-        lastResort.setLevel(LogLevel.NOTSET)
-    def setUp(self) -> None:
-        logging_manager.clear()
-        self.logger.handlers.clear()
-        #lastResort.setFormatter(self.fmt)
-        #self.logger.addHandler(lastResort)
-    def tearDown(self):
-        pass
-    def show(self, records, attrs=None):
-        while records:
-            item = records.pop(0)
-            try:
-                print({k: v for k, v in vars(item).items() if attrs is None or k in attrs})
-            except:
-                print(item)
+class AwareAgentAttr:
+    "Aware agent with _agent_name_ as attribute"
+    _agent_name_ = "_agent_name_attr"
+    @property
+    def name(self):
+        return fblog.get_agent_name(self)
 
-class TestLogging(BaseLoggingTest):
-    """Unit tests for firebird.base.logging"""
-    def test_module(self):
-        self.assertIsNotNone(lastResort)
-        self.assertIsNotNone(lastResort.formatter)
-    def test_aaa(self):
-        if int(platform.python_version_tuple()[1]) < 11:
-            AGENT = 'test_aaa (test_logging.TestLogging)'
-        else:
-            AGENT = 'test_aaa (test_logging.TestLogging.test_aaa)'
-        # root
-        with self.assertLogs() as log:
-            get_logger(self).info('Message')
-        rec: LogRecord = log.records.pop(0)
-        self.assertEqual(rec.name, 'root')
-        self.assertEqual(rec.levelno, LogLevel.INFO)
-        self.assertEqual(rec.args, ())
-        self.assertEqual(rec.module, 'test_logging')
-        self.assertEqual(rec.filename, 'test_logging.py')
-        self.assertEqual(rec.funcName, 'test_aaa')
-        self.assertEqual(rec.topic, '')
-        self.assertEqual(rec.agent, AGENT)
-        self.assertEqual(rec.context, UNDEFINED)
-        self.assertEqual(rec.message, 'Message')
-        # trace
-        with self.assertLogs() as log:
-            get_logger(self, topic='trace').info('Message')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, 'trace')
-        self.assertEqual(rec.levelno, LogLevel.INFO)
-        self.assertEqual(rec.args, ())
-        self.assertEqual(rec.module, 'test_logging')
-        self.assertEqual(rec.filename, 'test_logging.py')
-        self.assertEqual(rec.funcName, 'test_aaa')
-        self.assertEqual(rec.topic, 'trace')
-        self.assertEqual(rec.agent, AGENT)
-        self.assertEqual(rec.context, UNDEFINED)
-        self.assertEqual(rec.message, 'Message')
-    def test_interpolation(self):
-        data = ['interpolation', 'breakdown', 'overflow']
-        # Using keyword arguments
-        with self.assertLogs() as log:
-            get_logger(self).info('Information {data}', data=data[0])
-        rec: LogRecord = log.records.pop(0)
-        self.assertEqual(rec.message, 'Information interpolation')
-        # Using positional dictionary
-        with self.assertLogs() as log:
-            get_logger(self).info('Information {data}', {'data': data[1]})
-        rec = log.records.pop(0)
-        self.assertEqual(rec.message, 'Information breakdown')
-        # Using positional args
-        with self.assertLogs() as log:
-            get_logger(self).info('Information {args[0][2]}', data)
-        rec = log.records.pop(0)
-        self.assertEqual(rec.message, 'Information overflow')
-    def test_bind(self):
-        LOG_AC = 'test.agent.ctx'
-        LOG_AX = 'test.agent.ANY'
-        LOG_XC = 'test.ANY.ctx'
-        LOG_XX = 'test.ANY.ANY'
-        ctx = Namespace()
-        ctx.logging_id = 'CONTEXT'
-        ctx_B = Namespace()
-        ctx_B.logging_id = 'B-CONTEXT'
-        agent = Namespace()
-        agent.logging_id = 'AGENT'
-        agent_B = Namespace()
-        agent_B.logging_id = 'B-AGENT'
-        #
-        logging_manager.bind_logger(agent, ctx, LOG_AC)
-        logging_manager.bind_logger(agent, ANY, LOG_AX)
-        logging_manager.bind_logger(ANY, ctx, LOG_XC)
-        # root logger unmasked
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger(agent_B, ctx_B).debug('General:B-Agent:B-context')
-        rec: LogRecord = log.records.pop(0)
-        self.assertEqual(rec.name, 'root')
-        # this will mask the root logger, we also test the `bind_logger()`
-        bind_logger(ANY, ANY, LOG_XX)
-        #
-        self.assertTrue(BindFlag.ANY_AGENT in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_CTX in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_ANY in logging_manager.bindings)
-        self.assertTrue(BindFlag.DIRECT in logging_manager.bindings)
-        self.assertEqual(len(logging_manager.loggers), 4)
-        self.assertEqual(len(logging_manager.topics), 1)
-        self.assertEqual(logging_manager.topics[''], 4)
-        #
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger(agent, ctx).debug('General:Agent:Context')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, LOG_AC)
-        #
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger(agent, ctx_B).debug('General:Agent:B-context')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, LOG_AX)
-        #
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger(agent, ANY).debug('General:Agent:ANY')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, LOG_AX)
-        #
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger(agent).debug('General:Agent:UNDEFINED')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, LOG_AX)
-        #
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger(agent_B, ctx).debug('General:B-Agent:Context')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, LOG_XC)
-        #
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger(context=ctx).debug('General:UNDEFINED:Context')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, LOG_XC)
-        #
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger(agent_B, ctx_B).debug('General:B-Agent:B-context')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, LOG_XX)
-        #
-        with self.assertLogs(level='DEBUG') as log:
-            get_logger().debug('General:UNDEFINED:UNDEFINED')
-        rec = log.records.pop(0)
-        self.assertEqual(rec.name, LOG_XX)
-    def test_clear(self):
-        LOG_AC = 'test.agent.ctx'
-        LOG_AX = 'test.agent.ANY'
-        LOG_XC = 'test.ANY.ctx'
-        LOG_XX = 'test.ANY.ANY'
-        ctx = Namespace()
-        ctx.logging_id = 'CONTEXT'
-        agent = Namespace()
-        agent.logging_id = 'AGENT'
-        #
-        logging_manager.bind_logger(agent, ctx, LOG_AC)
-        logging_manager.bind_logger(agent, ANY, LOG_AX)
-        logging_manager.bind_logger(ANY, ctx, LOG_XC)
-        logging_manager.bind_logger(ANY, ANY, LOG_XX)
-        #
-        self.assertTrue(BindFlag.ANY_AGENT in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_CTX in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_ANY in logging_manager.bindings)
-        self.assertTrue(BindFlag.DIRECT in logging_manager.bindings)
-        self.assertEqual(len(logging_manager.loggers), 4)
-        self.assertEqual(len(logging_manager.topics), 1)
-        # Clear
-        logging_manager.clear()
-        self.assertFalse(BindFlag.ANY_AGENT in logging_manager.bindings)
-        self.assertFalse(BindFlag.ANY_CTX in logging_manager.bindings)
-        self.assertFalse(BindFlag.ANY_ANY in logging_manager.bindings)
-        self.assertFalse(BindFlag.DIRECT in logging_manager.bindings)
-        self.assertEqual(len(logging_manager.loggers), 0)
-        self.assertEqual(len(logging_manager.topics), 0)
-    def test_unbind(self):
-        LOG_AC = 'test.agent.ctx'
-        LOG_AX = 'test.agent.ANY'
-        LOG_XC = 'test.ANY.ctx'
-        LOG_XX = 'test.ANY.ANY'
-        ctx = Namespace()
-        ctx.logging_id = 'CONTEXT'
-        ctx_B = Namespace()
-        ctx_B.logging_id = 'B-CONTEXT'
-        agent = Namespace()
-        agent.logging_id = 'AGENT'
-        agent_B = Namespace()
-        agent_B.logging_id = 'B-AGENT'
-        #
-        logging_manager.bind_logger(agent, ctx, LOG_AC)
-        logging_manager.bind_logger(agent, ANY, LOG_AX)
-        logging_manager.bind_logger(ANY, ctx, LOG_XC)
-        logging_manager.bind_logger(ANY, ANY, LOG_XX)
-        #
-        self.assertTrue(BindFlag.ANY_AGENT in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_CTX in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_ANY in logging_manager.bindings)
-        self.assertTrue(BindFlag.DIRECT in logging_manager.bindings)
-        self.assertEqual(len(logging_manager.loggers), 4)
-        self.assertEqual(len(logging_manager.topics), 1)
-        self.assertEqual(logging_manager.topics[''], 4)
-        # Unbind
-        # nothing to remove
-        self.assertEqual(0, logging_manager.unbind(agent, ctx, 'trace'))
-        self.assertEqual(0, logging_manager.unbind(agent, ctx_B))
-        self.assertEqual(0, logging_manager.unbind(agent_B, ctx))
-        # targeted
-        self.assertEqual(1, logging_manager.unbind(ANY, ANY))
-        self.assertTrue(BindFlag.ANY_AGENT in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_CTX in logging_manager.bindings)
-        self.assertFalse(BindFlag.ANY_ANY in logging_manager.bindings)
-        self.assertTrue(BindFlag.DIRECT in logging_manager.bindings)
-        self.assertEqual(len(logging_manager.loggers), 3)
-        self.assertEqual(logging_manager.topics[''], 3)
-        # group (all agents for context)
-        self.assertEqual(2, logging_manager.unbind(ALL, ctx))
-        self.assertFalse(BindFlag.ANY_AGENT in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_CTX in logging_manager.bindings)
-        self.assertFalse(BindFlag.ANY_ANY in logging_manager.bindings)
-        self.assertFalse(BindFlag.DIRECT in logging_manager.bindings)
-        self.assertEqual(len(logging_manager.loggers), 1)
-        self.assertEqual(logging_manager.topics[''], 1)
-        # rebind
-        logging_manager.bind_logger(agent, ctx, LOG_AC)
-        logging_manager.bind_logger(agent, ANY, LOG_AX)
-        logging_manager.bind_logger(ANY, ctx, LOG_XC)
-        logging_manager.bind_logger(ANY, ANY, LOG_XX)
-        # group (all contexts for agent)
-        self.assertEqual(2, logging_manager.unbind(agent, ALL))
-        self.assertTrue(BindFlag.ANY_AGENT in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_CTX in logging_manager.bindings)
-        self.assertTrue(BindFlag.ANY_ANY in logging_manager.bindings)
-        self.assertFalse(BindFlag.DIRECT in logging_manager.bindings)
-        self.assertEqual(len(logging_manager.loggers), 2)
-        self.assertEqual(logging_manager.topics[''], 2)
-    def test_null_logger(self):
-        with self.assertLogs() as log:
-            get_logger(self).info('Message')
-        rec: LogRecord = log.records.pop(0)
-        self.assertEqual(rec.message, 'Message')
-        install_null_logger()
-        bind_logger(ANY, ANY, 'null')
-        with self.assertRaises(AssertionError) as cm:
-            with self.assertLogs() as log:
-                get_logger(self).info('Message')
-        self.assertEqual(cm.exception.args, ("no logs of level INFO or higher triggered on root",))
+class AwareAgentProperty:
+    "Aware agent with _agent_name_ as dynamic property"
+    def __init__(self, agent_name: Any):
+        self._int_agent_name = agent_name
+    @property
+    def _agent_name_(self) -> Any:
+        return self._int_agent_name
+    @property
+    def name(self):
+        return fblog.get_agent_name(self)
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.fixture
+def manager():
+    fblog.logging_manager.reset()
+    return fblog.logging_manager
+
+@contextmanager
+def context_filter(to):
+    ctxfilter = fblog.ContextFilter()
+    to.addFilter(ctxfilter)
+    yield
+    to.removeFilter(ctxfilter)
+
+def test_fstr_message():
+    ns = Namespace()
+    ns.nested = Namespace()
+    ns.nested.item = "item!"
+    ns.attr = "attr"
+    ns.number = 5
+    #
+    msg = fblog.FStrMessage("-> Message <-")
+    assert str(msg) == "-> Message <-"
+    msg = fblog.FStrMessage("Let's see {ns.number=} * 5 = {ns.number * 5}, [{ns.nested.item}] or {ns.attr!r}", {"ns": ns})
+    assert str(msg) == "Let's see ns.number=5 * 5 = 25, [item!] or 'attr'"
+    msg = fblog.FStrMessage("Let's see {ns.number=} * 5 = {ns.number * 5}, [{ns.nested.item}] or {ns.attr!r}", ns=ns)
+    assert str(msg) == "Let's see ns.number=5 * 5 = 25, [item!] or 'attr'"
+    msg = fblog.FStrMessage("Let's see {args[0]=} * 5 = {args[0] * 5}, {ns.attr!r}", 5, ns=ns)
+    assert str(msg) == "Let's see args[0]=5 * 5 = 25, 'attr'"
+
+def test_brace_message():
+    point = Namespace()
+    point.x = 0.5
+    point.y = 0.5
+    msg = fblog.BraceMessage("Message with {0} {1}", 2, "placeholders")
+    assert str(msg) == "Message with 2 placeholders"
+    msg = fblog.BraceMessage("Message with coordinates: ({point.x:.2f}, {point.y:.2f})", point=point)
+    assert str(msg) == "Message with coordinates: (0.50, 0.50)"
+
+def test_dollar_message():
+    point = Namespace()
+    point.x = 0.5
+    point.y = 0.5
+    msg = fblog.DollarMessage("Message with $num $what", num=2, what="placeholders")
+    assert str(msg) == "Message with 2 placeholders"
+
+def test_context_filter(caplog):
+    caplog.set_level(logging.INFO)
+    log = logging.getLogger()
+    log.info("Message")
+    for rec in caplog.records:
+        assert not hasattr(rec, "domain")
+        assert not hasattr(rec, "topic")
+        assert not hasattr(rec, "agent")
+        assert not hasattr(rec, "context")
+    caplog.clear()
+    with context_filter(log):
+        log.info("Message")
+        for rec in caplog.records:
+            assert rec.domain is None
+            assert rec.topic is None
+            assert rec.agent is None
+            assert rec.context is None
+
+def test_context_adapter(caplog):
+    caplog.set_level(logging.INFO)
+    log = fblog.ContextLoggerAdapter(logging.getLogger(), "domain", "topic", "agent", "agent_name")
+    log.info("Message")
+    for rec in caplog.records:
+        assert rec.domain == "domain"
+        assert rec.topic == "topic"
+        assert rec.agent == "agent_name"
+        assert rec.context is None
+
+def test_context_adapter_filter(caplog):
+    caplog.set_level(logging.INFO)
+    log = fblog.ContextLoggerAdapter(logging.getLogger(), "domain", "topic", "agent", "agent_name")
+    with context_filter(log.logger):
+        log.info("Message")
+        for rec in caplog.records:
+            assert rec.domain == "domain"
+            assert rec.topic == "topic"
+            assert rec.agent == "agent_name"
+            assert rec.context is None
+
+def test_mngr_default_domain():
+    manager = fblog.LoggingManager()
+    assert manager.default_domain is None
+    manager.default_domain = "default_domain"
+    assert manager.default_domain == "default_domain"
+
+def test_mngr_logger_fmt():
+    manager = fblog.LoggingManager()
+    assert manager.logger_fmt == []
+    value = ["app"]
+    manager.logger_fmt = value
+    assert manager.logger_fmt == value
+    value[0] = "xxx"
+    assert manager.logger_fmt == ["app"]
+    manager.logger_fmt = ["app", "", "module"]
+    assert manager.logger_fmt == ["app", "module"]
+    with pytest.raises(ValueError) as cm:
+        manager.logger_fmt = ["app", None, "module"]
+    assert cm.value.args == ("Unsupported item type <class 'NoneType'>",)
+    with pytest.raises(ValueError) as cm:
+        manager.logger_fmt = [1]
+    assert cm.value.args == ("Unsupported item type <class 'int'>",)
+    with pytest.raises(ValueError) as cm:
+        manager.logger_fmt = ["app", fblog.TOPIC, "x", fblog.TOPIC]
+    assert cm.value.args == ("Only one occurence of sentinel TOPIC allowed",)
+    with pytest.raises(ValueError) as cm:
+        manager.logger_fmt = ["app", fblog.DOMAIN, "x", fblog.DOMAIN]
+    assert cm.value.args == ("Only one occurence of sentinel DOMAIN allowed",)
+    value = ["app", fblog.DOMAIN, fblog.TOPIC]
+    manager.logger_fmt = value
+    assert manager.logger_fmt == value
+
+def test_mngr_get_logger_name():
+    manager = fblog.LoggingManager()
+    assert manager._get_logger_name("domain", "topic") == ""
+    manager.logger_fmt = ["app"]
+    assert manager._get_logger_name("domain", "topic") == "app"
+    manager.logger_fmt = ["app", "module"]
+    assert manager._get_logger_name("domain", "topic") == "app.module"
+    manager.logger_fmt = ["app", fblog.DOMAIN]
+    assert manager._get_logger_name("domain", "topic") == "app.domain"
+    manager.logger_fmt = ["app", fblog.TOPIC]
+    assert manager._get_logger_name("domain", "topic") == "app.topic"
+    manager.logger_fmt = ["app", fblog.TOPIC, "", fblog.DOMAIN]
+    assert manager._get_logger_name("domain", "topic") == "app.topic.domain"
+
+def test_mngr_set_get_topic_mapping():
+    topic = "topic"
+    new_topic = "topic-X"
+    manager = fblog.LoggingManager()
+    assert len(manager._topic_map) == 0
+    assert manager.get_topic_mapping(topic) is None
+    #
+    manager.set_topic_mapping(topic, new_topic)
+    assert len(manager._topic_map) == 1
+    assert manager.get_topic_mapping(topic) == new_topic
+    #
+    manager.set_topic_mapping(topic, None)
+    assert len(manager._topic_map) == 0
+    assert manager.get_topic_mapping(topic) is None
+    #
+    manager.set_topic_mapping(topic, DEFAULT)
+    assert manager.get_topic_mapping(topic) == str(DEFAULT)
+    assert len(manager._topic_map) == 1
+    #
+    manager.set_topic_mapping(new_topic, DEFAULT)
+    assert len(manager._topic_map) == 2
+
+def test_mngr_topic_domain_to_logger_name():
+    agent = NaiveAgent()
+    manager = fblog.LoggingManager()
+    manager.logger_fmt = ["app", fblog.TOPIC, fblog.DOMAIN]
+    #
+    log = manager.get_logger(agent, "topic")
+    assert log.logger.name == "app.topic"
+    #
+    manager.logger_fmt = ["app"]
+    assert manager._get_logger_name("domain", "topic") == "app"
+    #
+    manager.logger_fmt = ["app", "module"]
+    assert manager._get_logger_name("domain", "topic") == "app.module"
+    #
+    manager.logger_fmt = ["app", fblog.DOMAIN]
+    assert manager._get_logger_name("domain", "topic") == "app.domain"
+    #
+    manager.logger_fmt = ["app", fblog.TOPIC]
+    assert manager._get_logger_name("domain", "topic") == "app.topic"
+    #
+    manager.logger_fmt = ["app", fblog.TOPIC, "", fblog.DOMAIN]
+    assert manager._get_logger_name("domain", "topic") == "app.topic.domain"
+
+def test_mngr_get_agent_name_str():
+    agent = "agent"
+    manager = fblog.LoggingManager()
+    assert manager.get_agent_name(agent) == agent
+
+def test_mngr_get_agent_name_naive_obj():
+    agent = NaiveAgent()
+    manager = fblog.LoggingManager()
+    assert manager.get_agent_name(agent) == "tests.test_logging.NaiveAgent"
+
+def test_mngr_get_agent_name_aware_obj_attr():
+    agent = AwareAgentAttr()
+    manager = fblog.LoggingManager()
+    assert manager.get_agent_name(agent) == "_agent_name_attr"
+
+def test_mngr_get_agent_name_aware_obj_dynamic():
+    agent = AwareAgentProperty("_agent_name_property")
+    manager = fblog.LoggingManager()
+    assert manager.get_agent_name(agent) == "_agent_name_property"
+    agent._int_agent_name = DEFAULT
+    assert manager.get_agent_name(agent) == "DEFAULT"
+
+def test_mngr_set_get_agent_mapping():
+    agent = "agent"
+    new_agent = "agent-X"
+    manager = fblog.LoggingManager()
+    assert len(manager._agent_map) == 0
+    assert manager.get_agent_mapping(agent) is None
+    #
+    manager.set_agent_mapping(agent, new_agent)
+    assert len(manager._agent_map) == 1
+    assert manager.get_agent_mapping(agent) == new_agent
+    #
+    manager.set_agent_mapping(agent, None)
+    assert len(manager._agent_map) == 0
+    assert manager.get_agent_mapping(agent) is None
+    #
+    manager.set_agent_mapping(agent, DEFAULT)
+    assert len(manager._agent_map) == 1
+    assert manager.get_agent_mapping(agent) == str(DEFAULT)
+    #
+    manager.set_agent_mapping(new_agent, DEFAULT)
+    assert len(manager._agent_map) == 2
+
+def test_mngr_set_get_domain_mapping():
+    domain = "domain"
+    agent_naive = NaiveAgent()
+    agent_aware_attr = AwareAgentAttr()
+    agent_aware_prop_1 = AwareAgentProperty("agent_aware_prop_1")
+    agent_aware_prop_2 = AwareAgentProperty("agent_aware_prop_2")
+    manager = fblog.LoggingManager()
+    assert len(manager._agent_domain_map) == 0
+    assert len(manager._domain_agent_map) == 0
+    assert manager.get_agent_domain(agent_naive.name) is None
+    assert manager.get_agent_domain(agent_aware_attr.name) is None
+    assert manager.get_agent_domain(agent_aware_prop_1.name) is None
+    assert manager.get_agent_domain(agent_aware_prop_2.name) is None
+    assert manager.get_domain_mapping(domain) is None
+    # Set
+    manager.set_domain_mapping(domain, [agent_naive.name, agent_aware_attr.name])
+    assert len(manager._agent_domain_map) == 2
+    assert len(manager._domain_agent_map) == 1
+    assert manager.get_domain_mapping(domain) == set([agent_naive.name, agent_aware_attr.name])
+    assert manager.get_agent_domain(agent_naive.name) == domain
+    assert manager.get_agent_domain(agent_aware_attr.name) == domain
+    assert manager.get_agent_domain(agent_aware_prop_1.name) is None
+    assert manager.get_agent_domain(agent_aware_prop_2.name) is None
+    # Update
+    manager.set_domain_mapping(domain, [agent_naive.name, agent_aware_prop_1.name])
+    assert len(manager._agent_domain_map) == 3
+    assert len(manager._domain_agent_map) == 1
+    assert manager.get_domain_mapping(domain) == set([agent_naive.name, agent_aware_attr.name,
+                                                      agent_aware_prop_1.name])
+    assert manager.get_agent_domain(agent_naive.name) == domain
+    assert manager.get_agent_domain(agent_aware_attr.name) == domain
+    assert manager.get_agent_domain(agent_aware_prop_1.name) == domain
+    assert manager.get_agent_domain(agent_aware_prop_2.name) is None
+    # Replace + single name
+    manager.set_domain_mapping(domain, agent_naive.name, replace=True)
+    assert len(manager._agent_domain_map) == 1
+    assert len(manager._domain_agent_map) == 1
+    assert manager.get_domain_mapping(domain) == set([agent_naive.name])
+    assert manager.get_agent_domain(agent_naive.name) == domain
+    assert manager.get_agent_domain(agent_aware_attr.name) is None
+    assert manager.get_agent_domain(agent_aware_prop_1.name) is None
+    assert manager.get_agent_domain(agent_aware_prop_2.name) is None
+    # Remove
+    manager.set_domain_mapping(domain, None)
+    assert len(manager._agent_domain_map) == 0
+    assert len(manager._domain_agent_map) == 0
+    assert manager.get_agent_domain(agent_naive.name) is None
+    assert manager.get_agent_domain(agent_aware_attr.name) is None
+    assert manager.get_agent_domain(agent_aware_prop_1.name) is None
+    assert manager.get_agent_domain(agent_aware_prop_2.name) is None
+    assert manager.get_domain_mapping(domain) is None
+
+def test_mngr_get_logger():
+    manager = fblog.LoggingManager()
+    agent = "agent"
+    agent_naive = NaiveAgent()
+    domain = "domain"
+    topic = "topic"
+    new_topic = "new_topic"
+    root_logger = "root"
+    app_logger = "app"
+    # No mappings
+    logger = manager.get_logger(agent)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == root_logger
+    assert logger.extra == {"domain": None, "topic": None, "agent": agent}
+    # Domain mapped
+    manager.set_domain_mapping(domain, agent)
+    manager.set_domain_mapping(domain, agent_naive.name)
+    logger = manager.get_logger(agent)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == root_logger
+    assert logger.extra == {"domain": domain, "topic": None, "agent": agent}
+    # With topic
+    logger = manager.get_logger(agent, topic)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == root_logger
+    assert logger.extra == {"domain": domain, "topic": topic, "agent": agent}
+    # Simple logger fmt
+    manager.logger_fmt = ["app"]
+    logger = manager.get_logger(agent, topic)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger
+    assert logger.extra == {"domain": domain, "topic": topic, "agent": agent}
+    #
+    manager.logger_fmt = ["app", fblog.DOMAIN]
+    # Logger fmt with DOMAIN, no topic
+    logger = manager.get_logger(agent)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + "." + domain
+    assert logger.extra == {"domain": domain, "topic": None, "agent": agent}
+    # Logger fmt with DOMAIN, with topic
+    logger = manager.get_logger(agent, topic)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + "." + domain
+    assert logger.extra == {"domain": domain, "topic": topic, "agent": agent}
+    # Logger fmt with DOMAIN, no topic, with NaiveAgent
+    logger = manager.get_logger(agent_naive)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + "." + domain
+    assert logger.extra == {"domain": domain, "topic": None, "agent": agent_naive.name}
+    #
+    manager.logger_fmt = ["app", fblog.TOPIC]
+    # Logger fmt with TOPIC, no topic
+    logger = manager.get_logger(agent)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger
+    assert logger.extra == {"domain": domain, "topic": None, "agent": agent}
+    # Logger fmt with TOPIC, with topic
+    logger = manager.get_logger(agent, topic)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + "." + topic
+    assert logger.extra == {"domain": domain, "topic": topic, "agent": agent}
+    # Logger fmt with TOPIC, with mapped topic
+    manager.set_topic_mapping(topic, new_topic)
+    logger = manager.get_logger(agent, topic)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + "." + new_topic
+    assert logger.extra == {"domain": domain, "topic": new_topic, "agent": agent}
+    manager.set_topic_mapping(topic, None)
+    #
+    manager.logger_fmt = ["app", fblog.DOMAIN, fblog.TOPIC]
+    # Logger fmt with DOMAIN and TOPIC, no topic
+    logger = manager.get_logger(agent)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + "." + domain
+    assert logger.extra == {"domain": domain, "topic": None, "agent": agent}
+    # Logger fmt with DOMAIN and TOPIC, with topic
+    logger = manager.get_logger(agent, topic)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + "." + domain + "." + topic
+    assert logger.extra == {"domain": domain, "topic": topic, "agent": agent}
+    #
+    manager.set_domain_mapping(domain, None)
+    # Logger fmt with DOMAIN and TOPIC, no topic, no domain
+    logger = manager.get_logger(agent)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger
+    assert logger.extra == {"domain": None, "topic": None, "agent": agent}
+    # Logger fmt with DOMAIN and TOPIC, with topic, no domain
+    logger = manager.get_logger(agent, topic)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + "." + topic
+    assert logger.extra == {"domain": None, "topic": topic, "agent": agent}
+    # Logger fmt with DOMAIN and TOPIC, no topic, default domain
+    manager.default_domain = "default_domain"
+    logger = manager.get_logger(agent)
+    assert isinstance(logger, fblog.ContextLoggerAdapter)
+    assert logger.name == app_logger + ".default_domain"
+    assert logger.extra == {"domain": "default_domain", "topic": None, "agent": agent}
+
+def test_context_adapter(caplog):
+    manager = fblog.LoggingManager()
+    agent = "agent"
+    agent_naive = NaiveAgent()
+    agent_aware = AwareAgentAttr()
+    domain = "domain"
+    topic = "topic"
+    message = "Log message"
+    manager.set_domain_mapping(domain, [agent, agent_naive.name, agent_aware.name])
+    caplog.set_level(logging.NOTSET)
+    # Agent name
+    log = manager.get_logger(agent)
+    log.info(message)
+    assert len(caplog.records) == 1
+    rec = caplog.records.pop(0)
+    assert rec.name == "root"
+    assert rec.funcName == "test_context_adapter"
+    assert rec.filename == "test_logging.py"
+    assert rec.message == message
+    assert rec.domain == domain
+    assert rec.agent == agent
+    assert rec.topic is None
+    assert rec.context is None
+    # Naive agent, no log_context
+    log = manager.get_logger(agent_naive)
+    log.info(message)
+    assert len(caplog.records) == 1
+    rec = caplog.records.pop(0)
+    assert rec.name == "root"
+    assert rec.funcName == "test_context_adapter"
+    assert rec.filename == "test_logging.py"
+    assert rec.message == message
+    assert rec.domain == domain
+    assert rec.agent == agent_naive.name
+    assert rec.topic is None
+    assert rec.context is None
+    # Naive agent, with log_context
+    agent_naive.log_context = "Context data"
+    log = manager.get_logger(agent_naive)
+    log.info(message)
+    assert len(caplog.records) == 1
+    rec = caplog.records.pop(0)
+    assert rec.name == "root"
+    assert rec.funcName == "test_context_adapter"
+    assert rec.filename == "test_logging.py"
+    assert rec.message == message
+    assert rec.domain == domain
+    assert rec.agent == agent_naive.name
+    assert rec.topic is None
+    assert rec.context == "Context data"
+
+def test_context_filter(caplog):
+    manager = fblog.LoggingManager()
+    caplog.set_level(logging.NOTSET)
+    # No filter
+    logging.getLogger().info("Message")
+    assert len(caplog.records) == 1
+    rec = caplog.records.pop(0)
+    assert not hasattr(rec, "domain")
+    assert not hasattr(rec, "topic")
+    assert not hasattr(rec, "agent")
+    assert not hasattr(rec, "context")
+    # Filter, no attrs in record
+    with caplog.filtering(fblog.ContextFilter()):
+        logging.getLogger().info("Message")
+    assert len(caplog.records) == 1
+    rec = caplog.records.pop(0)
+    assert rec.domain is None
+    assert rec.topic is None
+    assert rec.agent is None
+    assert rec.context is None
+    # Filter, attrs in record
+    agent = AwareAgentAttr()
+    agent.log_context = "Context data"
+    domain = "domain"
+    topic = "topic"
+    manager.set_domain_mapping(domain, agent.name)
+    log = manager.get_logger(agent, topic)
+    with caplog.filtering(fblog.ContextFilter()):
+        log.info("Message")
+    assert len(caplog.records) == 1
+    rec = caplog.records.pop(0)
+    assert rec.domain == domain
+    assert rec.topic == topic
+    assert rec.agent == agent.name
+    assert rec.context == "Context data"
+
+def test_logger_factory():
+    manager = fblog.LoggingManager()
+    assert manager.get_logger_factory() == manager._logger_factory
+    manager.set_logger_factory(None)
+    assert manager._logger_factory is None
+
+def test_mngr_reset():
+    manager = fblog.LoggingManager()
+    assert len(manager._agent_domain_map) == 0
+    assert len(manager._domain_agent_map) == 0
+    assert len(manager._topic_map) == 0
+    assert len(manager._agent_map) == 0
+    assert len(manager.logger_fmt) == 0
+    assert manager.default_domain is None
+    # Setup
+    manager.set_agent_mapping("agent", "new_agent")
+    manager.set_domain_mapping("domain", "agent")
+    manager.set_topic_mapping("topic", "new_topic")
+    manager.logger_fmt = ["app"]
+    manager.default_domain = "app"
+    assert len(manager._agent_domain_map) == 1
+    assert len(manager._domain_agent_map) == 1
+    assert len(manager._topic_map) == 1
+    assert len(manager._agent_map) == 1
+    assert manager.logger_fmt == ["app"]
+    assert manager.default_domain == "app"
+    # Reset
+    manager.reset()
+    assert len(manager._agent_domain_map) == 0
+    assert len(manager._domain_agent_map) == 0
+    assert len(manager._topic_map) == 0
+    assert len(manager._agent_map) == 0
+    assert len(manager.logger_fmt) == 0
+    assert manager.default_domain is None

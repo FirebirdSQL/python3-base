@@ -37,24 +37,27 @@
 """
 
 from __future__ import annotations
-from typing import Hashable, Callable, Any, Type, Union
+
+from collections.abc import Callable, Hashable
 from dataclasses import dataclass
 from decimal import Decimal, DecimalException
 from enum import Enum, IntEnum, IntFlag
+from typing import Any
 from uuid import UUID
-from .types import Distinct, MIME, ZMQAddress
+
 from .collections import Registry
+from .types import MIME, Distinct, ZMQAddress
 
 #: Function that converts typed value to its string representation.
 TConvertToStr = Callable[[Any], str]
 #: Function that converts string representation of typed value to typed value.
-TConvertFromStr = Callable[[Type, str], Any]
+TConvertFromStr = Callable[[type, str], Any]
 
 @dataclass
 class Convertor(Distinct):
     """Data convertor registry entry.
     """
-    cls: Type
+    cls: type
     to_str: TConvertToStr
     from_str: TConvertFromStr
     def get_key(self) -> Hashable:
@@ -87,12 +90,12 @@ def any2str(value: Any) -> str:
     """
     return str(value)
 
-def str2any(cls: Type, value: str) -> Any:
+def str2any(cls: type, value: str) -> Any:
     """Converts string to data type value using `type(value)`.
     """
     return cls(value)
 
-def register_convertor(cls: Type, *,
+def register_convertor(cls: type, *,
                        to_str: TConvertToStr=any2str,
                        from_str: TConvertFromStr=str2any):
     """Registers convertor function(s).
@@ -104,7 +107,7 @@ def register_convertor(cls: Type, *,
     """
     _convertors.store(Convertor(cls, to_str, from_str))
 
-def register_class(cls: Type) -> None:
+def register_class(cls: type) -> None:
     """Registers class for name lookup.
 
     .. seealso:: `has_convertor()`, `get_convertor()`
@@ -116,21 +119,20 @@ def register_class(cls: Type) -> None:
         raise TypeError(f"Class '{cls.__name__}' already registered as '{_classes[cls.__name__]!r}'")
     _classes[cls.__name__] = cls
 
-def _get_convertor(cls: Union[Type, str]) -> Convertor:
+def _get_convertor(cls: type | str) -> Convertor:
     if isinstance(cls, str):
         cls = _classes.get(cls, cls)
     if isinstance(cls, str):
         conv = list(_convertors.filter(f"item.{'full_name' if '.' in cls else 'name'} == '{cls}'"))
         conv = conv.pop(0) if conv else None
-    else:
-        if (conv := _convertors.get(cls)) is None:
-            for base in cls.__mro__:
-                conv = _convertors.get(base)
-                if conv is not None:
-                    break
+    elif (conv := _convertors.get(cls)) is None:
+        for base in cls.__mro__:
+            conv = _convertors.get(base)
+            if conv is not None:
+                break
     return conv
 
-def has_convertor(cls: Union[Type, str]) -> bool:
+def has_convertor(cls: type | str) -> bool:
     """Returns True if class has a convertor.
 
     Arguments:
@@ -148,7 +150,7 @@ def has_convertor(cls: Union[Type, str]) -> bool:
     """
     return _get_convertor(cls) is not None
 
-def update_convertor(cls: Union[Type, str], *,
+def update_convertor(cls: type | str, *,
                      to_str: TConvertToStr=None,
                      from_str: TConvertFromStr=None):
     """Update convertor function(s).
@@ -181,7 +183,7 @@ def convert_to_str(value: Any) -> str:
     return get_convertor(value.__class__).to_str(value)
 
 
-def convert_from_str(cls: Union[Type, str], value: str) -> Any:
+def convert_from_str(cls: type | str, value: str) -> Any:
     """Converts value from string to data type using registered convertor.
 
     Arguments:
@@ -203,7 +205,7 @@ def convert_from_str(cls: Union[Type, str], value: str) -> Any:
     """
     return get_convertor(cls).from_str(cls, value)
 
-def get_convertor(cls: Union[Type, str]) -> Convertor:
+def get_convertor(cls: type | str) -> Convertor:
     """Returns Convertor for data type.
 
     Arguments:
@@ -229,15 +231,15 @@ def get_convertor(cls: Union[Type, str]) -> Convertor:
 def _register():
     """Internal function for registration of builtin converters."""
 
-    def bool2str(value: bool) -> str:
+    def bool2str(value: bool) -> str: # noqa: FBT001
         return TRUE_STR[0] if value else FALSE_STR[0]
-    def str2bool(type_: Type, value: str) -> bool:  # pylint: disable=[W0613]
+    def str2bool(type_: type, value: str) -> bool: # noqa: ARG001
         if (v := value.lower()) in TRUE_STR:
             return True
         if v not in FALSE_STR:
             raise ValueError("Value is not a valid bool string constant")
         return False
-    def str2decimal(type_: Type, value: str) -> Decimal:
+    def str2decimal(type_: type, value: str) -> Decimal:
         try:
             return type_(value)
         except DecimalException as exc:
@@ -245,9 +247,19 @@ def _register():
     def enum2str(value: Enum) -> str:
         "Converts any Enum/Flag value to string"
         return value.name
-    def str2enum(cls: Type, value: str) -> Enum:
+    def str2enum(cls: type, value: str) -> Enum:
         "Converts string to Enum/Flag value"
         return {k.lower(): v for k, v in cls.__members__.items()}[value.lower()]
+    def str2flag(cls: type, value: str) -> Enum:
+        "Converts string to Enum/Flag value"
+        result = None
+        for item in value.lower().split('|'):
+            value = {k.lower(): v for k, v in cls.__members__.items()}[item]
+            if result:
+                result |= value
+            else:
+                result = value
+        return result
 
     register_convertor(str)
     register_convertor(int)
@@ -261,7 +273,7 @@ def _register():
     register_convertor(Enum, to_str=enum2str, from_str=str2enum)
     # We must register IntEnum and IntFlag because 'int' is before Enum in MRO
     register_convertor(IntEnum, to_str=enum2str, from_str=str2enum)
-    register_convertor(IntFlag, to_str=enum2str, from_str=str2enum)
+    register_convertor(IntFlag, to_str=enum2str, from_str=str2flag)
 
 _register()
 del _register

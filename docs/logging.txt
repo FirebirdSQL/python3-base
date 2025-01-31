@@ -146,7 +146,16 @@ The following program is an example of small but complex enough code that you ca
        def interact(self, other: Person, message: str) -> Mood:
            print(f"[{other.name}] {message}")
            # >>> LOGGING
-           get_logger(self, topic='Person').debug(f'Processing "{message}" from [{other.name}]')
+           # Note that messages are normal strings that use f-strings interpolation.
+           # You may specify values using keyword format:
+           get_logger(self, topic='Person').debug('Processing "{message}" from [{other.name}]',
+                                                  message=message, other=other)
+           # Or you can use a dictionary:
+           # get_logger(self, topic="Person").debug('Processing "{message}" from [{other.name}]',
+           #                                        {'message': message, 'other': other})
+           # You can also use f-strings directly, but they are ALWAYS evaluated, regardless
+           # whether the message is written to log or not.
+           # get_logger(self, topic='Person').debug(f'Processing "{message}" from [{other.name}]')
            # <<< LOGGING
            self.process(message)
            return self.mood
@@ -205,7 +214,9 @@ The following program is an example of small but complex enough code that you ca
        "Simulation of virtual agents meeting"
 
        for person in persons:
+           # >>> LOGGING
            person.log_context = name
+           # <<< LOGGING
 
        start = monotonic()
        print("Meeting started...")

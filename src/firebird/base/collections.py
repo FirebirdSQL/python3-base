@@ -48,7 +48,7 @@ All containers provide next operations:
 * `occurrence` that returns number of items for which `expr` is evaluated as True.
 * `all` and `any` that return True if `expr` is evaluated as True for all or any list element(s).
 * `report` that returns generator that yields data produced by expression(s) evaluated on
-  list items.
+  collection items.
 
 Individual collection types provide additional operations like splitting and extracting
 based on expression etc.
@@ -58,14 +58,16 @@ referencing the collection item(s), or lambda functions.
 """
 
 from __future__ import annotations
-from typing import Type, Union, Any, Dict, List, Tuple, Mapping, Sequence, Generator, \
-     Iterable, Callable, cast
-from operator import attrgetter
+
 import copy as std_copy
-from .types import Error, Distinct, Sentinel, UNDEFINED
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+from operator import attrgetter
+from typing import Any, cast
+
+from .types import UNDEFINED, Distinct, Error, Sentinel
 
 
-def make_lambda(expr: str, params: str='item', context: Dict[str, Any]=None):
+def make_lambda(expr: str, params: str='item', context: dict[str, Any] | None=None):
     """Makes lambda function from expression.
 
     Arguments:
@@ -73,19 +75,20 @@ def make_lambda(expr: str, params: str='item', context: Dict[str, Any]=None):
         params: Comma-separated list of names that should be used as lambda parameters
         context: Dictionary passed as `context` to `eval`.
     """
-    return eval(f'lambda {params}:{expr}', context) if context else eval(f'lambda {params}:{expr}')
+    return eval(f"lambda {params}:{expr}", context) if context \
+           else eval(f"lambda {params}:{expr}") # noqa: S307
 
 
 #: Collection Item
 Item = Any
 #: Collection Item type specification
-TypeSpec = Union[Type, Tuple[Type]]
+TypeSpec = type | tuple[type]
 #: Collection Item sort expression
-ItemExpr = Union[str, Callable[[Item], Item]]
+ItemExpr = str | Callable[[Item], Item]
 #: Filter expression
-FilterExpr = Union[str, Callable[[Item], bool]]
+FilterExpr = str | Callable[[Item], bool]
 #: Check expression
-CheckExpr = Union[str, Callable[[Item, Any], bool]]
+CheckExpr = str | Callable[[Item, Any], bool]
 
 class BaseObjectCollection:
     """Base class for collection of objects.
@@ -232,11 +235,11 @@ class BaseObjectCollection:
                 return True
         return False
 
-class DataList(List[Item], BaseObjectCollection):
+class DataList(list[Item], BaseObjectCollection):
     """List of data (objects) with additional functionality.
     """
-    def __init__(self, items: Iterable=None, type_spec: TypeSpec=UNDEFINED,
-                 key_expr: str=None, frozen: bool=False):
+    def __init__(self, items: Iterable | None=None, type_spec: TypeSpec=UNDEFINED,
+                 key_expr: str | None=None, *, frozen: bool=False):
         """
         Arguments:
             items:     Sequence to initialize the collection.
@@ -250,8 +253,8 @@ class DataList(List[Item], BaseObjectCollection):
         Raises:
             ValueError: When initialization sequence contains invalid instance.
         """
-        assert key_expr is None or isinstance(key_expr, str)
-        assert key_expr is None or make_lambda(key_expr) is not None
+        assert key_expr is None or isinstance(key_expr, str) # noqa: S101
+        assert key_expr is None or make_lambda(key_expr) is not None # noqa: S101
         if items is not None:
             super().__init__(items)
         else:
@@ -268,7 +271,7 @@ class DataList(List[Item], BaseObjectCollection):
         self.__key_expr: str = key_expr
         self.__frozen: bool = False
         self._type_spec: TypeSpec = type_spec
-        self.__map: Dict = None
+        self.__map: dict = None
         if frozen:
             self.freeze()
     def __valchk(self, value: Item) -> None:
@@ -328,7 +331,7 @@ class DataList(List[Item], BaseObjectCollection):
         """
         for item in iterable:
             self.append(item)
-    def sort(self, attrs: List=None, expr: ItemExpr=None, reverse: bool=False) -> None:
+    def sort(self, attrs: list | None=None, expr: ItemExpr | None=None, *, reverse: bool=False) -> None:
         """Sort items in-place, optionaly using attribute values as key or key expression.
 
         Arguments:
@@ -347,7 +350,7 @@ class DataList(List[Item], BaseObjectCollection):
                L.sort(expr=lambda x: x.name.upper()) # Sort by upper item.name
                L.sort(expr='item.name.upper()')      # Sort by upper item.name
         """
-        assert attrs is None or isinstance(attrs, (list, tuple))
+        assert attrs is None or isinstance(attrs, list | tuple) # noqa: S101
         if attrs:
             super().sort(key=attrgetter(*attrs), reverse=reverse)
         elif expr:
@@ -376,8 +379,8 @@ class DataList(List[Item], BaseObjectCollection):
         self.__frozen = True
         if self.__key_expr:
             fce = make_lambda(self.__key_expr)
-            self.__map = dict(((key, index) for index, key in enumerate((fce(item) for item in self))))
-    def split(self, expr: FilterExpr, frozen: bool=False) -> Tuple[DataList, DataList]:
+            self.__map = {key: index for index, key in enumerate(fce(item) for item in self)}
+    def split(self, expr: FilterExpr, *, frozen: bool=False) -> tuple[DataList, DataList]:
         """Return two new `DataList` instances, first with items for which `expr` is
         evaluated as True and second for `expr` evaluated as False.
 
@@ -394,7 +397,7 @@ class DataList(List[Item], BaseObjectCollection):
         """
         return DataList(self.filter(expr), self._type_spec, self.__key_expr, frozen=frozen), \
                DataList(self.filterfalse(expr), self._type_spec, self.__key_expr, frozen=frozen)
-    def extract(self, expr: FilterExpr, copy: bool=False) -> DataList:
+    def extract(self, expr: FilterExpr, *, copy: bool=False) -> DataList:
         """Move/copy items for which `expr` is evaluated as True into new `DataList`.
 
         Arguments:
@@ -468,7 +471,7 @@ class DataList(List[Item], BaseObjectCollection):
         """
         return self.__key_expr
     @property
-    def type_spec(self) -> Union[TypeSpec, Sentinel]:
+    def type_spec(self) -> TypeSpec | Sentinel:
         """Specification of valid type(s) for list values, or `.UNDEFINED` if there is
         no such constraint.
         """
@@ -503,13 +506,13 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
     Whenever a `key` is required, you can use either a `Distinct` instance, or any value
     that represens a key value for instances of stored type.
     """
-    def __init__(self, data: Union[Mapping, Sequence, Registry]=None):
+    def __init__(self, data: Mapping | Sequence | Registry=None):
         """
         Arguments:
             data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`
                   instances.
         """
-        self._reg: Dict = {}
+        self._reg: dict = {}
         if data:
             self.update(data)
     def __len__(self):
@@ -517,15 +520,14 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
     def __getitem__(self, key):
         return self._reg[key.get_key() if isinstance(key, Distinct) else key]
     def __setitem__(self, key, value):
-        assert isinstance(value, Distinct)
+        assert isinstance(value, Distinct) # noqa: S101
         self._reg[key.get_key() if isinstance(key, Distinct) else key] = value
     def __delitem__(self, key):
         del self._reg[key.get_key() if isinstance(key, Distinct) else key]
     def __iter__(self):
         return iter(self._reg.values())
     def __repr__(self):
-        return f"{self.__class__.__name__}(" \
-               f"[{', '.join(repr(x) for x in self)}])"
+        return f"{self.__class__.__name__}([{', '.join(repr(x) for x in self)}])"
     def __contains__(self, item):
         if isinstance(item, Distinct):
             item = item.get_key()
@@ -544,7 +546,7 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         Raises:
             ValueError: When item is already registered.
         """
-        assert isinstance(item, Distinct), f"Item is not of type '{Distinct.__name__}'"
+        assert isinstance(item, Distinct), f"Item is not of type '{Distinct.__name__}'" # noqa: S101
         key = item.get_key()
         if key in self._reg:
             raise ValueError(f"Item already registered, key: '{key}'")
@@ -554,7 +556,7 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         """Removes item from registry (same as: del R[item]).
         """
         del self._reg[item.get_key()]
-    def update(self, _from: Union[Distinct, Mapping, Sequence]) -> None:
+    def update(self, _from: Distinct | Mapping | Sequence) -> None:
         """Update items in the registry.
 
         Arguments:
@@ -566,7 +568,7 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         else:
             for item in cast(Mapping, _from).values() if hasattr(_from, 'values') else _from:
                 self[item] = item
-    def extend(self, _from: Union[Distinct, Mapping, Sequence]) -> None:
+    def extend(self, _from: Distinct | Mapping | Sequence) -> None:
         """Store one or more items to the registry.
 
         Arguments:
@@ -596,7 +598,7 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         is not found, the `default` is returned if given, otherwise `KeyError` is raised.
         """
         return self._reg.pop(key.get_key() if isinstance(key, Distinct) else key, default)
-    def popitem(self, last: bool=True) -> Distinct:
+    def popitem(self, *, last: bool=True) -> Distinct:
         """Returns and removes a `.Distinct` object. The objects are returned in LIFO order
         if `last` is true or FIFO order if false.
         """

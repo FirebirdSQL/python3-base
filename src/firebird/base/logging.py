@@ -38,14 +38,19 @@
 """
 
 from __future__ import annotations
-from typing import Any, Dict, Tuple, Union, Hashable
-from enum import IntEnum, Flag, auto
-from collections.abc import Mapping
-from dataclasses import dataclass
-from logging import Logger, LoggerAdapter, getLogger, lastResort, Formatter
-from platform import python_version_tuple
-from .types import UNDEFINED, DEFAULT, ANY, ALL, Distinct, CachedDistinct, Sentinel
-from .collections import Registry
+
+import logging
+from collections.abc import Iterable, Mapping
+from enum import Enum, IntEnum
+from typing import Any
+
+
+class FormatElement(Enum):
+    DOMAIN = 1
+    TOPIC = 2
+
+DOMAIN = FormatElement.DOMAIN
+TOPIC = FormatElement.TOPIC
 
 class LogLevel(IntEnum):
     """Shadow enumeration for logging levels.
@@ -59,263 +64,322 @@ class LogLevel(IntEnum):
     FATAL = CRITICAL
     WARN = WARNING
 
-class BindFlag(Flag):
-    """Internal flags used by `LoggingManager`.
+class FStrMessage:
+    """Log message that uses f-string format.
     """
-    DIRECT = auto()
-    ANY_AGENT = auto()
-    ANY_CTX = auto()
-    ANY_ANY = auto()
-
-class FBLoggerAdapter(LoggerAdapter, CachedDistinct):
-    """`~logging.LoggerAdapter` that injects information about context, agent and topic
-    into `extra` and with **f-string** log message support.
-    """
-    def __init__(self, logger: Logger, agent: Any=UNDEFINED, context: Any=UNDEFINED, topic: str=''):
-        """
-        Arguments:
-            logger: Adapted Logger instance.
-            agent: Agent for logger
-            context: Context for logger
-            topic: Topic of recorded information.
-        """
-        #: Adapted Logger instance.
-        self.logger: Logger = logger
-        #: Agent for logger.
-        self.agent: Any = agent
-        #: Context for logger.
-        self.context: Any = context
-        #: Topic for logger.
-        self.topic: str = topic
-    @classmethod
-    def extract_key(cls, *args, **kwargs) -> Hashable:
-        """Returns instance key extracted from constructor arguments.
-        """
-        return (args[1], args[2])
-    def get_key(self) -> Hashable: # pragma: no cover
-        """Returns instance key.
-        """
-        return (self.topic, self.agent, self.context)
-    def process(self, msg, kwargs) -> Tuple[str, Dict]:
-        """Process the logging message and keyword arguments passed into
-        a logging call to insert contextual information. You can either
-        manipulate the message itself, the keyword args or both. Return
-        the message and kwargs modified (or not) to suit your needs.
-        """
-        return msg, kwargs
-    def log(self, level, msg, *args, **kwargs):
-        """Delegate a log call to the underlying logger after processing.
-
-        Interpolates the message as **f-string** using either `kwargs` or dict passed as
-        only one positional argument. If sole positional argument is not dictionary or
-        `args` has more than one item, adds `args` into namespace for interpolation.
-
-        Moves 'context', 'agent' and 'topic' keyword arguments into `extra`.
-
-        Strips out all keyword arguments not expected by `logging.Logger`.
-        """
-        if self.isEnabledFor(level):
-            msg, kwargs = self.process(msg, kwargs)
-            if (args and len(args) == 1 and isinstance(args[0], Mapping) and args[0]):
-                ns = args[0]
-            else:
-                ns = kwargs
-                if args:
-                    ns['args'] = args
-            msg = eval(f'f"""{msg}"""', globals(), ns)
-            args = ()
-            if 'stacklevel' not in kwargs:
-                kwargs['stacklevel'] = 3 if int(python_version_tuple()[1]) < 11 else 2
-            kwargs.setdefault('extra', {}).update(topic=self.topic, agent=self.agent,
-                                                  context=self.context)
-            self.logger.log(level, msg, *args, **{k: v for k, v in kwargs.items()
-                                                  if k in ['exc_info', 'stack_info',
-                                                           'stacklevel', 'extra']})
-
-@dataclass(order=True, frozen=True)
-class BindInfo(Distinct):
-    """Information about Logger binding.
-    """
-    topic: str
-    agent: str
-    context: str
-    logger: FBLoggerAdapter
-    def get_key(self) -> Any:
-        "Returns distinct key value = Tuple(topic, agent, context)."
-        return (self.topic, self.agent, self.context)
-
-def get_logging_id(obj: Any) -> Any:
-    """Returns logging ID for object.
-
-    Arguments:
-        obj: Any object
-
-    Returns:
-        1. `logging_id` attribute if `obj` does have it, or..
-        2. `__qualname__` attribute if `obj` does have it, or..
-        3. `str(obj)`
-    """
-    return getattr(obj, 'logging_id', getattr(obj, '__qualname__', str(obj)))
-
-class LoggingIdMixin:
-    """Mixin class that adds `logging_id` property and `__str__` that returns `logging_id`.
-    """
+    def __init__(self, fmt, /, *args, **kwargs):
+        self.fmt = fmt
+        self.args = args
+        self.kwargs = kwargs
+        if (args and len(args) == 1 and isinstance(args[0], Mapping) and args[0]):
+            self.kwargs = args[0]
+        else:
+            self.kwargs = kwargs
+            if args:
+                self.kwargs['args'] = args
     def __str__(self):
-        return self.logging_id
-    @property
-    def logging_id(self) -> str:
-        """Returns `_logging_id_` attribute if defined, else returns qualified class name.
+        return eval(f'f"""{self.fmt}"""', globals(), self.kwargs) # noqa: S307
+        #return self.fmt.format(*self.args, **self.kwargs)
+
+class BraceMessage:
+    """Log message that uses brace (str.format) format.
+    """
+    def __init__(self, fmt, /, *args, **kwargs):
+        self.fmt = fmt
+        self.args = args
+        self.kwargs = kwargs
+    def __str__(self):
+        return self.fmt.format(*self.args, **self.kwargs)
+
+class DollarMessage:
+    """Log message that uses dollar (string.Template) format.
+    """
+    def __init__(self, fmt, /, **kwargs):
+        self.fmt = fmt
+        self.kwargs = kwargs
+    def __str__(self):
+        from string import Template
+        return Template(self.fmt).substitute(**self.kwargs)
+
+class ContextFilter(logging.Filter):
+    """Filter that adds `domain`, `topic`, `agent` and `context` fields to `LogRecord`
+    if they are not already present.
+    """
+    def filter(self, record):
+        for attr in ('domain', 'topic', 'agent', 'context'):
+            if not hasattr(record, attr):
+                setattr(record, attr, None)
+        return True
+
+class ContextLoggerAdapter(logging.LoggerAdapter):
+    """
+    This example adapter expects the passed in dict-like object to have a
+    'connid' key, whose value in brackets is prepended to the log message.
+    """
+    def __init__(self, logger, domain: Any, topic: Any, agent: Any, agent_name: str):
         """
-        return getattr(self, '_logging_id_', self.__class__.__qualname__)
+        """
+        self.agent = agent
+        super().__init__(logger,
+                         {'domain': domain,
+                          'topic': topic,
+                          'agent': agent_name}
+                         )
+    def process(self, msg, kwargs):
+        """
+        """
+        self.extra['context'] = getattr(self.agent, 'log_context', None)
+        #if "stacklevel" not in kwargs:
+            #kwargs["stacklevel"] = 1
+        kwargs['extra'] = self.extra
+        return msg, kwargs
 
 class LoggingManager:
-    """Logger manager.
+    """Logging manager.
     """
     def __init__(self):
-        self.loggers: Registry = Registry()
-        self.topics: Dict[str, int] = {}
-        self.bindings: BindFlag = BindFlag(0)
-    def _update_bindings(self, agent: Any, context: Any) -> None:
-        if agent is ANY:
-            self.bindings |= BindFlag.ANY_AGENT
-        if context is ANY:
-            self.bindings |= BindFlag.ANY_CTX
-        if (agent is ANY) and (context is ANY):
-            self.bindings |= BindFlag.ANY_ANY
-        if (agent is not ANY) and (context is not ANY):
-            self.bindings |= BindFlag.DIRECT
-    def _update_topics(self, topic: str) -> None:
-        if topic in self.topics:
-            self.topics[topic] += 1
-        else:
-            self.topics[topic] = 1
-    def bind_logger(self, agent: Any, context: Any, logger: Union[str, Logger], topic: str='') -> None:
-        """Bind agent and context to specific logger.
+        self._agent_domain_map: dict[str, str] = {}
+        self._domain_agent_map: dict[str, set] = {}
+        self._topic_map: dict[str, str] = {}
+        self._agent_map: dict[str, str] = {}
+        self.__logger_fmt: list[str | FormatElement] = []
+        self.__default_domain: str | None = None
+        self._logger_factory = logging.getLogger
+    def get_logger_factory(self):
+        """Return a callable which is used to create a Logger.
+        """
+        return self._logger_factory
+    def set_logger_factory(self, factory):
+        """Set a callable which is used to create a Logger.
 
-        Arguments:
-            agent: Agent identification
-            context: Context identification
-            logger: Loger (instance or name)
-            topic: Topic of recorded information
+        Parameters:
+            factory: The factory callable to be used to instantiate a logger.
 
-        The identification of agent and context could be:
+        The factory has the following signature: `factory(name, *args, **kwargs)`
+        """
+        self._logger_factory = factory
+    def reset(self) -> None:
+        """Resets manager to "factory defaults": no mappings, no `logger_fmt` and undefined
+        `default_domain`.
+        """
+        self._agent_domain_map.clear()
+        self._domain_agent_map.clear()
+        self._topic_map.clear()
+        self._agent_map.clear()
+        self.__logger_fmt.clear()
+        self.__default_domain = None
+    @property
+    def logger_fmt(self) -> list[str | FormatElement]:
+        """Logger format.
 
-            1. String
-            2. Object instance. Uses `get_logging_id()` to retrieve its logging ID.
-            3. Sentinel. The ANY sentinel matches any particular agent or context. You can
-               use sentinel `.UNDEFINED` to register a logger for cases when agent or
-               context are not specified in logger lookup.
+        The list can contain any number of string values \u200b\u200band at most one occurrence of `DOMAIN`
+        or `TOPIC` sentinels. Empty strings are removed.
+
+        The final `logging.Logger` name is constructed by joining elements of this list with
+        dots, and with sentinels replaced with `domain` and `topic` names.
+
+        Example:
+           logger_fmt = ['app', Sentinel.DOMAIN, Sentinel.TOPIC]
+           domain = 'database'
+           topic = 'trace'
+
+           Logger name will be: "app.database.trace"
+        """
+        return self.__logger_fmt
+    @logger_fmt.setter
+    def logger_fmt(self, value: list[str | FormatElement]) -> None:
+        def validated(seq):
+            domains = 0
+            topics = 0
+            for item in seq:
+                match item:
+                    case x if isinstance(x, str):
+                        if x:
+                            yield item
+                    case FormatElement.DOMAIN:
+                        if domains:
+                            raise ValueError("Only one occurence of sentinel DOMAIN allowed")
+                        domains += 1
+                        yield item
+                    case FormatElement.TOPIC:
+                        if topics:
+                            raise ValueError("Only one occurence of sentinel TOPIC allowed")
+                        topics += 1
+                        yield item
+                    case _:
+                        raise ValueError(f"Unsupported item type {type(item)}")
+
+        self.__logger_fmt = list(validated(value))
+    @property
+    def default_domain(self) -> str | FormatElement:
+        """Default domain. Could be either a string or `None`.
 
         Important:
-           You SHOULD NOT use sentinel `.ALL` for `agent` or `context` identification! This
-           sentinel is used by `.unbind()`, so bindings that use ALL could not be removed
-           by `.unbind()`.
-
+            Does not validate the value type, instead it's converted to string.
         """
-        if isinstance(logger, str):
-            logger = getLogger(logger)
-        if not isinstance(agent, (str, Sentinel)):
-            agent = get_logging_id(agent)
-        if not isinstance(context, (str, Sentinel)):
-            context = get_logging_id(context)
-        if agent is not ANY and context is not ANY:
-            logger = FBLoggerAdapter(logger, agent, context)
-        self._update_bindings(agent, context)
-        self._update_topics(topic)
-        self.loggers.update(BindInfo(topic, agent, context, logger))
-    def unbind(self, agent: Any, context: Any, topic: str='') -> int:
-        """Drops logger bindings.
+        return self.__default_domain
+    @default_domain.setter
+    def default_domain(self, value: str | FormatElement) -> None:
+        self.__default_domain = str(value)
+    def _get_logger_name(self, domain: str, topic: str | None) -> str:
+        """Returns `logging.Logger` name.
         """
-        if not isinstance(agent, (str, Sentinel)):
-            agent = get_logging_id(agent)
-        if not isinstance(context, (str, Sentinel)):
-            context = get_logging_id(context)
-        if topic in self.topics:
-            rm = [i for i in self.loggers
-                  if i.topic == topic and ((i.agent == agent) or agent is ALL)
-                  and ((i.context == context) or context is ALL)]
-            for item in rm:
-                self.loggers.remove(item)
-            # recalculate optimizations
-            self.topics.clear()
-            self.bindings = BindFlag(0)
-            for item in self.loggers:
-                self._update_bindings(item.agent, item.context)
-                self._update_topics(item.topic)
-            return len(rm)
-        return 0
-    def clear(self) -> None:
-        """Remove all logger bindings.
-        """
-        self.loggers.clear()
-        self.topics.clear()
-        self.bindings = BindFlag(0)
-    def get_logger(self, agent: Any=UNDEFINED, context: Any=DEFAULT, topic: str='') -> FBLoggerAdapter:
-        """Return a logger for the specified agent and context combination.
+        result = []
+        for item in self.logger_fmt:
+            match item:
+                case x if isinstance(x, str):
+                    result.append(item)
+                case x if x is DOMAIN:
+                    if domain:
+                        result.append(domain)
+                case x if x is TOPIC:
+                    if topic:
+                        result.append(topic)
+        return '.'.join(result)
+    def set_topic_mapping(self, topic: str, new_topic: str | None) -> None:
+        """Sets or removes the mapping of an topic name to another name.
 
         Arguments:
-            agent: Agent identification.
-            context: Context identification.
-            topic: Topic of recorded information.
+            topic: Topic name.
+            new_topic: Either `None` or new topic name.
 
-        The identification of agent and context could be:
+        - When `new_topic` is a string, it maps `topic` to `new_topic`. Empty string is
+          like `None`.
+        - When `new_topic` is `None`, it removes any mapping.
 
-            1. String
-            2. Object instance. Uses `get_logging_id()` to retrieve its logging ID.
-            3. Sentinel `.UNDEFINED`
-            4. When `context` is sentinel `.DEFAULT`, uses `agent` attribute `log_context`
-               (if defined) or sentinel `.UNDEFINED` otherwise.
-
-        The search for a suitable topic logger proceeds as follows:
-
-            1. Return logger registered for specified agent and context, or...
-            2. Return logger registered for ANY agent and specified context, or...
-            3. Return logger registered for specified agent and ANY context, or...
-            4. Return logger registered for ANY agent and ANY context, or...
-            5. Return the root logger.
+        Important:
+            Does not validate the `new_topic` value type, instead it's converted to string.
         """
-        if context is DEFAULT:
-            context = getattr(agent, 'log_context', UNDEFINED)
-        if agent is not UNDEFINED and not isinstance(agent, str):
-            agent = get_logging_id(agent)
-        if context is not UNDEFINED and not isinstance(context, str):
-            context = get_logging_id(context)
-        result: BindInfo = None
-        if topic in self.topics:
-            if BindFlag.DIRECT in self.bindings and \
-               (result := self.loggers.get((topic, agent, context))) is not None:
-                result = result.logger
-            elif BindFlag.ANY_AGENT in self.bindings and \
-                 (result := self.loggers.get((topic, ANY, context))) is not None:
-                result = result.logger
-            elif BindFlag.ANY_CTX in self.bindings and \
-                 (result := self.loggers.get((topic, agent, ANY))) is not None:
-                result = result.logger
-            elif BindFlag.ANY_ANY in self.bindings and \
-                 (result := self.loggers.get((topic, ANY, ANY))) is not None:
-                result = result.logger
-            else:
-                result = getLogger(topic)
+        if new_topic:
+            self._topic_map[topic] = str(new_topic)
         else:
-            result = getLogger(topic)
-        return result if isinstance(result, FBLoggerAdapter) \
-               else FBLoggerAdapter(result, agent, context, topic)
+            self._topic_map.pop(topic, None)
+    def get_topic_mapping(self, topic: str) -> str | None:
+        """Returns current name mapping for topic.
 
-#: Logging Manager
+        Arguments:
+            topic: Topic name.
+
+        Returns:
+            Reassigned topic name or `None`.
+        """
+        return self._topic_map.get(topic)
+    def get_agent_name(self, agent: Any) -> str:
+        """Returns agent name.
+
+        Arguments:
+            agent: Agent name or object that identifies the agent (typically an instance
+                   of agent class).
+
+        Returns:
+            Agent name. If `agent` value is a string, is returned as is. If it's an object,
+            it returns value of its `_agent_name_` attribute if defined, otherwise it returns
+            name in "MODULE_NAME.CLASS_QUALNAME" format. If `_agent_name_` value is not a string,
+            it's converted to string.
+
+        Important:
+            This method does apply agent name mapping to returned value.
+
+        Example:
+            > from firebird.base.logging import manager
+            > manager.get_agent_name(manager)
+            'firebird.base.logging.LoggingManager'
+        """
+        agent_name = agent
+        if not isinstance(agent, str):
+            if not (agent_name := getattr(agent, '_agent_name_', None)):
+                agent_name = f'{agent.__class__.__module__}.{agent.__class__.__qualname__}'
+        agent_name = self._agent_map.get(agent_name, agent_name)
+        return str(agent_name)
+    def set_agent_mapping(self, agent: str, new_agent: str | None) -> None:
+        """Sets or removes the mapping of an agent name to another name.
+
+        Argument:
+            agent: Agent name.
+            new_agent: New agent name or `None` to remove the mapping. Empty string is like `None`.
+
+        Important:
+            Does not validate the `new_agent` value type, instead it's converted to string.
+        """
+        if new_agent:
+            self._agent_map[agent] = str(new_agent)
+        else:
+            self._agent_map.pop(agent, None)
+    def get_agent_mapping(self, agent: str) -> str | None:
+        """Returns current name mapping for agent.
+
+        Arguments:
+            agent: Agent name.
+
+        Returns:
+            Reassigned agent name or `None`.
+        """
+        return self._agent_map.get(agent)
+    def get_agent_domain(self, agent: str) -> str | None:
+        """Returns domain name assigned to agent.
+
+        Arguments:
+            agent: Agent name.
+
+        Returns:
+            Domain assigned to agent or `None`.
+        """
+        return self._agent_domain_map.get(agent)
+    def set_domain_mapping(self, domain: str, agents: Iterable[str] | str | None, *,
+                           replace: bool=False) -> None:
+        """Sets, updates, or removes agent name mappings to a domain.
+
+        Argument:
+            domain:  Domain name.
+            agents:  Iterable with agent names, single agent name, or `None`.
+            replace: When True, the new mapping replaces the current one, otherwise the
+                     mapping is updated.
+
+        Important:
+            Passing `None` to `agents` removes all agent mappings for specified domain,
+            regardless of `replace` value.
+        """
+        if (replace or agents is None) and domain in self._domain_agent_map:
+            for agent in self._domain_agent_map[domain]:
+                del self._agent_domain_map[agent]
+            if agents is None:
+                del self._domain_agent_map[domain]
+                return
+        if replace or domain not in self._domain_agent_map:
+            self._domain_agent_map[domain] = set()
+        agents = set([agents] if isinstance(agents, str) else agents)
+        self._domain_agent_map[domain].update(agents)
+        for agent in agents:
+            self._agent_domain_map[agent] = domain
+    def get_domain_mapping(self, domain: str) -> set[str] | None:
+        """Returns current agent mapping for domain.
+
+        Arguments:
+            domain: Domain name.
+
+        Returns:
+            set of agent names assigned to domain or `None`.
+        """
+        return self._domain_agent_map.get(domain)
+    def get_logger(self, agent: Any, topic: str | None=None) -> ContextLoggerAdapter:
+        """Returns `.ContextLoggerAdapter` for specified `agent` and optional `topic`.
+
+        Arguments:
+            agent: Agent specification. Calls `.get_agent_name` to determine agent's name.
+            topic: Optional topic.
+
+        """
+        agent_name = self.get_agent_name(agent)
+        agent_name = self._agent_map.get(agent_name, agent_name)
+        domain = self._agent_domain_map.get(agent_name, self.default_domain)
+        topic = self._topic_map.get(topic, topic)
+        # Get logger
+        logger = self._logger_factory(self._get_logger_name(domain, topic))
+        return ContextLoggerAdapter(logger, domain, topic, agent, agent_name)
+
+#: Context logging manager.
 logging_manager: LoggingManager = LoggingManager()
-
-#: shortcut for `logging_manager.bind_logger()`
-bind_logger = logging_manager.bind_logger
-#: shortcut for `logging_manager.get_logger()`
+#: Shortcut to global `.LoggingManager.get_logger` function.
 get_logger = logging_manager.get_logger
-
-# Install simple formatter for lastResort handler
-if lastResort is not None and lastResort.formatter is None:
-    lastResort.setFormatter(Formatter('%(levelname)s: %(message)s'))
-
-def install_null_logger():
-    """Installs 'null' logger.
-    """
-    log = getLogger('null')
-    log.propagate = False
-    log.disabled = True
+#: Shortcut to global `.LoggingManager.get_agent_name` function.
+get_agent_name = logging_manager.get_agent_name
