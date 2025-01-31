@@ -135,3 +135,7 @@ dmypy.json
 
 # Sphinx build
 docs/_build
+docs/firebird-base.docset/
+
+# Other local files and directories
+local/
