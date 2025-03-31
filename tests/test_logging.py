@@ -45,9 +45,7 @@ import pytest
 
 import firebird.base.logging as fblog
 
-#import (FStrMessage, BraceMessage, DollarMessage, manager,get_logger)
 from firebird.base.types import *
-
 
 class Namespace:
     "Simple Namespace"
@@ -76,10 +74,6 @@ class AwareAgentProperty:
     def name(self):
         return fblog.get_agent_name(self)
 
-@pytest.fixture
-def manager():
-    fblog.logging_manager.reset()
-    return fblog.logging_manager
 
 @contextmanager
 def context_filter(to):

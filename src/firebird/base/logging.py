@@ -65,7 +65,7 @@ class LogLevel(IntEnum):
     WARN = WARNING
 
 class FStrMessage:
-    """Log message that uses f-string format.
+    """Log message that uses `f-string` format.
     """
     def __init__(self, fmt, /, *args, **kwargs):
         self.fmt = fmt
@@ -82,7 +82,7 @@ class FStrMessage:
         #return self.fmt.format(*self.args, **self.kwargs)
 
 class BraceMessage:
-    """Log message that uses brace (str.format) format.
+    """Log message that uses brace (`str.format`) format.
     """
     def __init__(self, fmt, /, *args, **kwargs):
         self.fmt = fmt
@@ -92,7 +92,7 @@ class BraceMessage:
         return self.fmt.format(*self.args, **self.kwargs)
 
 class DollarMessage:
-    """Log message that uses dollar (string.Template) format.
+    """Log message that uses dollar (`string.Template`) format.
     """
     def __init__(self, fmt, /, **kwargs):
         self.fmt = fmt
@@ -102,7 +102,7 @@ class DollarMessage:
         return Template(self.fmt).substitute(**self.kwargs)
 
 class ContextFilter(logging.Filter):
-    """Filter that adds `domain`, `topic`, `agent` and `context` fields to `LogRecord`
+    """Filter that adds `domain`, `topic`, `agent` and `context` fields to `logging.LogRecord`
     if they are not already present.
     """
     def filter(self, record):
@@ -112,13 +112,18 @@ class ContextFilter(logging.Filter):
         return True
 
 class ContextLoggerAdapter(logging.LoggerAdapter):
+    """A logger adapter that adds `domain`, `topic`, `agent` and `context` items to `extra`
+    dictionary which is used to populate the `__dict__` of the `logging.LogRecord` created for the
+    logging event.
+
+    Parameters:
+        logger: Adapted Logger instance.
+        domain: Context Domain name.
+        topic: Context Topic name.
+        agent: Agent identification (object or string)
+        agent_name: Agent name
     """
-    This example adapter expects the passed in dict-like object to have a
-    'connid' key, whose value in brackets is prepended to the log message.
-    """
-    def __init__(self, logger, domain: Any, topic: Any, agent: Any, agent_name: str):
-        """
-        """
+    def __init__(self, logger, domain: str, topic: str, agent: Any, agent_name: str):
         self.agent = agent
         super().__init__(logger,
                          {'domain': domain,
@@ -126,9 +131,8 @@ class ContextLoggerAdapter(logging.LoggerAdapter):
                           'agent': agent_name}
                          )
     def process(self, msg, kwargs):
-        """
-        """
-        self.extra['context'] = getattr(self.agent, 'log_context', None)
+        if 'context' not in self.extra:
+            self.extra['context'] = getattr(self.agent, 'log_context', None)
         #if "stacklevel" not in kwargs:
             #kwargs["stacklevel"] = 1
         kwargs['extra'] = self.extra
@@ -172,14 +176,15 @@ class LoggingManager:
     def logger_fmt(self) -> list[str | FormatElement]:
         """Logger format.
 
-        The list can contain any number of string values \u200b\u200band at most one occurrence of `DOMAIN`
-        or `TOPIC` sentinels. Empty strings are removed.
+        The list can contain any number of string values and at most one occurrence of `DOMAIN`
+        or `TOPIC` enum values. Empty strings are removed.
 
         The final `logging.Logger` name is constructed by joining elements of this list with
         dots, and with sentinels replaced with `domain` and `topic` names.
 
-        Example:
-           logger_fmt = ['app', Sentinel.DOMAIN, Sentinel.TOPIC]
+        Example::
+
+           logger_fmt = ['app', DOMAIN, TOPIC]
            domain = 'database'
            topic = 'trace'
 
@@ -189,38 +194,38 @@ class LoggingManager:
     @logger_fmt.setter
     def logger_fmt(self, value: list[str | FormatElement]) -> None:
         def validated(seq):
-            domains = 0
-            topics = 0
+            domain_found = False
+            topic_found = False
             for item in seq:
                 match item:
                     case x if isinstance(x, str):
                         if x:
                             yield item
                     case FormatElement.DOMAIN:
-                        if domains:
+                        if domain_found:
                             raise ValueError("Only one occurence of sentinel DOMAIN allowed")
-                        domains += 1
+                        domain_found = True
                         yield item
                     case FormatElement.TOPIC:
-                        if topics:
+                        if topic_found:
                             raise ValueError("Only one occurence of sentinel TOPIC allowed")
-                        topics += 1
+                        topic_found = True
                         yield item
                     case _:
                         raise ValueError(f"Unsupported item type {type(item)}")
 
         self.__logger_fmt = list(validated(value))
     @property
-    def default_domain(self) -> str | FormatElement:
+    def default_domain(self) -> str | None:
         """Default domain. Could be either a string or `None`.
 
         Important:
-            Does not validate the value type, instead it's converted to string.
+            When assigned, it does not validate the value type, but converts it to string.
         """
         return self.__default_domain
     @default_domain.setter
-    def default_domain(self, value: str | FormatElement) -> None:
-        self.__default_domain = str(value)
+    def default_domain(self, value: str | None) -> None:
+        self.__default_domain = None if value is None else str(value)
     def _get_logger_name(self, domain: str, topic: str | None) -> str:
         """Returns `logging.Logger` name.
         """
@@ -267,7 +272,7 @@ class LoggingManager:
     def get_agent_name(self, agent: Any) -> str:
         """Returns agent name.
 
-        Arguments:
+        Parameters:
             agent: Agent name or object that identifies the agent (typically an instance
                    of agent class).
 
@@ -280,7 +285,8 @@ class LoggingManager:
         Important:
             This method does apply agent name mapping to returned value.
 
-        Example:
+        Example::
+
             > from firebird.base.logging import manager
             > manager.get_agent_name(manager)
             'firebird.base.logging.LoggingManager'
@@ -294,7 +300,7 @@ class LoggingManager:
     def set_agent_mapping(self, agent: str, new_agent: str | None) -> None:
         """Sets or removes the mapping of an agent name to another name.
 
-        Argument:
+        Parameters:
             agent: Agent name.
             new_agent: New agent name or `None` to remove the mapping. Empty string is like `None`.
 
@@ -329,11 +335,10 @@ class LoggingManager:
                            replace: bool=False) -> None:
         """Sets, updates, or removes agent name mappings to a domain.
 
-        Argument:
+        Parameters:
             domain:  Domain name.
             agents:  Iterable with agent names, single agent name, or `None`.
-            replace: When True, the new mapping replaces the current one, otherwise the
-                     mapping is updated.
+            replace: When True, the new mapping replaces the current one, otherwise the mapping is updated.
 
         Important:
             Passing `None` to `agents` removes all agent mappings for specified domain,
@@ -358,7 +363,7 @@ class LoggingManager:
             domain: Domain name.
 
         Returns:
-            set of agent names assigned to domain or `None`.
+            Set of agent names assigned to domain or `None`.
         """
         return self._domain_agent_map.get(domain)
     def get_logger(self, agent: Any, topic: str | None=None) -> ContextLoggerAdapter:
@@ -383,3 +388,7 @@ logging_manager: LoggingManager = LoggingManager()
 get_logger = logging_manager.get_logger
 #: Shortcut to global `.LoggingManager.get_agent_name` function.
 get_agent_name = logging_manager.get_agent_name
+#: Shortcut to global `.LoggingManager.set_domain_mapping` function.
+set_domain_mapping = logging_manager.set_domain_mapping
+#: Shortcut to global `.LoggingManager.set_agent_mapping` function.
+set_agent_mapping = logging_manager.set_agent_mapping

@@ -48,7 +48,7 @@ the code by embedded comments.
        PLEASED = auto()
        HAPPY = auto()
 
-   class Person(LoggingIdMixin, TracedMixin): # LOGGING & TRACE
+   class Person(TracedMixin): # TRACE
        "Sample virtual human agent"
        def __init__(self, name: str, mood: Mood=Mood.NEUTRAL):
            self.name: str = name
@@ -56,7 +56,7 @@ the code by embedded comments.
            self.partners: List[Person] = []
        # >>> LOGGING & TRACE
        @property
-       def _logging_id_(self) -> str:
+       def _agent_name_(self) -> str:
            return f"{self.mood.name} {self.name}"
        # <<< LOGGING & TRACE
        def change_mood(self, offset: int) -> None:

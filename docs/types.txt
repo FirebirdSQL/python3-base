@@ -137,39 +137,18 @@ One such approach uses custom descendants of builtin `str` type.
 --------------
 
 .. autoclass:: ZMQAddress
-
-------
-
 .. autoclass:: MIME
-
-------
-
 .. autoclass:: PyExpr
-
-------
-
 .. autoclass:: PyCode
-
-----------
-
 .. autoclass:: PyCallable
 
 Meta classes
 ============
 
 .. autoclass:: SingletonMeta
-
-------------
-
 .. autoclass:: SentinelMeta
-
-------------------
-
 .. autoclass:: CachedDistinctMeta
-
------------
-
-.. autofunction:: Conjunctive
+.. autofunction:: conjunctive
 
 Functions
 =========

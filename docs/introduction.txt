@@ -46,8 +46,50 @@ based on expression etc.
 Expressions used by these methods could be strings that contain Python expression referencing
 the collection item(s), or lambda functions.
 
-Data conversion from/to string
-==============================
+Callback systems
+================
+
+Module `~firebird.base.signal` provides two callback mechanisms: one based on signals and
+slots similar to Qt signal/slot, and second based on optional method delegation similar to
+events in Delphi.
+
+In both cases, the callback callables could be functions, instance or class methods,
+partials and lambda functions. The `inspect` module is used to define the signature for
+callbacks, and to validate that only compatible callables are assigned.
+
+Context-based logging
+=====================
+
+Module `.logging` provides context-based logging system built on top of standard `logging`
+module. It also solves the common logging management problem when various modules use hard-coded
+separate loggers, and provides several types of message wrappers that allow lazy message
+interpolation using f-string, brace (`str.format`) or dollar (`string.Template`) formats.
+
+The context-based logging:
+
+1. Adds context information into `~logging.LogRecord`, that could be used in logging entry formats.
+2. Allows assignment of loggers to specific contexts.
+
+Trace/audit for class instances
+===============================
+
+Module `.trace` provides trace/audit logging for functions or object methods through
+context-based logging provided by `.logging` module.
+
+The trace logging is performed by `.traced` decorator. You can use this decorator directly,
+or use `.TracedMixin` class to automatically decorate methods of class instances on creation.
+Each decorated callable could log messages before execution, after successful execution or
+on failed execution (when unhandled exception is raised by callable). The trace decorator
+can automatically add `agent` and `context` information, and include parameters passed to
+callable, execution time, return value, information about raised exception etc. to log messages.
+
+The trace logging is managed by `.TraceManager`, that allows dynamic configuration of traced
+callables at runtime.
+
+Trace supports configuration based on `~firebird.base.config`.
+
+Symetric data conversion from/to string
+=======================================
 
 While Python types typically support conversion to string via builtin `str()` function (and
 custom `__str__` methods), there is no symetric operation that converts string created by
@@ -91,42 +133,6 @@ Hook manager
 Module `.hooks` provides a general framework for callbacks and “hookable” events, that
 supports multiple usage strategies.
 
-Context-based logging
-=====================
-
-Module `.logging` provides context-based logging system built on top of standard `logging`
-module.
-
-The context-based logging:
-
-* Adds context information (defined as combination of topic, agent and context string values)
-  into `~logging.LogRecord`, that could be used in logging message.
-* Adds support for f-string message format.
-* Allows assignment of loggers to specific contexts. The `.LoggingManager` class maintains
-  a set of bindings between `Logger` objects and combination of `agent`, `context` and `topic`
-  specifications. It’s possible to bind loggers to exact combination of values, or whole
-  sets of values using `.ANY` sentinel. It means that is possible to assign specific Logger
-  to log messages for particular agent in any context, or any agent operating in specific
-  context etc.
-
-Trace/audit for class instances
-===============================
-
-Module `.trace` provides trace/audit logging for functions or object methods through
-context-based logging provided by `.logging` module.
-
-The trace logging is performed by `.traced` decorator. You can use this decorator directly,
-or use `.TracedMixin` class to automatically decorate methods of class instances on creation.
-Each decorated callable could log messages before execution, after successful execution or
-on failed execution (when unhandled exception is raised by callable). The trace decorator
-can automatically add `agent` and `context` information, and include parameters passed to
-callable, execution time, return value, information about raised exception etc. to log messages.
-
-The trace logging is managed by `.TraceManager`, that allows dynamic configuration of traced
-callables at runtime.
-
-Trace supports configuration based on `~firebird.base.config`.
-
 Registry for Google Protocol Buffer messages and enums
 ======================================================
 
@@ -135,13 +141,3 @@ The generated `*_pb2.py protobuf` files could be registered using `.register_dec
 `.load_registered` function. The registry could be then used to obtain information about
 protobuf messages or enum types, or to create message instances or enum values.
 
-Callback systems
-================
-
-Module `~firebird.base.signal` provides two callback mechanisms: one based on signals and
-slots similar to Qt signal/slot, and second based on optional method delegation similar to
-events in Delphi.
-
-In both cases, the callback callables could be functions, instance or class methods,
-partials and lambda functions. The `inspect` module is used to define the signature for
-callbacks, and to validate that only compatible callables are assigned.

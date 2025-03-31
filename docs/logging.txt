@@ -5,315 +5,150 @@
 logging - Context-based logging
 ###############################
 
+.. versionchanged:: 2.0.0
+
 Overview
 ========
 
 This module provides context-based logging system built on top of standard `logging` module.
+It also solves the common logging management problem when various modules use hard-coded
+separate loggers, and provides several types of message wrappers that allow lazy message
+interpolation using f-string, brace (`str.format`) or dollar (`string.Template`) formats.
 
 The context-based logging:
 
-1. Adds context information into `~logging.LogRecord`, that could be used in logging message.
-2. Adds support for f-string message format.
-3. Allows assignment of loggers to specific contexts.
+1. Adds context information into `~logging.LogRecord`, that could be used in logging entry formats.
+2. Allows assignment of loggers to specific contexts.
 
-The logging context
--------------------
-The logging context is defined as combination of `topic`, `agent` and `context` string values.
+Basics
+------
 
+Normally, when you want to use a logger, you call the `logging.getLogger` function and
+pass it a logger name (or not to get the `root` logger). The common (and recommended) practice
+is to use `getLogger(__name__)` which often leads to logging configuration problems as complex
+applications with many modules (including used libraries) may create complex logger hierarchy.
+
+Our `logging` module solves the problem by replacing the logger name with `agent` identification.
 The `agent` is typically an unit of code that works in specific execution contexts. For
-example a code that process client request in web application (where request is the context),
-or executes SQL command (the context could be a database connection, or transaction).
-The `topic` is optional. It could be any string value that can be used as secondary context.
+example a code that process client request in web application (where request is the `context`),
+or executes SQL command (the context could be a `database connection`). In most cases, the
+`agent` is an instance of some class.
 
-Agent and Context identification
---------------------------------
-Agents and contexts could be identified by string value, or by any object (i.e. you can use
-the object that implement the agent or context). If object is used, the ID could be
-provided as `logging_id` attribute, `__name__` attribute or by `__str__()` return value.
+So, from user's perspective, the context logging is used similarly to normal Python logging -
+but you pass the `agent` identification instead logger name to `.get_logger` function. If `agent`
+identification is a string, it's used as is. If it's an object, it uses value of its `_agent_name_`
+attribute if defined, otherwise it uses name in "MODULE_NAME.CLASS_QUALNAME" format. If
+`_agent_name_` value is not a string, it's converted to string.
 
-A `LoggingIdMixin` class could be used to add `logging_id` support to any class.
+The typical usage pattern inside a class is therefore::
 
-The LoggingManager
-------------------
-The `LoggingManager` class maintains a set of bindings between `~logging.Logger` objects and
-combination of `agent`, `context` and `topic` specifications. It's possible to bind loggers
-to exact combination of values, or whole sets of values using `.ANY` sentinel. It means that
-is possible to assign specific `~logging.Logger` to log messages for particular agent in
-any context, or any agent operating in specific context etc.
+    logger = get_logger(self)
 
-To log `agent` activities, use a logger returned by `.get_logger()` function/method.
+or for direct use::
 
-Example
--------
+    get_logger(self).debug("message")
 
-The following program is an example of small but complex enough code that you can use to experiment with contextual logging options. Parts relevant to logging are highlighted in the code by embedded comments. The program is very simple simulation of virtual "human" agents that can change their mood during mutual interaction.
+The `.get_logger` also has an optional `topic` string parameter that could be used to
+differentiate between various logging "streams". For example the `~firebird.base.trace` module
+uses context logging with topic "trace", so it's possible to configure the logging system
+to handle "trace" output in specific way.
 
-.. code-block:: python
+The underlying machinery behind `.get_logger` function maps the `agent` and its context to
+particular `~logging.Logger`, and returns a `.ContextLoggerAdapter` that you can use as normal
+logger. This adapter is responsible to add context information into `~logging.LogRecord`.
 
-   # test-logging.py
-   from __future__ import annotations
-   import logging
-   from time import monotonic
-   from decimal import Decimal
-   from enum import IntEnum, auto
-   from firebird.base.types import *
-   from firebird.base.logging import LogLevel, LoggingIdMixin, get_logger
+Context information
+-------------------
+The conext information added by `.ContextLoggerAdapter` into `~logging.LogRecord` consists
+from next items:
 
-   class Mood(IntEnum):
-       "Agent moods"
-       ANGRY = auto()
-       SAD = auto()
-       NEUTRAL = auto()
-       PLEASED = auto()
-       HAPPY = auto()
+agent:
+   String representation of the agent identification described above.
+context:
+   Agent context that could be defined via `log_context` attribute on `agent` instance, or
+   by assigning its value directly to `extra['context']` on adapter returned by `.get_logger()`
+   function.
+domain:
+   A name assigned to a group of agents (more about that later).
+topic:
+   Name of a logging stream.
 
-   class Person(LoggingIdMixin): # LOGGING
-       "Sample virtual human agent"
-       def __init__(self, name: str, mood: Mood=Mood.NEUTRAL):
-           self.name: str = name
-           self.mood: Mood = mood
-           self.partners: List[Person] = []
-       # >>> LOGGING
-       @property
-       def _logging_id_(self) -> str:
-           return f"{self.mood.name} {self.name}"
-       # <<< LOGGING
-       def change_mood(self, offset: int) -> None:
-           result = self.mood + offset
-           if result < Mood.ANGRY:
-               self.mood = Mood.ANGRY
-           elif result > Mood.HAPPY:
-               self.mood = Mood.HAPPY
-           else:
-               self.mood = Mood(result)
-       def process(self, message: str) -> None:
-           msg = message.lower()
-           if msg == "what you are doing here":
-               self.change_mood(-1)
-           if 'awful' in msg:
-               self.change_mood(-1)
-           if ('nice' in msg) or ('wonderful' in msg) or ('pleased' in msg):
-               if self.mood != Mood.ANGRY:
-                   self.change_mood(1)
-           if 'happy' in msg:
-               if self.mood != Mood.ANGRY:
-                   self.change_mood(2)
-           if 'very nice' in msg:
-               if self.mood != Mood.ANGRY:
-                   self.change_mood(1)
-           if 'get lost' in msg:
-               self.change_mood(-2)
-           if self.name.lower() in msg:
-               if self.mood == Mood.SAD:
-                   self.change_mood(1)
-           if self.name.lower() not in msg:
-               if self.mood == Mood.NEUTRAL:
-                   self.change_mood(-1)
-       def process_response(self, to: str, mood: Mood) -> None:
-           if to == 'greeting':
-               if self.mood == Mood.NEUTRAL:
-                   if mood > Mood.NEUTRAL:
-                       self.mood = Mood.PLEASED
-                   elif mood == Mood.ANGRY:
-                       self.mood = Mood.SAD
-               elif self.mood == Mood.SAD:
-                   if mood == Mood.SAD:
-                       self.mood = Mood.NEUTRAL
-                   elif mood == Mood.HAPPY:
-                       self.mood = Mood.ANGRY
-               elif self.mood == Mood.ANGRY and mood == Mood.SAD:
-                   self.mood = Mood.NEUTRAL
-           elif to == 'chat':
-               if self.mood == Mood.SAD and mood > Mood.NEUTRAL:
-                   self.mood = Mood.NEUTRAL
-               elif self.mood == Mood.ANGRY and mood == Mood.SAD:
-                   self.mood = Mood.NEUTRAL
-               elif self.mood == Mood.PLEASED and mood == Mood.ANGRY:
-                   self.mood = Mood.NEUTRAL
-               elif self.mood == Mood.HAPPY and mood == Mood.ANGRY:
-                   self.mood = Mood.SAD
-           elif to == 'bye':
-               if self.mood == Mood.NEUTRAL:
-                   if mood == Mood.ANGRY:
-                       self.mood = Mood.ANGRY
-                   elif mood > Mood.NEUTRAL:
-                       self.mood = Mood.PLEASED
-               elif self.mood == Mood.HAPPY and mood == Mood.ANGRY:
-                   self.mood = Mood.NEUTRAL
-       def meet(self, other: Person) -> None:
-           self.partners.append(other)
-           self.greeting(other)
-       def interact(self, other: Person, message: str) -> Mood:
-           print(f"[{other.name}] {message}")
-           # >>> LOGGING
-           # Note that messages are normal strings that use f-strings interpolation.
-           # You may specify values using keyword format:
-           get_logger(self, topic='Person').debug('Processing "{message}" from [{other.name}]',
-                                                  message=message, other=other)
-           # Or you can use a dictionary:
-           # get_logger(self, topic="Person").debug('Processing "{message}" from [{other.name}]',
-           #                                        {'message': message, 'other': other})
-           # You can also use f-strings directly, but they are ALWAYS evaluated, regardless
-           # whether the message is written to log or not.
-           # get_logger(self, topic='Person').debug(f'Processing "{message}" from [{other.name}]')
-           # <<< LOGGING
-           self.process(message)
-           return self.mood
-       def greeting(self, other: Person) -> None:
-           if self.mood == Mood.NEUTRAL:
-               msg = f"Hi {other.name}, I'm {self.name}"
-           elif self.mood == Mood.ANGRY:
-               msg = "Hi"
-           elif self.mood == Mood.SAD:
-               msg = f"Hi {other.name}"
-           else:
-               msg = f"Hi {other.name}, I'm {self.name}. I'm {self.mood.name} to meet you."
-           self.process_response('greeting', other.interact(self, msg))
-       def chat(self) -> None:
-           for other in self.partners:
-               if self.mood == Mood.ANGRY:
-                   msg = "What you are doing here?"
-               elif self.mood == Mood.SAD:
-                   msg = "The weather is awful today, don't you think?"
-               elif self.mood == Mood.NEUTRAL:
-                   msg = "It's a fine day, don't you think?"
-               elif self.mood == Mood.PLEASED:
-                   msg = "It's a very nice day, don't you think?"
-               else:
-                   msg = "Today is a wonderful day!"
-               self.process_response('chat', other.interact(self, msg))
-       def bye(self) -> str:
-           while self.partners:
-               other = self.partners.pop()
-               if self.mood == Mood.ANGRY:
-                   msg = "Get lost!"
-               elif self.mood == Mood.SAD:
-                   msg = "Bye"
-               elif self.mood == Mood.NEUTRAL:
-                   msg = f"Bye, {other.name}."
-               elif self.mood == Mood.PLEASED:
-                   msg = f"See you, {other.name}!"
-               else:
-                   msg = f"Bye, {other.name}. Have a nice day!"
-               self.process_response('bye', other.interact(self, msg))
-           if self.mood == Mood.ANGRY:
-               result = "I hate this meeting!"
-           elif self.mood == Mood.SAD:
-               result = "It was a waste of time!"
-           elif self.mood == Mood.NEUTRAL:
-               result = "It was OK."
-           elif self.mood == Mood.PLEASED:
-               result = "Nice meeting, I think."
-           else:
-               result = "What a wonderful meeting!"
-           return result
-       def __repr__(self) -> str:
-           return f"{self.name} [{self.mood.name}]"
+They could be used in `~logging.Formatter` templates. If you want to use logging that combines
+normal and context logging, it's necessary to assign `~ContextFilter` to your `logging.Handler`
+to add (empty) context information into `LogRecords` that are produced by normal loggers.
 
-   def meeting(name: str, persons: List[Person]):
-       "Simulation of virtual agents meeting"
+LoggingManager
+--------------
+The `firebird.base.logging` module defines a global `.LoggingManager` instance `logging_manager`
+that manages several mappings and implements the `~.LoggingManager.get_logger` method.
 
-       for person in persons:
-           # >>> LOGGING
-           person.log_context = name
-           # <<< LOGGING
+Some methods are also provided as global functions for conveniense: `.get_logger`,
+`.set_agent_mapping`, `.set_domain_mapping` and `.get_agent_name`.
 
-       start = monotonic()
-       print("Meeting started...")
-       print(f"Attendees: {', '.join(f'{x.name} [{x.mood.name}]' for x in persons)}")
+Mappings and Logger names
+-------------------------
 
-       for person in persons:
-           for other in persons:
-               if other is not person:
-                   person.meet(other)
+The `~logging.Logger` wrapped by the `.get_logger` function is determined by applying the
+values ​​of several parameters to the logger name format. These parameters are:
 
-       for person in persons:
-           person.chat()
+- Domain: String used to group output from agents.
+- Topic: String identification of particular logging stream.
 
-       for person in persons:
-           person.bye()
+The logger name format is a list that can contain any number of string values and at most
+one occurrence of `DOMAIN` or `TOPIC` enum values. Empty strings are removed.
 
-       e = str(Decimal(monotonic() - start))
-       print(f"Meeting closed in {e[:e.find('.')+6]} sec.")
-       print(f"Outcome: {', '.join(f'{x.name} [{x.mood.name}]' for x in persons)}")
+The final `~logging.Logger` name is constructed by joining elements of this list with
+dots, and with sentinels replaced with `domain` and `topic` names.
 
-   def test_loggig(name: str, first: Mood, second: Mood) -> None:
-       meeting(name, [Person('Alex', first), Person('David', second)])
+For example, if values are defined as::
 
-   if __name__ == '__main__':
-       # >>> LOGGING
-       logger = logging.getLogger()
-       logger.setLevel(LogLevel.NOTSET)
-       sh = logging.StreamHandler()
-       sh.setFormatter(logging.Formatter('%(levelname)-10s: [%(topic)s][%(agent)s][%(context)s] %(message)s'))
-       logger.addHandler(sh)
-       # <<< LOGGING
-       test_loggig('TEST-1', Mood.SAD, Mood.PLEASED)
-       print('-'*20)
-       test_loggig('TEST-2', Mood.HAPPY, Mood.ANGRY)
+   logger_fmt = ['app', DOMAIN, TOPIC]
+   domain = 'database'
+   topic = 'trace'
 
-|
+the Logger name will be: "app.database.trace"
 
-**Output from sample code**::
+The logger name format is defined in `.LoggingManager.logger_fmt` property, and it's an
+empty list by default, which means that `.get_logger` function always maps to **root** logger.
 
-   > python test-logging.py
-   Meeting started...
-   Attendees: Alex [SAD], David [PLEASED]
-   [Alex] Hi David
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "Hi David" from [Alex]
-   [David] Hi Alex, I'm David. I'm PLEASED to meet you.
-   DEBUG     : [Person][SAD Alex][TEST-1] Processing "Hi Alex, I'm David. I'm PLEASED to meet you." from [David]
-   [Alex] It's a fine day, don't you think?
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "It's a fine day, don't you think?" from [Alex]
-   [David] It's a very nice day, don't you think?
-   DEBUG     : [Person][NEUTRAL Alex][TEST-1] Processing "It's a very nice day, don't you think?" from [David]
-   [Alex] Bye, David. Have a nice day!
-   DEBUG     : [Person][PLEASED David][TEST-1] Processing "Bye, David. Have a nice day!" from [Alex]
-   [David] Bye, Alex. Have a nice day!
-   DEBUG     : [Person][HAPPY Alex][TEST-1] Processing "Bye, Alex. Have a nice day!" from [David]
-   Meeting closed in 0.00132 sec.
-   Outcome: Alex [HAPPY], David [HAPPY]
-   --------------------
-   Meeting started...
-   Attendees: Alex [HAPPY], David [ANGRY]
-   [Alex] Hi David, I'm Alex. I'm HAPPY to meet you.
-   DEBUG     : [Person][ANGRY David][TEST-2] Processing "Hi David, I'm Alex. I'm HAPPY to meet you." from [Alex]
-   [David] Hi
-   DEBUG     : [Person][HAPPY Alex][TEST-2] Processing "Hi" from [David]
-   [Alex] Today is a wonderful day!
-   DEBUG     : [Person][ANGRY David][TEST-2] Processing "Today is a wonderful day!" from [Alex]
-   [David] What you are doing here?
-   DEBUG     : [Person][SAD Alex][TEST-2] Processing "What you are doing here?" from [David]
-   [Alex] Bye
-   DEBUG     : [Person][NEUTRAL David][TEST-2] Processing "Bye" from [Alex]
-   [David] Bye
-   DEBUG     : [Person][SAD Alex][TEST-2] Processing "Bye" from [David]
-   Meeting closed in 0.00050 sec.
-   Outcome: Alex [SAD], David [SAD]
+The `domain` is determined from `agent` passed to `.get_logger`. You can use `.set_domain_mapping`
+to assign agent identifications to particular domain. The agents that are not assigned to domain
+belong to default domain specifid in `.LoggingManager.default_domain`, which is `None` by default.
+
+It's also possible to change agent identification used for logger name mapping porposes to
+different value with `.set_agent_mapping` function.
 
 Enums & Flags
 =============
+.. autoclass:: FormatElement
 .. autoclass:: LogLevel
-.. autoclass:: BindFlag
+
+Constants
+=========
+.. autodata:: DOMAIN
+.. autodata:: TOPIC
 
 Functions
 =========
-.. autofunction:: bind_logger
 .. autofunction:: get_logger
-.. autofunction:: get_logging_id
-.. autofunction:: install_null_logger
+.. autofunction:: set_domain_mapping
+.. autofunction:: set_agent_mapping
+.. autofunction:: get_agent_name
 
-Logger adapter
-==============
-.. autoclass:: FBLoggerAdapter
+Adapters and Filters
+====================
+.. autoclass:: ContextLoggerAdapter
+.. autoclass:: ContextFilter
 
 Logging manager
 ===============
 .. autoclass:: LoggingManager
 
-Mixins
-======
-.. autoclass:: LoggingIdMixin
+Messages
+========
+.. autoclass:: FStrMessage
+.. autoclass:: BraceMessage
+.. autoclass:: DollarMessage
 
 Globals
 =======

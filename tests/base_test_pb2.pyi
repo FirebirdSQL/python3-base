@@ -1,15 +1,10 @@
-from collections.abc import Iterable as _Iterable
-from collections.abc import Mapping as _Mapping
-from typing import ClassVar as _ClassVar
-from typing import Optional as _Optional
-from typing import Union as _Union
-
 from google.protobuf import any_pb2 as _any_pb2
-from google.protobuf import descriptor as _descriptor
-from google.protobuf import message as _message
 from google.protobuf import struct_pb2 as _struct_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
@@ -44,7 +39,7 @@ class TestState(_message.Message):
     TEST_FIELD_NUMBER: _ClassVar[int]
     name: str
     test: TestEnum
-    def __init__(self, name: str | None = ..., test: TestEnum | str | None = ...) -> None: ...
+    def __init__(self, name: _Optional[str] = ..., test: _Optional[_Union[TestEnum, str]] = ...) -> None: ...
 
 class TestCollection(_message.Message):
     __slots__ = ("name", "tests", "context", "annotation", "supplement")
@@ -58,4 +53,4 @@ class TestCollection(_message.Message):
     context: _struct_pb2.Struct
     annotation: _struct_pb2.Struct
     supplement: _containers.RepeatedCompositeFieldContainer[_any_pb2.Any]
-    def __init__(self, name: str | None = ..., tests: _Iterable[TestState | _Mapping] | None = ..., context: _struct_pb2.Struct | _Mapping | None = ..., annotation: _struct_pb2.Struct | _Mapping | None = ..., supplement: _Iterable[_any_pb2.Any | _Mapping] | None = ...) -> None: ...
+    def __init__(self, name: _Optional[str] = ..., tests: _Optional[_Iterable[_Union[TestState, _Mapping]]] = ..., context: _Optional[_Union[_struct_pb2.Struct, _Mapping]] = ..., annotation: _Optional[_Union[_struct_pb2.Struct, _Mapping]] = ..., supplement: _Optional[_Iterable[_Union[_any_pb2.Any, _Mapping]]] = ...) -> None: ...
