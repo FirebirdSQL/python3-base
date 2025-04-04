@@ -4,6 +4,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.0] - Unreleased
+
+### Added
+
+- `firebird.base.buffer.MemoryBuffer.get_raw` method.
+- `get_raw` method to `BufferFactory`, `BytesBufferFactory` and `CTypesBufferFactory`.
+
+### Changed
+
+- Tests changed from `unittest` to `pytest`, 96% code coverage.
+- Minimal Python version raised to 3.11.
+- The `firebird.base.logging` module was completelly reworked.
+- Function `firebird.base.types.Conjunctive` renamed to `conjunctive`.
+- `firebird.base.collections.DataList.__init__` parameter `frozen` is now keyword-only.
+- `firebird.base.collections.DataList.extract` parameter `copy` is now keyword-only.
+- `firebird.base.collections.DataList.sort` parameter `reverse` is now keyword-only.
+- `firebird.base.collections.DataList.split` parameter `frozen` is now keyword-only.
+- `firebird.base.collections.Registry.popitem` parameter `last` is now keyword-only.
+- `firebird.base.collections.BaseObjectCollection.contains` parameter `expr` now does not have default value.
+- Deprecated `firebird.base.config.create_config` function was removed.
+- `firebird.base.config.DirectoryScheme` parameter `force_home` is now keyword only.
+- `firebird.base.config.Option` parameters `required` and `default` are now keyword only.
+- Parameter `context` was removed from `firebird.base.trace.traced` decorator.
+- Option `context` was removed from `firebird.base.trace.BaseTraceConfig`.
+- Log function return value as `repr` rather than `str`.
+
+### Fixed
+
+- Broken `firebird.base.types.Distinct` support for dataclasses and hash function.
+- Raise `BufferError` istead `IOError` in `firebird.base.buffer.MemoryBuffer` methods `resize`,
+  `read` and `read_number`
+- Problem with `firebird.base.collections.Registry.pop` that did not raised `KeyError` when
+  `default` was not specified.
+- Bug in `firebird.base.collections.Registry.popitem` with `last` = True.
+- Problem with name handling in `firebird.base.config.ConfigOption.clear` and `set_value`.
+- Problem with `firebird.base.config.WindowsDirectoryScheme` and `firebird.base.config.MacOSDirectoryScheme` constructors.
+- Problem with `firebird.base.config.ListOption.item_types` value.
+- Problem with internal `.Convertor` initialization in `firebird.base.config.ListOption`.
+- Use copy of `default` list stead direct use in `firebird.base.config.ListOption`.
+- `firebird.base.config.ListOption.get_formatted` and `firebird.base.config.ListOption.get_as_str`
+  should return typed values for multitype lists.
+- `firebird.base.config.ConfigOption.validate` should validate the `Config` as well if defined.
+- `firebird.base.config.ConfigListOption.validate` should report error for empty list when `required`.
+- Problem with conversion of flags from string in `firebird.base.strconv`.
+
 ## [1.8.0] - 2024-05-03
 
 ### Added

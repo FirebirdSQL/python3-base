@@ -111,19 +111,14 @@ supports multiple usage strategies.
 ### Context-based logging
 
 Module `logging` provides context-based logging system built on top of standard `logging`
-module.
+module. It also solves the common logging management problem when various modules use hard-coded
+separate loggers, and provides several types of message wrappers that allow lazy message
+interpolation using f-string, brace (`str.format`) or dollar (`string.Template`) formats.
 
 The context-based logging:
 
-- Adds context information (defined as combination of topic, agent and context string values)
-  into `logging.LogRecord`, that could be used in logging message.
-- Adds support for f-string message format.
-- Allows assignment of loggers to specific contexts. The `LoggingManager` class maintains
-  a set of bindings between `Logger` objects and combination of `agent`, `context` and `topic`
-  specifications. It’s possible to bind loggers to exact combination of values, or whole
-  sets of values using `ANY` sentinel. It means that is possible to assign specific Logger
-  to log messages for particular agent in any context, or any agent operating in specific
-  context etc.
+1. Adds context information into `logging.LogRecord`, that could be used in logging entry formats.
+2. Allows assignment of loggers to specific contexts.
 
 ### Trace/audit for class instances
 

@@ -389,7 +389,7 @@ class WindowsDirectoryScheme(DirectoryScheme):
             force_home: When True, general directories (i.e. all except user-specific and
                 TMP) would be always based on HOME directory.
         """
-        super().__init__(name, version, force_home)
+        super().__init__(name, version, force_home=force_home)
         app_dir = Path(self.name)
         if self.version is not None:
             app_dir /= self.version
@@ -462,7 +462,7 @@ class MacOSDirectoryScheme(DirectoryScheme):
             name: Appplication name.
             version: Application version.
         """
-        super().__init__(name, version, force_home)
+        super().__init__(name, version, force_home=force_home)
         app_dir = Path(self.name)
         if self.version is not None:
             app_dir /= self.version
@@ -733,8 +733,9 @@ class Config:
         """
         if self.optional and not self.name:
             return ''
-        lines = [f"[{self.name}]\n", ';\n']
+        lines = [f"[{self.name}]\n"]
         if not plain:
+            lines.append(';\n')
             for line in self.get_description().strip().splitlines():
                 lines.append(f"; {line}\n")
         for option in self.options:
@@ -1146,7 +1147,7 @@ class DecimalOption(Option[Decimal]):
         try:
             self._value = Decimal(value)
         except DecimalException as exc:
-            raise ValueError(str(exc)) from exc
+            raise ValueError("Cannot convert string to Decimal") from exc
     def get_as_str(self) -> str:
         """Returns value as string.
         """
@@ -1747,14 +1748,17 @@ class ListOption(Option[list]):
         self._value: list = None
         #: Datatypes of list items. If there is more than one type, each value in
         #: config file must have format: `type_name:value_as_str`.
-        self.item_types: Sequence[type] = (item_type, ) if isinstance(item_type, type) else item_type
+        self.item_types: Sequence[type] = item_type if isinstance(item_type, Sequence) else (item_type, )
         #: String that separates list item values when options value is read from
         #: `ConfigParser`. Default separator is None. It's possible to use a line break as
         #: separator. If separator is `None` and the value contains line breaks, it uses
         #: the line break as separator, otherwise it uses comma as separator.
         self.separator: str | None = separator
-        self._convertor: Convertor = get_convertor(item_type) if isinstance(item_type, type) else None
+        self._convertor: Convertor = get_convertor(item_type) if not isinstance(item_type, Sequence) else None
         super().__init__(name, list, description, required=required, default=default)
+        # Value fixup, store copy of default list instead direct assignment
+        if default is not None:
+            self.set_value(list(default))
     def _get_value_description(self) -> str:
         return f"list [{', '.join(x.__name__ for x in self.item_types)}]\n"
     def _check_value(self, value: list) -> None:
@@ -1776,13 +1780,13 @@ class ListOption(Option[list]):
         Arguments:
             to_default: If True, sets the option value to default value, else to None.
         """
-        self._value = self.default if to_default else None
+        self._value = list(self.default) if to_default and self.default is not None else None
     def get_formatted(self) -> str:
         """Returns value formatted for use in config file.
         """
         if self._value is None:
             return '<UNDEFINED>'
-        result = [convert_to_str(i) for i in self._value]
+        result = [self._get_as_typed_str(i) for i in self._value]
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ',' # noqa: PLR2004
@@ -1821,7 +1825,7 @@ class ListOption(Option[list]):
     def get_as_str(self) -> str:
         """Returns value as string.
         """
-        result = [convert_to_str(i) for i in self._value]
+        result = [self._get_as_typed_str(i) for i in self._value]
         sep = self.separator
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ',' # noqa: PLR2004
@@ -2227,6 +2231,8 @@ class ConfigOption(Option[str]):
         """
         if self.required and self.get_value().name == '':
             raise Error(f"Missing value for required option '{self.name}'")
+        if self.get_value().name != '':
+            self.value.validate()
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
 
@@ -2368,6 +2374,14 @@ class ConfigListOption(Option[list]):
             to_default: As ConfigListOption does not have default value, this parameter is ignored.
         """
         self._value.clear()
+    def validate(self) -> None:
+        """Validates option state.
+
+        Raises:
+            Error: When required option does not have a value.
+        """
+        if self.required and len(self.get_value()) == 0:
+            raise Error(f"Missing value for required option '{self.name}'")
     def get_formatted(self) -> str:
         """Returns value formatted for use in config file.
         """

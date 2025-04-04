@@ -5,12 +5,14 @@ Changelog
 Version 2.0.0 (unreleased)
 ==========================
 
-* Change tests from `unittest` to `pytest`, almost complete code coverage.
+* Change tests from `unittest` to `pytest`, 96% code coverage.
 * Minimal Python version raised to 3.11.
 * Code cleanup and optimization for Python 3.11 features.
 * `~firebird.base.types` module:
 
   - Change: Function `Conjunctive` renamed to `.conjunctive`.
+  - Fix: `.Distinct` support for dataclasses was broken.
+  - Fix: `.Distinct` support for `hash` was broken.
 
 * `~firebird.base.buffer` module:
 
@@ -25,13 +27,25 @@ Version 2.0.0 (unreleased)
   - `.DataList.sort` parameter `reverse` is now keyword-only.
   - `.DataList.split` parameter `frozen` is now keyword-only.
   - `.Registry.popitem` parameter `last` is now keyword-only.
+  - `.BaseObjectCollection.contains` parameter `expr` now does not have default value.
+  - Fix: problem with `.Registry.pop` that did not raised `KeyError` when `default` was
+    not specified.
+  - Fix: bug in `.Registry.popitem` with `last` = True.
 
 * `~firebird.base.config` module:
 
   - Deprecated `.create_config` function was removed.
-  - Change: `DirectoryScheme` parameter `force_home` is now keyword only.
-  - Change: `Option` parameters `required` and `default` are now keyword only.
+  - Change: `.DirectoryScheme` parameter `force_home` is now keyword only.
+  - Change: `.Option` parameters `required` and `default` are now keyword only.
   - Fix: Problem with name handling in `.ConfigOption.clear` and `set_value`.
+  - Fix: Problem with `.WindowsDirectoryScheme` and `.MacOSDirectoryScheme` constructors.
+  - Fix: Problem with `.ListOption.item_types` value.
+  - Fix: Problem with internal `.Convertor` initialization in `.ListOption`.
+  - Fix: Use copy of `default` list stead direct use in `.ListOption`.
+  - Fix: `.ListOption.get_formatted` and `.ListOption.get_as_str` should return typed values
+    for multitype lists.
+  - Fix: `.ConfigOption.validate` should validate the `.Config` as well if defined.
+  - Fix: `.ConfigListOption.validate` should report error for empty list when `required`.
 
 * `~firebird.base.strconv` module:
 

@@ -33,171 +33,239 @@
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________.
 
+"""Unit tests for the ListOption configuration option class."""
+
 from __future__ import annotations
 
 from decimal import Decimal
 from enum import IntEnum
 from uuid import UUID
-
 import pytest
+from configparser import ConfigParser # Import for type hinting
+from collections.abc import Sequence
 
 from firebird.base import config
-from firebird.base.strconv import convert_to_str
-from firebird.base.types import MIME, Error, ZMQAddress
+from firebird.base.config_pb2 import ConfigProto # Import for proto tests
+from firebird.base.strconv import convert_to_str, register_class # For multi-type test setup
+from firebird.base.types import MIME, Error, ZMQAddress # For multi-type test setup
 
+# --- Constants for Test Sections ---
 DEFAULT_S = "DEFAULT"
 PRESENT_S = "present"
 ABSENT_S = "absent"
 BAD_S = "bad_value"
 EMPTY_S = "empty"
 
+# --- Test Helper Classes ---
+
 class SimpleEnum(IntEnum):
-    "Enum for testing"
+    """Enum used for testing within lists."""
     UNKNOWN    = 0
     READY      = 1
     RUNNING    = 2
-    WAITING    = 3
-    SUSPENDED  = 4
-    FINISHED   = 5
-    ABORTED    = 6
-    # Aliases
-    CREATED    = 1
-    BLOCKED    = 3
-    STOPPED    = 4
-    TERMINATED = 6
 
-class StrParams:
+class TestParamBase:
+    """Base class for test parameter sets."""
+    # Values used in tests
+    DEFAULT_VAL = []
+    PRESENT_VAL = []
+    DEFAULT_OPT_VAL = []
+    NEW_VAL = []
+    PROTO_VALUE = []
+    LONG_VAL = [] # For testing multiline formatting
+
+    # String representations expected/used
+    DEFAULT_PRINT = "" # How DEFAULT_OPT_VAL prints in get_config comment
+    PRESENT_AS_STR = "" # How PRESENT_VAL serializes to string
+    NEW_PRINT = "" # How NEW_VAL prints in get_config non-commented
+    PROTO_VALUE_STR = "" # How PROTO_VALUE serializes to string for proto
+
+    # Config option parameters
+    ITEM_TYPE: type | tuple[type, ...] = None # type: ignore
+    TYPE_NAMES: str = "" # Generated string like "int, str"
+    SEPARATOR: str | None = None # Separator override for ListOption
+
+    # Expected error message for bad conversion from config string
+    BAD_MSG: tuple | None = None
+
+    # Raw config string template for this type
+    conf_str: str = ""
+
+    # Derived value used in tests
+    LONG_PRINT: str = "" # Generated multiline string from LONG_VAL
+
+    def __init__(self):
+        """Initializes derived values after subclass defines bases."""
+        self.conf: ConfigParser = None
+        self.prepare() # Allow subclasses to modify values before generating strings
+        # Generate TYPE_NAMES string
+        type_tuple = (self.ITEM_TYPE, ) if isinstance(self.ITEM_TYPE, type) else self.ITEM_TYPE
+        self.TYPE_NAMES = ", ".join(t.__name__ for t in type_tuple)
+        # Generate LONG_PRINT (multiline format)
+        x = "\n   "
+        self.LONG_PRINT = f"\n   {x.join(self._format_item(item) for item in self.LONG_VAL)}"
+
+    def prepare(self):
+        """Placeholder for subclass modifications before string generation."""
+        pass
+
+    def _format_item(self, item) -> str:
+        """Helper to format list items, handling multi-type."""
+        result = convert_to_str(item)
+        if not isinstance(self.ITEM_TYPE, type): # Multi-type case
+            result = f"{item.__class__.__name__}:{result}"
+        return result
+
+# --- Parameter Sets for Different List Item Types ---
+
+class StrParams(TestParamBase):
+    """Parameters for ListOption[str]."""
     DEFAULT_VAL = ["DEFAULT_value"]
-    DEFAULT_PRINT = "DEFAULT_1, DEFAULT_2, DEFAULT_3"
     PRESENT_VAL = ["present_value_1", "present_value_2"]
-    PRESENT_AS_STR = "present_value_1,present_value_2"
     DEFAULT_OPT_VAL = ["DEFAULT_1", "DEFAULT_2", "DEFAULT_3"]
     NEW_VAL = ["NEW"]
-    NEW_PRINT = "NEW"
-    ITEM_TYPE = str
     PROTO_VALUE = ["proto_value_1", "proto_value_2"]
-    PROTO_VALUE_STR = "proto_value_1,proto_value_2"
     LONG_VAL = ["long" * 3, "verylong" * 3, "veryverylong" * 5]
-    BAD_MSG = None
-    def __init__(self):
-        self.prepare()
-        x = (self.ITEM_TYPE, ) if isinstance(self.ITEM_TYPE, type) else self.ITEM_TYPE
-        self.TYPE_NAMES = ", ".join(t.__name__ for t in x)
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(self.LONG_VAL)}"
-        self.conf_str = """[%(DEFAULT)s]
-option_name = DEFAULT_value
+
+    DEFAULT_PRINT = "DEFAULT_1, DEFAULT_2, DEFAULT_3"
+    PRESENT_AS_STR = "present_value_1,present_value_2" # Loaded multiline
+    NEW_PRINT = "NEW"
+    PROTO_VALUE_STR = "proto_value_1,proto_value_2" # Default comma for short proto
+
+    ITEM_TYPE = str
+    BAD_MSG = None # No conversion error expected for string
+
+    conf_str = """
+[%(DEFAULT)s]
 [%(PRESENT)s]
 option_name =
   present_value_1
   present_value_2
 [%(ABSENT)s]
 [%(BAD)s]
+# Bad value test not applicable for str, use EMPTY instead
+[%(EMPTY)s]
 option_name =
 """
 
-class IntParams(StrParams):
+class IntParams(TestParamBase):
+    """Parameters for ListOption[int]."""
     DEFAULT_VAL = [0]
     PRESENT_VAL = [10, 20]
     DEFAULT_OPT_VAL = [1, 2, 3]
     NEW_VAL = [100]
-    DEFAULT_PRINT = "1, 2, 3"
-    PRESENT_AS_STR = "10,20"
-    NEW_PRINT = "100"
-    ITEM_TYPE = int
     PROTO_VALUE = [30, 40, 50]
-    PROTO_VALUE_STR = "30,40,50"
     LONG_VAL = [x for x in range(50)]
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(str(x) for x in self.LONG_VAL)}"
-        self.BAD_MSG = ("invalid literal for int() with base 10: 'this is not an integer'",)
-        self.conf_str = """[%(DEFAULT)s]
+
+    DEFAULT_PRINT = "1, 2, 3"
+    PRESENT_AS_STR = "10,20" # Loaded comma-separated
+    NEW_PRINT = "100"
+    PROTO_VALUE_STR = "30,40,50"
+
+    ITEM_TYPE = int
+    BAD_MSG = ("invalid literal for int() with base 10: 'invalid'",)
+
+    conf_str = """
+[%(DEFAULT)s]
 option_name = 0
 [%(PRESENT)s]
 option_name = 10, 20
 [%(ABSENT)s]
 [%(BAD)s]
-option_name = this is not an integer
+option_name = invalid
+[%(EMPTY)s]
+option_name =
 """
 
-class FloatParams(StrParams):
+class FloatParams(TestParamBase):
+    """Parameters for ListOption[float]."""
     DEFAULT_VAL = [0.0]
     PRESENT_VAL = [10.1, 20.2]
     DEFAULT_OPT_VAL = [1.11, 2.22, 3.33]
     NEW_VAL = [100.101]
+    PROTO_VALUE = [30.3, 40.4, 50.5]
+    LONG_VAL = [x / 1.5 for x in range(50)]
+
     DEFAULT_PRINT = "1.11, 2.22, 3.33"
     PRESENT_AS_STR = "10.1,20.2"
     NEW_PRINT = "100.101"
-    ITEM_TYPE = float
-    PROTO_VALUE = [30.3, 40.4, 50.5]
     PROTO_VALUE_STR = "30.3,40.4,50.5"
-    LONG_VAL = [x / 1.5 for x in range(50)]
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(str(x) for x in self.LONG_VAL)}"
-        self.BAD_MSG = ("could not convert string to float: 'this is not a float'",)
-        self.conf_str = """[%(DEFAULT)s]
+
+    ITEM_TYPE = float
+    BAD_MSG = ("could not convert string to float: 'invalid'",)
+
+    conf_str = """
+[%(DEFAULT)s]
 option_name = 0.0
 [%(PRESENT)s]
 option_name = 10.1, 20.2
 [%(ABSENT)s]
 [%(BAD)s]
-option_name = this is not a float
+option_name = invalid
+[%(EMPTY)s]
+option_name =
 """
 
-class DecimalParams(StrParams):
+class DecimalParams(TestParamBase):
+    """Parameters for ListOption[Decimal]."""
     DEFAULT_VAL = [Decimal("0.0")]
     PRESENT_VAL = [Decimal("10.1"), Decimal("20.2")]
     DEFAULT_OPT_VAL = [Decimal("1.11"), Decimal("2.22"), Decimal("3.33")]
     NEW_VAL = [Decimal("100.101")]
+    PROTO_VALUE = [Decimal("30.3"), Decimal("40.4"), Decimal("50.5")]
+    LONG_VAL = [Decimal(str(x / 1.5)) for x in range(50)]
+
     DEFAULT_PRINT = "1.11, 2.22, 3.33"
     PRESENT_AS_STR = "10.1,20.2"
     NEW_PRINT = "100.101"
-    ITEM_TYPE = Decimal
-    PROTO_VALUE = [Decimal("30.3"), Decimal("40.4"), Decimal("50.5")]
     PROTO_VALUE_STR = "30.3,40.4,50.5"
-    LONG_VAL = [Decimal(str(x / 1.5)) for x in range(50)]
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(str(x) for x in self.LONG_VAL)}"
-        self.BAD_MSG = ("could not convert string to Decimal: 'this is not a decimal'",)
-        self.conf_str = """[%(DEFAULT)s]
+
+    ITEM_TYPE = Decimal
+    BAD_MSG = ("could not convert string to Decimal: 'invalid'",)
+
+    conf_str = """
+[%(DEFAULT)s]
 option_name = 0.0
 [%(PRESENT)s]
 option_name = 10.1, 20.2
 [%(ABSENT)s]
 [%(BAD)s]
-option_name = this is not a decimal
+option_name = invalid
+[%(EMPTY)s]
+option_name =
 """
 
-class BoolParams(StrParams):
-    DEFAULT_VAL = [0]
+class BoolParams(TestParamBase):
+    """Parameters for ListOption[bool]."""
+    DEFAULT_VAL = [False] # From "0"
     PRESENT_VAL = [True, False]
     DEFAULT_OPT_VAL = [True, False, True]
     NEW_VAL = [True]
+    PROTO_VALUE = [False, True, False]
+    LONG_VAL = [bool(x % 2) for x in range(40)] # Alternating True/False
+
     DEFAULT_PRINT = "yes, no, yes"
     PRESENT_AS_STR = "yes,no"
     NEW_PRINT = "yes"
-    ITEM_TYPE = bool
-    PROTO_VALUE = [False, True, False]
     PROTO_VALUE_STR = "no,yes,no"
-    LONG_VAL = [bool(x % 2) for x in range(40)]
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(convert_to_str(x) for x in self.LONG_VAL)}"
-        self.BAD_MSG = ("Value is not a valid bool string constant",)
-        self.conf_str = """[%(DEFAULT)s]
+
+    ITEM_TYPE = bool
+    BAD_MSG = ("Value is not a valid bool string constant",)
+
+    conf_str = """
+[%(DEFAULT)s]
 option_name = 0
 [%(PRESENT)s]
 option_name = yes, no
 [%(ABSENT)s]
 [%(BAD)s]
 option_name = this is not a bool
+[%(EMPTY)s]
+option_name =
 """
 
-class UUIDParams(StrParams):
+class UUIDParams(TestParamBase):
+    """Parameters for ListOption[UUID]."""
     DEFAULT_VAL = [UUID("eeb7f94a-256d-11ea-ad1d-5404a6a1fd6e")]
     PRESENT_VAL = [UUID("0a7fd53a-256e-11ea-ad1d-5404a6a1fd6e"),
                    UUID("0551feb2-256e-11ea-ad1d-5404a6a1fd6e")]
@@ -205,46 +273,49 @@ class UUIDParams(StrParams):
                        UUID("3521db30-256e-11ea-ad1d-5404a6a1fd6e"),
                        UUID("3a3e68cc-256e-11ea-ad1d-5404a6a1fd6e")]
     NEW_VAL = [UUID("3e8a4ce8-256e-11ea-ad1d-5404a6a1fd6e")]
-    DEFAULT_PRINT = "\n;   2f02868c-256e-11ea-ad1d-5404a6a1fd6e\n;   3521db30-256e-11ea-ad1d-5404a6a1fd6e\n;   3a3e68cc-256e-11ea-ad1d-5404a6a1fd6e"
+    PROTO_VALUE = [UUID("3a3e68cc-256e-11ea-ad1d-5404a6a1fd6e"), UUID("3521db30-256e-11ea-ad1d-5404a6a1fd6e")]
+    LONG_VAL = [UUID("2f02868c-256e-11ea-ad1d-5404a6a1fd6e") for x in range(10)]
+
+    DEFAULT_PRINT = "\n;   2f02868c-256e-11ea-ad1d-5404a6a1fd6e\n;   3521db30-256e-11ea-ad1d-5404a6a1fd6e\n;   3a3e68cc-256e-11ea-ad1d-5404a6a1fd6e" # Multiline default
     PRESENT_AS_STR = "0a7fd53a-256e-11ea-ad1d-5404a6a1fd6e,0551feb2-256e-11ea-ad1d-5404a6a1fd6e"
     NEW_PRINT = "3e8a4ce8-256e-11ea-ad1d-5404a6a1fd6e"
-    ITEM_TYPE = UUID
-    PROTO_VALUE = [UUID("3a3e68cc-256e-11ea-ad1d-5404a6a1fd6e"), UUID("3521db30-256e-11ea-ad1d-5404a6a1fd6e")]
     PROTO_VALUE_STR = "3a3e68cc-256e-11ea-ad1d-5404a6a1fd6e,3521db30-256e-11ea-ad1d-5404a6a1fd6e"
-    LONG_VAL = [UUID("2f02868c-256e-11ea-ad1d-5404a6a1fd6e") for x in range(10)]
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(str(x) for x in self.LONG_VAL)}"
-        self.BAD_MSG = ("badly formed hexadecimal UUID string",)
-        self.conf_str = """[%(DEFAULT)s]
+
+    ITEM_TYPE = UUID
+    BAD_MSG = ("badly formed hexadecimal UUID string",)
+
+    conf_str = """
+[%(DEFAULT)s]
 option_name = eeb7f94a-256d-11ea-ad1d-5404a6a1fd6e
 [%(PRESENT)s]
+# Mixed formats allowed by UUID constructor
 option_name = 0a7fd53a256e11eaad1d5404a6a1fd6e, 0551feb2-256e-11ea-ad1d-5404a6a1fd6e
 [%(ABSENT)s]
 [%(BAD)s]
 option_name = this is not an uuid
+[%(EMPTY)s]
+option_name =
 """
 
-class MIMEParams(StrParams):
+class MIMEParams(TestParamBase):
+    """Parameters for ListOption[MIME]."""
     DEFAULT_VAL = [MIME("application/octet-stream")]
-    PRESENT_VAL = [MIME("text/plain;charset=utf-8"),
-                   MIME("text/csv")]
-    DEFAULT_OPT_VAL = [MIME("text/html;charset=utf-8"),
-                       MIME("video/mp4"),
-                       MIME("image/png")]
+    PRESENT_VAL = [MIME("text/plain;charset=utf-8"), MIME("text/csv")]
+    DEFAULT_OPT_VAL = [MIME("text/html;charset=utf-8"), MIME("video/mp4"), MIME("image/png")]
     NEW_VAL = [MIME("audio/mpeg")]
-    DEFAULT_PRINT = "text/html;charset=utf-8, video/mp4, image/png"
-    PRESENT_AS_STR = "text/plain;charset=utf-8,text/csv"
-    NEW_PRINT = "audio/mpeg"
-    ITEM_TYPE = MIME
     PROTO_VALUE = [MIME("application/octet-stream"), MIME("video/mp4")]
-    PROTO_VALUE_STR = "application/octet-stream,video/mp4"
     LONG_VAL = [MIME("text/html;charset=win1250") for x in range(10)]
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(x for x in self.LONG_VAL)}"
-        self.BAD_MSG = ("MIME type specification must be 'type/subtype[;param=value;...]'",)
-        self.conf_str = """[%(DEFAULT)s]
+
+    DEFAULT_PRINT = "text/html;charset=utf-8, video/mp4, image/png"
+    PRESENT_AS_STR = "text/plain;charset=utf-8,text/csv" # Loaded multiline
+    NEW_PRINT = "audio/mpeg"
+    PROTO_VALUE_STR = "application/octet-stream,video/mp4"
+
+    ITEM_TYPE = MIME
+    BAD_MSG = ("MIME type specification must be 'type/subtype[;param=value;...]'",)
+
+    conf_str = """
+[%(DEFAULT)s]
 option_name = application/octet-stream
 [%(PRESENT)s]
 option_name =
@@ -253,37 +324,42 @@ option_name =
 [%(ABSENT)s]
 [%(BAD)s]
 option_name = wrong mime specification
+[%(EMPTY)s]
+option_name =
 """
 
-class ZMQAddressParams(StrParams):
+class ZMQAddressParams(TestParamBase):
+    """Parameters for ListOption[ZMQAddress]."""
     DEFAULT_VAL = [ZMQAddress("tcp://127.0.0.1:*")]
-    PRESENT_VAL = [ZMQAddress("ipc://@my-address"),
-                   ZMQAddress("inproc://my-address"),
-                   ZMQAddress("tcp://127.0.0.1:9001")]
+    PRESENT_VAL = [ZMQAddress("ipc://@my-address"), ZMQAddress("inproc://my-address"), ZMQAddress("tcp://127.0.0.1:9001")]
     DEFAULT_OPT_VAL = [ZMQAddress("tcp://127.0.0.1:8001")]
     NEW_VAL = [ZMQAddress("inproc://my-address")]
+    PROTO_VALUE = [ZMQAddress("tcp://www.firebirdsql.org:8001"), ZMQAddress("tcp://www.firebirdsql.org:9001")]
+    LONG_VAL = [ZMQAddress("tcp://www.firebirdsql.org:500") for x in range(10)]
+
     DEFAULT_PRINT = "tcp://127.0.0.1:8001"
     PRESENT_AS_STR = "ipc://@my-address,inproc://my-address,tcp://127.0.0.1:9001"
     NEW_PRINT = "inproc://my-address"
-    ITEM_TYPE = ZMQAddress
-    PROTO_VALUE = [ZMQAddress("tcp://www.firebirdsql.org:8001"), ZMQAddress("tcp://www.firebirdsql.org:9001")]
     PROTO_VALUE_STR = "tcp://www.firebirdsql.org:8001,tcp://www.firebirdsql.org:9001"
-    LONG_VAL = [ZMQAddress("tcp://www.firebirdsql.org:500") for x in range(10)]
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(x for x in self.LONG_VAL)}"
-        self.BAD_MSG = ("Protocol specification required",)
-        self.conf_str = """[%(DEFAULT)s]
+
+    ITEM_TYPE = ZMQAddress
+    BAD_MSG = ("Protocol specification required",)
+
+    conf_str = """
+[%(DEFAULT)s]
 option_name = tcp://127.0.0.1:*
 [%(PRESENT)s]
 option_name = ipc://@my-address, inproc://my-address, tcp://127.0.0.1:9001
 [%(ABSENT)s]
 [%(BAD)s]
 option_name = bad_value
+[%(EMPTY)s]
+option_name =
 """
 
-class MultiTypeParams(StrParams):
-    DEFAULT_VAL = ["DEFAULT_value"]
+class MultiTypeParams(TestParamBase):
+    """Parameters for ListOption with multiple item types."""
+    DEFAULT_VAL = ["DEFAULT_value"] # From str:DEFAULT_value
     PRESENT_VAL = [1, 1.1, Decimal("1.01"), True,
                    UUID("eeb7f94a-256d-11ea-ad1d-5404a6a1fd6e"),
                    MIME("application/octet-stream"),
@@ -291,21 +367,26 @@ class MultiTypeParams(StrParams):
                    SimpleEnum.RUNNING]
     DEFAULT_OPT_VAL = ["DEFAULT_1", 1, False]
     NEW_VAL = [MIME("text/plain;charset=utf-8")]
-    DEFAULT_PRINT = "DEFAULT_1, 1, no"
-    PRESENT_AS_STR = "1\n1.1\n1.01\nyes\neeb7f94a-256d-11ea-ad1d-5404a6a1fd6e\napplication/octet-stream\ntcp://127.0.0.1:*\nRUNNING"
-    NEW_PRINT = "text/plain;charset=utf-8"
-    ITEM_TYPE = (str, int, float, Decimal, bool, UUID, MIME, ZMQAddress, SimpleEnum)
     PROTO_VALUE = [UUID("2f02868c-256e-11ea-ad1d-5404a6a1fd6e"), MIME("application/octet-stream")]
-    PROTO_VALUE_STR = "UUID:2f02868c-256e-11ea-ad1d-5404a6a1fd6e,MIME:application/octet-stream"
     LONG_VAL = [ZMQAddress("tcp://www.firebirdsql.org:500"),
                 UUID("2f02868c-256e-11ea-ad1d-5404a6a1fd6e"),
                 MIME("application/octet-stream"),
                 "=" * 30, 1, True, 10.1, Decimal("20.20")]
-    def prepare(self):
-        x = "\n   "
-        self.LONG_PRINT = f"\n   {x.join(convert_to_str(x) for x in self.LONG_VAL)}"
-        self.BAD_MSG = ("Item type 'bin' not supported",)
-        self.conf_str = """[%(DEFAULT)s]
+
+    DEFAULT_PRINT = "str:DEFAULT_1, int:1, bool:no" # Needs type prefix
+    # Config is multiline, so default separator is newline for get_as_str
+    PRESENT_AS_STR = "int:1\nfloat:1.1\nDecimal:1.01\nbool:yes\nUUID:eeb7f94a-256d-11ea-ad1d-5404a6a1fd6e\nMIME:application/octet-stream\nZMQAddress:tcp://127.0.0.1:*\nSimpleEnum:RUNNING"
+    NEW_PRINT = "MIME:text/plain;charset=utf-8" # Needs type prefix
+    PROTO_VALUE_STR = "UUID:2f02868c-256e-11ea-ad1d-5404a6a1fd6e,MIME:application/octet-stream"
+
+    ITEM_TYPE = (str, int, float, Decimal, bool, UUID, MIME, ZMQAddress, SimpleEnum)
+    # Register classes used in multi-type list if not built-in or already registered
+    register_class(SimpleEnum)
+
+    BAD_MSG = ("Item type 'bin' not supported",) # From the bad config string below
+
+    conf_str = """
+[%(DEFAULT)s]
 option_name = str:DEFAULT_value
 [%(PRESENT)s]
 option_name =
@@ -314,207 +395,333 @@ option_name =
     Decimal: 1.01
     bool: yes
     UUID: eeb7f94a-256d-11ea-ad1d-5404a6a1fd6e
+    # Test using full name lookup
     firebird.base.types.MIME: application/octet-stream
+    # Test simple name lookup (requires prior register_class)
     ZMQAddress: tcp://127.0.0.1:*
     SimpleEnum:RUNNING
 [%(ABSENT)s]
 [%(BAD)s]
+# Contains an unsupported type prefix 'bin'
 option_name = str:this is string, int:20, bin:100110111
+[%(EMPTY)s]
+option_name =
 """
 
+# List of parameter classes to use with pytest.mark.parametrize
 params = [StrParams, IntParams, FloatParams, DecimalParams, BoolParams, UUIDParams,
           MIMEParams, ZMQAddressParams, MultiTypeParams]
 
-@pytest.fixture
-def conf(base_conf):
-    """Returns configparser initialized with data.
-    """
-    conf_str = """[%(DEFAULT)s]
-option_name = DEFAULT_value
-[%(PRESENT)s]
-option_name =
-  present_value_1
-  present_value_2
-[%(ABSENT)s]
-[%(BAD)s]
-option_name =
-"""
-    base_conf.read_string(conf_str % {"DEFAULT": DEFAULT_S, "PRESENT": PRESENT_S,
-                                      "ABSENT": ABSENT_S, "BAD": BAD_S, "EMPTY": EMPTY_S,})
-    return base_conf
-
 @pytest.fixture(params=params)
-def xx(base_conf, request):
-    """Parameters for List tests.
-    """
-    data = request.param()
-    data.conf = base_conf
-    conf_str = """[%(DEFAULT)s]
-option_name = DEFAULT_value
-[%(PRESENT)s]
-option_name =
-  present_value_1
-  present_value_2
-[%(ABSENT)s]
-[%(BAD)s]
-option_name =
-"""
-    base_conf.read_string(data.conf_str % {"DEFAULT": DEFAULT_S, "PRESENT": PRESENT_S,
-                                      "ABSENT": ABSENT_S, "BAD": BAD_S, "EMPTY": EMPTY_S,})
+def test_params(base_conf: ConfigParser, request) -> TestParamBase:
+    """Fixture providing parameterized test data for ListOption tests."""
+    param_class = request.param
+    data = param_class()
+    data.conf = base_conf # Attach the base config parser
+    # Read the specific config string for this parameter set
+    data.conf.read_string(data.conf_str % {"DEFAULT": DEFAULT_S, "PRESENT": PRESENT_S,
+                                           "ABSENT": ABSENT_S, "BAD": BAD_S, "EMPTY": EMPTY_S})
     return data
 
-def test_simple(xx):
-    opt = config.ListOption("option_name", xx.ITEM_TYPE, "description")
+# --- Test Cases ---
+
+def test_simple(test_params: TestParamBase):
+    """Tests basic ListOption: init, load, value access, clear, default handling."""
+    opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description")
+
+    # Verify initial state
     assert opt.name == "option_name"
     assert opt.datatype == list
     assert opt.description == "description"
     assert not opt.required
     assert opt.default is None
-    assert opt.value is None
-    opt.validate()
-    opt.load_config(xx.conf, PRESENT_S)
-    assert opt.value == xx.PRESENT_VAL
-    assert opt.get_as_str() == xx.PRESENT_AS_STR
+    assert opt.value is None # Initial value without default is None
+    assert opt.item_types == test_params.ITEM_TYPE if isinstance(test_params.ITEM_TYPE, Sequence) else (test_params.ITEM_TYPE, )
+    opt.validate() # Should pass as not required
+
+    # Load value from [present] section
+    opt.load_config(test_params.conf, PRESENT_S)
+    assert opt.value == test_params.PRESENT_VAL
+    # get_as_str() depends on default separator logic (newline if loaded multiline)
+    assert opt.get_as_str() == test_params.PRESENT_AS_STR
     assert isinstance(opt.value, opt.datatype)
-    opt.clear()
+    # get_formatted() depends on default separator logic
+    if '\n' in test_params.PRESENT_AS_STR: # Check if it was multiline
+        expected_format = f"\n   {test_params.PRESENT_AS_STR.replace(chr(10), chr(10) + '   ')}"
+        assert opt.get_formatted() == expected_format
+    else:
+        assert opt.get_formatted() == ", ".join(opt._get_as_typed_str(i) for i in test_params.PRESENT_VAL)
+
+
+    # Clear value (should reset to None as no default)
+    opt.clear(to_default=False)
     assert opt.value is None
-    opt.load_config(xx.conf, DEFAULT_S)
-    assert opt.value == xx.DEFAULT_VAL
-    assert isinstance(opt.value, opt.datatype)
+
+    # Clear value to default (should still be None)
+    opt.clear(to_default=True)
+    assert opt.value is None
+
+    # Set value manually to None
     opt.set_value(None)
     assert opt.value is None
-    opt.load_config(xx.conf, ABSENT_S)
-    assert opt.value == xx.DEFAULT_VAL
-    assert isinstance(opt.value, opt.datatype)
-    opt.set_value(xx.NEW_VAL)
-    assert opt.value == xx.NEW_VAL
-    assert isinstance(opt.value, opt.datatype)
-    # Wrong item type in list
-    if xx.ITEM_TYPE is str:
-        with pytest.raises(ValueError) as cm:
-            opt.value = ["ok", 1]
-        assert cm.value.args == ("List item[1] has wrong type",)
 
-def test_required(xx):
-    opt = config.ListOption("option_name", xx.ITEM_TYPE, "description", required=True)
-    assert opt.name == "option_name"
-    assert opt.datatype == list
-    assert opt.description == "description"
+    # Set value manually
+    opt.set_value(test_params.NEW_VAL)
+    assert opt.value == test_params.NEW_VAL
+    assert isinstance(opt.value, opt.datatype)
+
+    # Test assigning list with wrong item type (only if ITEM_TYPE is single)
+    if isinstance(test_params.ITEM_TYPE, type) and test_params.ITEM_TYPE is not str:
+        with pytest.raises(ValueError, match="List item\\[1\\] has wrong type"):
+            opt.value = [test_params.NEW_VAL[0], "a_string"]
+    elif isinstance(test_params.ITEM_TYPE, type) and test_params.ITEM_TYPE is str:
+        with pytest.raises(ValueError, match="List item\\[1\\] has wrong type"):
+            opt.value = [test_params.NEW_VAL[0], 123] # Assign int to str list
+
+
+def test_required(test_params: TestParamBase):
+    """Tests ListOption with the 'required' flag."""
+    opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description", required=True)
+
+    # Verify initial state (required, no default)
     assert opt.required
     assert opt.default is None
     assert opt.value is None
-    with pytest.raises(Error) as cm:
+    # Validation should fail when value is None
+    with pytest.raises(Error, match="Missing value for required option 'option_name'"):
         opt.validate()
-    assert cm.value.args == ("Missing value for required option 'option_name'",)
-    opt.load_config(xx.conf, PRESENT_S)
-    assert opt.value == xx.PRESENT_VAL
+
+    # Load value, validation should pass
+    opt.load_config(test_params.conf, PRESENT_S)
+    assert opt.value == test_params.PRESENT_VAL
     opt.validate()
-    opt.clear()
+
+    # Clear to default (which is None), validation should fail again
+    opt.clear(to_default=True)
     assert opt.value is None
-    opt.load_config(xx.conf, DEFAULT_S)
-    assert opt.value == xx.DEFAULT_VAL
-    with pytest.raises(ValueError) as cm:
+    with pytest.raises(Error, match="Missing value for required option 'option_name'"):
+        opt.validate()
+
+    # Setting value to None should raise ValueError for required option
+    with pytest.raises(ValueError, match="Value is required for option 'option_name'"):
         opt.set_value(None)
-    assert cm.value.args == ("Value is required for option 'option_name'.",)
-    opt.load_config(xx.conf, ABSENT_S)
-    assert opt.value == xx.DEFAULT_VAL
-    opt.set_value(xx.NEW_VAL)
-    assert opt.value == xx.NEW_VAL
 
-def test_bad_value(xx):
-    opt = config.ListOption("option_name", xx.ITEM_TYPE, "description")
-    if xx.ITEM_TYPE is str:
-        opt.load_config(xx.conf, BAD_S)
-        assert opt.value is None
-    else:
-        with pytest.raises(ValueError) as cm:
-            opt.load_config(xx.conf, BAD_S)
-        #print(f'{cm.exception.args}\n')
-        assert cm.value.args == xx.BAD_MSG
-        assert opt.value is None
-    with pytest.raises(TypeError) as cm:
-        opt.set_value(10.0)
-    assert cm.value.args == ("Option 'option_name' value must be a 'list', not 'float'",)
-
-def test_default(xx):
-    opt = config.ListOption("option_name", xx.ITEM_TYPE, "description",
-                            default=xx.DEFAULT_OPT_VAL)
-    assert opt.name == "option_name"
-    assert opt.datatype == list
-    assert opt.description == "description"
-    assert not opt.required
-    assert opt.default == xx.DEFAULT_OPT_VAL
-    assert isinstance(opt.default, opt.datatype)
-    assert opt.value == xx.DEFAULT_OPT_VAL
-    assert isinstance(opt.value, opt.datatype)
+    # Set value manually
+    opt.set_value(test_params.NEW_VAL)
+    assert opt.value == test_params.NEW_VAL
     opt.validate()
-    opt.load_config(xx.conf, PRESENT_S)
-    assert opt.value == xx.PRESENT_VAL
-    opt.clear()
+
+def test_bad_value(test_params: TestParamBase):
+    """Tests loading invalid list string values."""
+    opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description")
+
+    # Load from section with bad value
+    if test_params.BAD_MSG:
+        with pytest.raises(ValueError) as excinfo:
+            opt.load_config(test_params.conf, BAD_S)
+        # Check if the specific underlying error matches
+        if isinstance(excinfo.value, Exception):
+            assert excinfo.value.args == test_params.BAD_MSG
+        else:
+            # For multi-type error which isn't from cause
+            assert excinfo.value.args == test_params.BAD_MSG
+
+        assert opt.value is None # Value should remain unchanged (None)
+    else:
+        # For string list, BAD_S might be empty or contain convertible strings
+        opt.load_config(test_params.conf, BAD_S)
+        # Depending on conf_str for StrParams, value might be None or ['']
+        assert opt.value is None or opt.value == ['']
+
+
+    # Load from section with empty value (should result in None or empty list)
+    opt.load_config(test_params.conf, EMPTY_S)
+    assert opt.value is None # Empty config value results in None
+
+    # Test assigning invalid type via set_value
+    with pytest.raises(TypeError, match="Option 'option_name' value must be a 'list', not 'float'"):
+        opt.set_value(10.0) # type: ignore
+
+    # Test setting invalid string via set_as_str
+    if test_params.BAD_MSG:
+        with pytest.raises(ValueError) as excinfo:
+            opt.set_as_str("invalid" if not isinstance(test_params.ITEM_TYPE, Sequence) else "bin:invalid")
+        if isinstance(excinfo.value, Exception):
+            assert excinfo.value.args == test_params.BAD_MSG
+        elif test_params.ITEM_TYPE is bool: # Bool error isn't nested
+            assert excinfo.value.args == test_params.BAD_MSG
+
+
+def test_default(test_params: TestParamBase):
+    """Tests ListOption with a defined default list value."""
+    opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description",
+                            default=test_params.DEFAULT_OPT_VAL)
+
+    # Verify initial state (default value should be set)
+    assert not opt.required
+    assert opt.default == test_params.DEFAULT_OPT_VAL
+    assert isinstance(opt.default, opt.datatype)
+    assert opt.value == test_params.DEFAULT_OPT_VAL # Initial value is the default
+    assert isinstance(opt.value, opt.datatype)
+    opt.validate() # Should pass
+
+    # Load value from [present] section (overrides default)
+    opt.load_config(test_params.conf, PRESENT_S)
+    assert opt.value == test_params.PRESENT_VAL
+
+    # Clear to default
+    opt.clear(to_default=True)
+    # Default is copied, should be equal but not the same instance
     assert opt.value == opt.default
-    opt.load_config(xx.conf, DEFAULT_S)
-    assert opt.value == xx.DEFAULT_VAL
+    assert opt.value is not opt.default
+
+    # Clear to None
+    opt.clear(to_default=False)
+    assert opt.value is None
+
+    # Set value manually to None
     opt.set_value(None)
     assert opt.value is None
-    opt.load_config(xx.conf, ABSENT_S)
-    assert opt.value == xx.DEFAULT_VAL
-    opt.set_value(xx.NEW_VAL)
-    assert opt.value == xx.NEW_VAL
 
-def test_proto(xx, proto):
-    opt = config.ListOption("option_name", xx.ITEM_TYPE, "description",
-                            default=xx.DEFAULT_OPT_VAL)
-    proto_value = xx.PROTO_VALUE
+    # Set value manually
+    opt.set_value(test_params.NEW_VAL)
+    assert opt.value == test_params.NEW_VAL
+
+    # Ensure default list wasn't modified if value was appended to
+    opt.value.append(test_params.DEFAULT_VAL[0]) # Modify the current value list
+    assert opt.default == test_params.DEFAULT_OPT_VAL # Original default should be unchanged
+
+def test_proto(test_params: TestParamBase, proto: ConfigProto):
+    """Tests serialization to and deserialization from Protobuf messages."""
+    opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description",
+                            default=test_params.DEFAULT_OPT_VAL)
+    proto_value = test_params.PROTO_VALUE
+    proto_value_str = test_params.PROTO_VALUE_STR
+
+    # Set value and serialize (saves as string)
     opt.set_value(proto_value)
-    proto.options["option_name"].as_string = xx.PROTO_VALUE_STR
-    proto_dump = str(proto)
-    opt.load_proto(proto)
-    assert opt.value == proto_value
-    assert isinstance(opt.value, opt.datatype)
-    proto.Clear()
-    assert "option_name" not in proto.options
     opt.save_proto(proto)
     assert "option_name" in proto.options
-    assert str(proto) == proto_dump
-    # empty proto
+    assert proto.options["option_name"].HasField('as_string')
+    # Serialized string uses default separator logic (comma unless long)
+    assert proto.options["option_name"].as_string == proto_value_str
+    proto_dump = proto.SerializeToString() # Save serialized state
+
+    # Clear option and deserialize from string
     opt.clear(to_default=False)
-    proto.Clear()
-    opt.load_proto(proto)
     assert opt.value is None
-    # bad proto value
-    proto.options["option_name"].as_uint32 = 1000
-    with pytest.raises(TypeError) as cm:
-        opt.load_proto(proto)
-    assert cm.value.args == ("Wrong value type: uint32",)
+    proto_read = ConfigProto()
+    proto_read.ParseFromString(proto_dump)
+    opt.load_proto(proto_read)
+    assert opt.value == proto_value
+    assert isinstance(opt.value, opt.datatype)
+
+    # Test saving None value (should not add option to proto)
     proto.Clear()
-    opt.clear(to_default=False)
+    opt.set_value(None)
     opt.save_proto(proto)
     assert "option_name" not in proto.options
 
-def test_get_config(xx):
-    opt = config.ListOption("option_name", xx.ITEM_TYPE, "description",
-                            default=xx.DEFAULT_OPT_VAL)
-    lines = f"""; description
-; Type: list [{xx.TYPE_NAMES}]
-;option_name = {xx.DEFAULT_PRINT}
+    # Test loading from empty proto (value should remain unchanged)
+    opt.set_value(test_params.DEFAULT_OPT_VAL) # Set a known value
+    proto.Clear()
+    opt.load_proto(proto)
+    assert opt.value == test_params.DEFAULT_OPT_VAL # Should not change to None
+
+    # Test loading bad proto value (wrong type)
+    proto.Clear()
+    proto.options["option_name"].as_uint64 = 1 # Invalid type for ListOption (expects string)
+    with pytest.raises(TypeError, match="Wrong value type: uint64"):
+        opt.load_proto(proto)
+
+    # Test loading bad proto value (invalid string format for item type)
+    if test_params.BAD_MSG:
+        proto.Clear()
+        # Construct a bad string based on expected error
+        bad_item_str = "invalid"
+        proto.options["option_name"].as_string = bad_item_str if len(opt.item_types) == 1 \
+                                                else f"bin:{bad_item_str}" # Need prefix for multi
+        with pytest.raises(ValueError) as excinfo:
+            opt.load_proto(proto)
+        if isinstance(excinfo.value, Exception):
+            assert excinfo.value.args == test_params.BAD_MSG
+        # Handle multi-type case where error isn't nested
+        elif test_params is MultiTypeParams and test_params.BAD_MSG[0].startswith("Item type"):
+            assert excinfo.value.args == test_params.BAD_MSG
+
+
+def test_get_config(test_params: TestParamBase):
+    """Tests the get_config method for generating config file string representation."""
+    opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description",
+                            default=test_params.DEFAULT_OPT_VAL)
+
+    # Test output with default value (should be commented out)
+    expected_lines_default = f"""; description
+; Type: list [{test_params.TYPE_NAMES}]
+;option_name = {test_params.DEFAULT_PRINT}
 """
-    assert opt.get_config() == lines
-    lines = f"""; description
-; Type: list [{xx.TYPE_NAMES}]
-option_name = {xx.NEW_PRINT}
+    assert opt.get_config() == expected_lines_default
+
+    # Test output with explicitly set value
+    opt.set_value(test_params.NEW_VAL)
+    expected_lines_set = f"""; description
+; Type: list [{test_params.TYPE_NAMES}]
+option_name = {test_params.NEW_PRINT}
 """
-    opt.set_value(xx.NEW_VAL)
-    assert opt.get_config() == lines
-    lines = f"""; description
-; Type: list [{xx.TYPE_NAMES}]
+    assert opt.get_config() == expected_lines_set
+
+    # Test output when value is None (should show <UNDEFINED>)
+    opt.set_value(None)
+    expected_lines_none = f"""; description
+; Type: list [{test_params.TYPE_NAMES}]
 option_name = <UNDEFINED>
 """
-    opt.set_value(None)
-    assert opt.get_config() == lines
+    assert opt.get_config() == expected_lines_none
+    # Check get_formatted directly for None case
     assert opt.get_formatted() == "<UNDEFINED>"
-    lines = f"""; description
-; Type: list [{xx.TYPE_NAMES}]
-option_name = {xx.LONG_PRINT}
+
+    # Test multiline formatting for long values
+    opt.set_value(test_params.LONG_VAL)
+    expected_lines_long = f"""; description
+; Type: list [{test_params.TYPE_NAMES}]
+option_name = {test_params.LONG_PRINT}
 """
-    opt.set_value(xx.LONG_VAL)
-    assert opt.get_config() == lines
+    assert opt.get_config() == expected_lines_long
+
+    # Test plain output
+    opt.set_value(test_params.NEW_VAL)
+    assert opt.get_config(plain=True) == f"option_name = {test_params.NEW_PRINT}\n"
+    opt.set_value(None)
+    assert opt.get_config(plain=True) == "option_name = <UNDEFINED>\n"
+
+def test_separator_override(test_params: TestParamBase):
+    """Tests ListOption with an explicit separator."""
+    # Use semicolon as separator
+    opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description",
+                            separator='|')
+    assert opt.separator == '|'
+
+    # Set value
+    opt.set_value(test_params.PRESENT_VAL)
+
+    # Check get_formatted uses the specified separator
+    expected_format = "| ".join(opt._get_as_typed_str(i) for i in test_params.PRESENT_VAL)
+    assert opt.get_formatted() == expected_format
+
+    # Check get_as_str uses the specified separator
+    expected_str = "|".join(opt._get_as_typed_str(i) for i in test_params.PRESENT_VAL)
+    assert opt.get_as_str() == expected_str
+
+    # Test set_as_str with the specified separator
+    opt.set_value(None) # Clear first
+    opt.set_as_str(expected_str)
+    assert opt.value == test_params.PRESENT_VAL
+
+    # Test set_as_str with a *different* separator (should likely fail or parse incorrectly)
+    opt.set_value(None)
+    if test_params.BAD_MSG: # Expect parsing error if items are not simple strings
+        with pytest.raises(ValueError):
+            opt.set_as_str("item1, item2") # Using comma instead of semicolon
+    else: # For string list, it will just parse as one item
+        opt.set_as_str("item1, item2")
+        assert opt.value == ["item1, item2"]

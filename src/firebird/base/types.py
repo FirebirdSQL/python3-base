@@ -175,6 +175,14 @@ STOP: Sentinel = Sentinel('STOP')
 # Distinct objects
 class Distinct(ABC):
     """Abstract base class for classes (incl. dataclasses) with distinct instances.
+
+.. important::
+
+   Dataclasses must be defined with `eq` set to `False`, i.e.::
+
+       @dataclass(eq=False)
+
+   Otherwise the `__hash__` and `__eq__` functions defined on `Distinct` will be overrriden.
     """
     @abstractmethod
     def get_key(self) -> Hashable:
@@ -187,6 +195,10 @@ class Distinct(ABC):
         """
     def __hash(self):
         return hash(self.get_key())
+    def __eq__(self, other):
+        if isinstance(other, Distinct):
+            return self.get_key() == other.get_key()
+        return False
     __hash__ = __hash
 
 class CachedDistinctMeta(ABCMeta):
@@ -435,6 +447,7 @@ class PyCallable(str):
         new = str.__new__(cls, value)
         new._callable_ = ns[callable_name]
         new.name = callable_name
+        new.__doc__ = new._callable_.__doc__
         return new
     def __call__(self, *args, **kwargs):
         return self._callable_(*args, **kwargs)

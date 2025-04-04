@@ -135,7 +135,7 @@ class ContextLoggerAdapter(logging.LoggerAdapter):
             self.extra['context'] = getattr(self.agent, 'log_context', None)
         #if "stacklevel" not in kwargs:
             #kwargs["stacklevel"] = 1
-        kwargs['extra'] = self.extra
+        kwargs['extra'] = dict(self.extra, **kwargs['extra']) if 'extra' in kwargs else self.extra
         return msg, kwargs
 
 class LoggingManager:
@@ -344,6 +344,14 @@ class LoggingManager:
             Passing `None` to `agents` removes all agent mappings for specified domain,
             regardless of `replace` value.
         """
+        # Remove agents that are already mapped
+        if agents is not None:
+            for agent in set([agents] if isinstance(agents, str) else agents):
+                current_domain = self._agent_domain_map.pop(agent, None)
+                if current_domain:
+                    self._domain_agent_map[current_domain].discard(agent)
+                    if not self._domain_agent_map[current_domain]:
+                        del self._domain_agent_map[current_domain]
         if (replace or agents is None) and domain in self._domain_agent_map:
             for agent in self._domain_agent_map[domain]:
                 del self._agent_domain_map[agent]

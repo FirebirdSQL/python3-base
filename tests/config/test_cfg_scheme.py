@@ -42,7 +42,6 @@ from pathlib import Path
 import pytest
 
 from firebird.base import config
-from firebird.base.types import Error
 
 _pd = "c:\\ProgramData"
 _ap = "C:\\Users\\username\\AppData"

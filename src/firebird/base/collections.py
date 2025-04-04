@@ -140,7 +140,7 @@ class BaseObjectCollection:
         for item in self.filter(expr):
             return item
         return default
-    def contains(self, expr: FilterExpr=None) -> bool:
+    def contains(self, expr: FilterExpr) -> bool:
         """Returns True if there is any item for which `expr` is evaluated as True.
 
         Arguments:
@@ -593,11 +593,14 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
             self._reg = data
         c.update(self)
         return c
-    def pop(self, key: Any, default: Any=None) -> Distinct:
+    def pop(self, key: Any, default: Any=...) -> Distinct:
         """Remove specified `key` and return the corresponding `.Distinct` object. If `key`
         is not found, the `default` is returned if given, otherwise `KeyError` is raised.
         """
-        return self._reg.pop(key.get_key() if isinstance(key, Distinct) else key, default)
+        if default is ...:
+            return self._reg.pop(key.get_key() if isinstance(key, Distinct) else key)
+        else:
+            return self._reg.pop(key.get_key() if isinstance(key, Distinct) else key, default)
     def popitem(self, *, last: bool=True) -> Distinct:
         """Returns and removes a `.Distinct` object. The objects are returned in LIFO order
         if `last` is true or FIFO order if false.
@@ -605,6 +608,9 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         if last:
             _, item = self._reg.popitem()
             return item
-        item = next(iter(self))
-        self.remove(item)
-        return item
+        try:
+            item = next(iter(self))
+            self.remove(item)
+            return item
+        except StopIteration:
+            raise KeyError()

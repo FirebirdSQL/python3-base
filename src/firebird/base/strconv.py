@@ -254,7 +254,7 @@ def _register():
         "Converts string to Enum/Flag value"
         result = None
         for item in value.lower().split('|'):
-            value = {k.lower(): v for k, v in cls.__members__.items()}[item]
+            value = {k.lower(): v for k, v in cls.__members__.items()}[item.strip()]
             if result:
                 result |= value
             else:
