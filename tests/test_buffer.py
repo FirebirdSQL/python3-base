@@ -58,7 +58,7 @@ def test_safe_ord():
     with pytest.raises(TypeError): # Should fail on multi-byte
         safe_ord(b'AB')
 
-def test_factory_bytes_create(factory):
+def test_factory_bytes_create():
     """Tests buffer creation edge cases for BytesBufferFactory."""
     bf = BytesBufferFactory()
     # Size specified, init shorter
@@ -84,7 +84,7 @@ def test_factory_bytes_create(factory):
     # Raw type
     assert isinstance(bf.get_raw(buf), bytearray)
 
-def test_factory_ctypes_create(factory):
+def test_factory_ctypes_create():
     """Tests buffer creation edge cases for CTypesBufferFactory."""
     cbf = CTypesBufferFactory()
     # Size specified, init shorter
