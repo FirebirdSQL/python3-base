@@ -142,36 +142,70 @@ def test_singleton_behavior():
 
 
 def test_sentinel_objects():
-    """Tests the Sentinel base class and predefined sentinel objects.
+    """Tests the Sentinel base class, its metaclass, and predefined sentinel objects.
 
     Verifies:
-    - Sentinel name is stored uppercase.
-    - __str__ and __repr__ methods produce correct output.
-    - Predefined sentinels exist and have the correct type.
-    - Creating a new sentinel adds it to the instances cache.
-    - Retrieving a sentinel by name (case-insensitive) returns the singleton instance.
+    - Predefined sentinels exist, have the correct type, name, str, and repr.
+    - Sentinels cannot be instantiated or subclassed.
+    - Dynamic creation of sentinels works, including custom repr.
     """
-    assert UNKNOWN.name == "UNKNOWN"
-    assert str(UNKNOWN) == "UNKNOWN"
-    assert repr(UNKNOWN) == "Sentinel('UNKNOWN')"
-
-    # Check predefined sentinels (just a sample)
+    # 1. Test Predefined Sentinels
     predefined = [DEFAULT, INFINITY, UNLIMITED, UNKNOWN, NOT_FOUND, UNDEFINED, ANY, ALL, SUSPEND, RESUME, STOP]
-    for sentinel in predefined:
-        assert isinstance(sentinel, Sentinel)
-        assert sentinel.name in Sentinel.instances
-        assert Sentinel.instances[sentinel.name] is sentinel
+    for sentinel_class in predefined:
+        class_name = sentinel_class.__name__
+        assert isinstance(sentinel_class, Sentinel), f"{class_name} is not instance of Sentinel"
+        # Check if it's an instance of itself (due to metaclass cls.__class__ = cls)
+        assert isinstance(sentinel_class, sentinel_class), f"{class_name} is not instance of itself"
+        # Check properties and representations
+        assert sentinel_class.name == class_name, f"Incorrect name for {class_name}"
+        assert str(sentinel_class) == class_name, f"Incorrect str for {class_name}"
+        assert repr(sentinel_class) == class_name, f"Incorrect repr for {class_name}"
 
-    # Test creation and retrieval
-    assert "TEST_SENTINEL" not in Sentinel.instances # Check case used in Sentinel creation
-    test_sentinel_upper = Sentinel("TEST_SENTINEL")
-    assert "TEST_SENTINEL" in Sentinel.instances
-    assert test_sentinel_upper.name == "TEST_SENTINEL"
-    test_sentinel_lower = Sentinel("test_sentinel")
-    assert test_sentinel_upper is test_sentinel_lower # Should be the same object
+    # 2. Test Instantiation/Subclassing Prevention
+    for sentinel_class in predefined:
+        # Cannot instantiate predefined sentinels
+        with pytest.raises(TypeError, match=f"Cannot initialise or subclass sentinel '{sentinel_class.__name__}'"):
+            sentinel_class() # type: ignore
+        # Cannot subclass predefined sentinels
+        with pytest.raises(TypeError, match=f"Cannot initialise or subclass sentinel '{sentinel_class.__name__}'"):
+            class SubSentinel(sentinel_class): # type: ignore
+                pass
 
-    # Clean up test sentinel
-    del Sentinel.instances["TEST_SENTINEL"]
+    # Cannot subclass Sentinel base class after its definition
+    # The class *definition* might succeed because it uses the metaclass,
+    # but instantiation of the subclass *should* fail.
+    class _SubSentinel(Sentinel):
+        pass
+    with pytest.raises(TypeError, match="Cannot initialise or subclass sentinel '_SubSentinel'"):
+        _SubSentinel()
+
+    # 3. Test Dynamic Sentinel Creation
+    # Simple dynamic creation
+    DynamicSent = Sentinel('DynamicSent')
+    assert DynamicSent.name == 'DynamicSent'
+    assert str(DynamicSent) == 'DynamicSent'
+    assert repr(DynamicSent) == 'DynamicSent'
+    assert isinstance(DynamicSent, Sentinel)
+    assert isinstance(DynamicSent, DynamicSent) # type: ignore
+
+    # Dynamic creation with custom repr
+    ReprSent = Sentinel('ReprSent', repr='<CustomReprValue>')
+    assert ReprSent.name == 'ReprSent'
+    assert str(ReprSent) == 'ReprSent' # __str__ uses __name__ via default metaclass __repr__
+    assert repr(ReprSent) == '<CustomReprValue>'
+    assert isinstance(ReprSent, Sentinel)
+    assert isinstance(ReprSent, ReprSent) # type: ignore
+
+    # Cannot instantiate dynamically created sentinels
+    with pytest.raises(TypeError, match="Cannot initialise or subclass sentinel 'DynamicSent'"):
+        DynamicSent() # type: ignore
+    with pytest.raises(TypeError, match="Cannot initialise or subclass sentinel 'ReprSent'"):
+        ReprSent() # type: ignore
+
+    # Dynamic creation attempt with bases (should fail due to metaclass __call__ logic redirecting
+    # to the neutered __new__)
+    with pytest.raises(TypeError, match="'Sentinel' must also be derived from when provided as a metaclass"):
+        Sentinel('BadDynamic', (object,), {})
 
 def test_distinct_abc():
     """Tests the Distinct abstract base class using a concrete dataclass implementation.

@@ -13,6 +13,9 @@ Version 2.0.0 (unreleased)
   - Change: Function `Conjunctive` renamed to `.conjunctive`.
   - Fix: `.Distinct` support for dataclasses was broken.
   - Fix: `.Distinct` support for `hash` was broken.
+  - Change: Sentinel objects completely reworked. Individual sentinels are now classes
+    derived from `.Sentinel`.
+  - Added: `__repr__` method for `.PyCode` and `.PyCallable` that will limit output to 50 characters.
 
 * `~firebird.base.buffer` module:
 

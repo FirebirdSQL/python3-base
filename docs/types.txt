@@ -125,7 +125,7 @@ One such approach uses custom descendants of builtin `str` type.
 .. caution::
 
    Custom string types have an inherent weakness. They support all inherited string methods,
-   but any method that returns string value return a base `str` type, not the decendant class
+   but any method that returns string value return a base `str` type, not the descendant class
    type. That same apply when you assign strings to variables that should be of custom
    string type.
 
@@ -146,7 +146,7 @@ Meta classes
 ============
 
 .. autoclass:: SingletonMeta
-.. autoclass:: SentinelMeta
+.. autoclass:: _SentinelMeta
 .. autoclass:: CachedDistinctMeta
 .. autofunction:: conjunctive
 

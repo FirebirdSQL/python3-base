@@ -8,12 +8,19 @@ signal - Callback system based on Signals and Slots, and "Delphi events"
 Overview
 ========
 
-This module provides two callback mechanisms: one based on signals and slots similar to Qt
-signal/slot, and second based on optional method delegation similar to events in Delphi.
+This module provides two callback mechanisms:
 
-In both cases, the callback callables could be functions, instance or class methods,
-partials and lambda functions. The `inspect` module is used to define the signature for
-callbacks, and to validate that only compatible callables are assigned.
+1.  Signals and Slots (`.Signal`, `.signal` decorator): Inspired by Qt, a signal
+    can be connected to multiple slots (callbacks). When the signal is emitted,
+    all connected slots are called. Return values from slots are ignored.
+2.  Eventsockets (`.eventsocket` decorator): Similar to Delphi events, an
+    eventsocket holds a reference to a *single* slot (callback). Assigning a new
+    slot replaces the previous one. Calling the eventsocket delegates the call
+    directly to the connected slot. Return values are passed back from the slot.
+
+In both cases, slots can be functions, instance/class methods, `functools.partial`
+objects, or lambda functions. The `inspect` module is used to enforce signature
+matching between the signal/eventsocket definition and the connected slots.
 
 .. important::
 
@@ -175,16 +182,10 @@ Classes
 =======
 
 .. autoclass:: Signal
-
-------------
-
 .. autoclass:: _EventSocket
 
 Decorators
 ==========
 
 .. autoclass:: signal
-
------------
-
 .. autoclass:: eventsocket

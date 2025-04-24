@@ -238,7 +238,7 @@ def test_basics(conf: ConfigParser):
     assert test_db_instance in cfg.configs
 
     # Test assigning invalid type to ConfigListOption
-    with pytest.raises(ValueError, match="List item\\[0\\] has wrong type"):
+    with pytest.raises(ValueError, match="List item\\[0\\] has wrong type: Expected 'DbConfig', got 'list'"):
         cfg.opt_cfgs.value = [list()] # type: ignore
 
 

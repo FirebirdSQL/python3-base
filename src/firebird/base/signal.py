@@ -40,7 +40,19 @@
 
 """firebird-base - Callback system based on Signals and Slots, and "Delphi events"
 
+TThis module provides two callback mechanisms:
 
+1.  **Signals and Slots (`Signal`, `signal` decorator):** Inspired by Qt, a signal
+    can be connected to multiple slots (callbacks). When the signal is emitted,
+    all connected slots are called. Return values from slots are ignored.
+2.  **Eventsockets (`eventsocket` decorator):** Similar to Delphi events, an
+    eventsocket holds a reference to a *single* slot (callback). Assigning a new
+    slot replaces the previous one. Calling the eventsocket delegates the call
+    directly to the connected slot. Return values are passed back from the slot.
+
+In both cases, slots can be functions, instance/class methods, `functools.partial`
+objects, or lambda functions. The `inspect` module is used to enforce signature
+matching between the signal/eventsocket definition and the connected slots.
 """
 
 from __future__ import annotations
@@ -52,31 +64,31 @@ from weakref import WeakKeyDictionary, ref
 
 
 class Signal:
-    """The Signal is the core object that handles connection with slots and emission.
+    """Handles connections between a signal and multiple slots (callbacks).
 
-    Slots are callables that are called when signal is emitted (the return value is ignored).
-    They could be functions, instance or class methods, partials and lambda functions.
+    When the signal is emitted, all connected slots are called with the
+    provided arguments. Return values from slots are ignored.
+
+    Arguments:
+        signature: The `inspect.Signature` object defining the expected parameters for
+                   connected slots.
+
+    Important:
+        Only slots that match the signature could be connected to signal. The check is
+        performed only on parameters, and not on return value type (as signals does
+        not have/ignore return values).
+
+        The match must be exact, including type annotations, parameter names, order,
+        parameter type etc. The sole exception to this rule are excess slot keyword
+        arguments with default values.
+
+    Note:
+        Signal functions with signatures different from signal could be adapted using
+        `functools.partial`. However, you can "mask" only keyword arguments (without
+        default) and leading positional arguments (as any positional argument binded
+        by name will not mask-out parameter from signature introspection).
     """
     def __init__(self, signature: Signature):
-        """
-        Arguments:
-            signature: Signature for slots.
-
-        Important:
-            Only slots that match the signature could be connected to signal. The check is
-            performed only on parameters, and not on return value type (as signals does
-            not have/ignore return values).
-
-            The match must be exact, including type annotations, parameter names, order,
-            parameter type etc. The sole exception to this rule are excess slot keyword
-            arguments with default values.
-
-        Note:
-            Signal functions with signatures different from signal could be adapted using
-            `functools.partial`. However, you can "mask" only keyword arguments (without
-            default) and leading positional arguments (as any positional argument binded
-            by name will not mask-out parameter from signature introspection).
-        """
         self._sig: Signature = signature.replace(parameters=[p for p in signature.parameters.values()
                                                              if p.name != 'self'],
                                                  return_annotation=Signature.empty)
@@ -85,8 +97,12 @@ class Signal:
         self._slots: list[Callable] = []
         self._islots: WeakKeyDictionary = WeakKeyDictionary()
     def __call__(self, *args, **kwargs):
+        """Shortcut for `emit(*args, **kwargs)`."""
         self.emit(*args, **kwargs)
     def _kw_test(self, sig: Signature) -> bool:
+        """Internal helper to check if the only difference between `sig` and `self._sig`
+        is the presence of extra keyword arguments with default values in `sig`.
+        """
         p = sig.parameters
         result = False
         for k in set(p).difference(set(self._sig.parameters)):
@@ -95,8 +111,14 @@ class Signal:
                 return False
         return result
     def emit(self, *args, **kwargs) -> None:
-        """Calls all the connected slots with the provided args and kwargs unless block
-        is activated.
+        """Emit the signal, calling all connected slots with the given arguments.
+
+        Does nothing if `self.block` is True. Handles different storage types
+        (functions, methods, lambdas, partials) correctly.
+
+        Arguments:
+            *args: Positional arguments to pass to the slots.
+            **kwargs: Keyword arguments to pass to the slots.
         """
         if self.block:
             return
@@ -114,13 +136,27 @@ class Signal:
         for obj, method in self._islots.items():
             method(obj, *args, **kwargs)
     def connect(self, slot: Callable) -> None:
-        """Connects the signal to callable that will receive the signal when emitted.
+        """Connect a callable slot to this signal.
+
+        The slot will be called whenever the signal is emitted.
 
         Arguments:
-            slot: Callable with signature that match the signature defined for signal.
+            slot: The callable (function, method, lambda, partial) to connect.
+                  Its signature must match the signal's signature (see class docs).
 
         Raises:
-            ValueError: When callable signature does not match the signature of signal.
+            ValueError: If `slot` is not callable or if its signature does not match
+                    the signal's signature (parameters and their types/names/kinds,
+                    excluding return type and allowing extra keyword args with defaults).
+
+        Storage Note:
+
+        - Regular functions are stored using `weakref.ref` to avoid preventing
+          garbage collection if the signal outlives the function's scope.
+        - Instance methods are stored using a `WeakKeyDictionary` mapping the
+          instance (weakly) to the unbound function.
+        - Lambdas and `functools.partial` objects are stored directly, as weak
+          references to them are often problematic.
         """
         if not callable(slot):
             raise ValueError(f"Connection to non-callable '{slot.__class__.__name__}' object failed")
@@ -143,7 +179,13 @@ class Signal:
             if new_slot_ref not in self._slots:
                 self._slots.append(new_slot_ref)
     def disconnect(self, slot) -> None:
-        """Disconnects the slot from the signal.
+        """Disconnect a previously connected slot from the signal.
+
+        Attempts to remove the specified slot. Does nothing if the slot
+        is not currently connected or not callable.
+
+        Arguments:
+            slot: The callable that was previously passed to `connect()`.
         """
         if not callable(slot):
             return
@@ -171,12 +213,26 @@ class Signal:
 
 
 class signal: # noqa: N801
-    """Decorator that defines signal as read-only property. The decorated function/method
-    is used to define the signature required for slots to successfuly register to signal,
-    and does not need to have a body as it's never executed.
+    """Decorator to define a `Signal` instance as a read-only property on a class.
 
-    The usage is similar to builtin `property`, except that it does not support custom
-    setter and deleter.
+    The decorated function's signature (excluding 'self') defines the required
+    signature for slots connecting to this signal. The body of the decorated
+    function is never executed.
+
+    A unique `Signal` instance is lazily created for each object instance the
+    first time the signal property is accessed.
+
+    Example::
+
+        class MyClass:
+            @signal
+            def value_changed(self, new_value: int):
+                # This signature dictates slots must accept (new_value: int)
+                pass # Body is ignored
+
+        instance = MyClass()
+        instance.value_changed.connect(my_slot_function)
+        instance.value_changed.emit(10)
     """
     def __init__(self, fget, doc=None):
         self._sig_ = Signature.from_callable(fget)
@@ -230,28 +286,47 @@ class _EventSocket:
         return self._slot is not None
 
 class eventsocket: # noqa: N801
-    """The `eventsocket` is like read/write property that handles connection and call
-    delegation to single slot. It basically works like Delphi event.
+    """Decorator defining a property that holds a single callable slot (like a Delphi event).
 
-    The Slot could be function, instance or class method, partial and lambda function.
+    Assigning a callable (function, method, lambda, partial) to the property connects it
+    as the event handler. Assigning `None` disconnects the current handler. Calling the
+    property like a method invokes the currently connected handler, passing through
+    arguments and returning its result.
+
+    The decorated function's signature (excluding 'self' but including the return
+    type annotation) defines the required signature for the assigned slot.
+
+    Use the `.is_set()` method on the property access to check if a handler is assigned.
+
+    Example::
+
+        class MyComponent:
+            @eventsocket
+            def on_update(self, data: dict) -> None:
+                # Slots must match (data: dict) -> None
+                pass
+
+            def do_update(self):
+                data = {'value': 1}
+                if self.on_update.is_set():
+                    self.on_update(data) # Call the assigned handler
+
+        def my_handler(data: dict):
+            print(f"Handler received: {data}")
+
+        comp = MyComponent()
+        comp.on_update = my_handler # Connect handler
+        comp.do_update()            # Calls my_handler
+        comp.on_update = None       # Disconnect handler
 
     Important:
-        Only slot that match the signature could be connected to eventsocket. The check is
-        performed on parameters and return value type (as events may have return values).
+        Signature matching includes parameter names, types, kinds, order, *and* the
+        return type annotation. The only exception is that the assigned slot may have
+        extra keyword arguments if they have default values.
 
-        The match must be exact, including type annotations, parameter names, order,
-        parameter type etc. The sole exception to this rule are excess slot keyword
-        arguments with default values.
-
-    Note:
-        Eventsocket functions with signatures different from event could be adapted
-        using `functools.partial`. However, you can "mask" only keyword arguments
-        (without default) and leading positional arguments (as any positional argument
-        binded by name will not mask-out parameter from signature introspection).
-
-    To call the event, simply call the eventsocket property with required parameters.
-    To check whether slot is assigned to eventsocket, use `is_set()` bool function
-    defined on property.
+    Storage Note:
+        Similar to `Signal`, functions and methods are stored using weak references
+        where appropriate to prevent memory leaks. Lambdas/partials are stored directly.
     """
     _empty = _EventSocket()
     def __init__(self, fget, doc=None):

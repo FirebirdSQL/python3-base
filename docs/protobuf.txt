@@ -8,10 +8,66 @@ protobuf - Registry for Google Protocol Buffer messages and enums
 Overview
 ========
 
-This module provides central registry for Google Protocol Buffer messages and enums.
-The generated `*_pb2.py` protobuf files could be registered using `register_decriptor`
-or `load_registered` function. The registry could be then used to obtain information
-about protobuf messages or enum types, or to create message instances or enum values.
+This module provides a central registry for Google Protocol Buffer message types
+and enum types generated from `.proto` files. It allows creating message instances
+and accessing enum information using their fully qualified names (e.g.,
+"my.package.MyMessage", "my.package.MyEnum") without needing to directly import
+the corresponding generated `_pb2.py` modules throughout the codebase.
+
+Benefits:
+
+*   Decouples code using protobuf messages from the specific generated modules.
+*   Provides a single point for managing and discovering available message/enum types.
+*   Facilitates dynamic loading of protobuf definitions via entry points.
+
+Core Features:
+
+*   Register message/enum types using their file DESCRIPTOR object.
+*   Create new message instances by name using `create_message()`.
+*   Access enum descriptors and values by name using `get_enum_type()`.
+*   Load protobuf definitions registered by other installed packages via entry points
+    using `load_registered()`.
+*   Helpers for common types like `google.protobuf.Struct`.
+
+Example::
+
+    # Assume you have my_proto_pb2.py generated from my_proto.proto
+    # containing:
+    # message Sample { required string name = 1; }
+    # enum Status { UNKNOWN = 0; OK = 1; ERROR = 2; }
+
+    from firebird.base.protobuf import (
+        register_descriptor, create_message, get_enum_type, is_msg_registered
+    )
+    # Import the generated descriptor (only needed once, e.g., at startup)
+    try:
+        from . import my_proto_pb2 # Replace with actual import path
+        HAS_MY_PROTO = True
+    except ImportError:
+        HAS_MY_PROTO = False
+
+    # 1. Register the types from the descriptor
+    if HAS_MY_PROTO:
+        register_descriptor(my_proto_pb2.DESCRIPTOR)
+        print(f"Is 'my_proto.Sample' registered? {is_msg_registered('my_proto.Sample')}")
+
+    # 2. Create a message instance by name
+    if HAS_MY_PROTO:
+        try:
+            msg = create_message('my_proto.Sample')
+            msg.name = "Example"
+            print(f"Created message: {msg}")
+
+            # 3. Access enum type and values by name
+            status_enum = get_enum_type('my_proto.Status')
+            print(f"Status enum name: {status_enum.name}")
+            print(f"OK value: {status_enum.OK}") # Access like attribute
+            print(f"Name for value 2: {status_enum.get_value_name(2)}") # Access via method
+            print(f"Available status keys: {status_enum.keys()}")
+
+        except KeyError as e:
+            print(f"Error accessing registered proto type: {e}")
+
 
 Constants
 =========

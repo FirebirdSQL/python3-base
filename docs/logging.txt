@@ -118,6 +118,77 @@ belong to default domain specifid in `.LoggingManager.default_domain`, which is 
 It's also possible to change agent identification used for logger name mapping porposes to
 different value with `.set_agent_mapping` function.
 
+Lazy Formatting Messages
+------------------------
+This module also provides message wrapper classes (`FStrMessage`, `BraceMessage`,
+`DollarMessage`) that defer string formatting until the log record is actually
+processed by a handler. This avoids the performance cost of formatting messages
+that might be filtered out due to log levels.
+
+Basic Setup Example
+-------------------
+
+.. code-block:: python
+
+    import logging
+    from firebird.base.logging import (
+        get_logger, LogLevel, ContextFilter, logging_manager,
+        DOMAIN, TOPIC # For logger_fmt
+    )
+
+    # 1. Configure standard logging (handlers, formatters)
+    log_format = "[%(levelname)-8s] %(asctime)s %(name)s (%(agent)s) - %(message)s"
+    formatter = logging.Formatter(log_format)
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+
+    # 2. Add ContextFilter to handler(s) to ensure context fields exist
+    handler.addFilter(ContextFilter())
+
+    # 3. Get the root logger or specific standard loggers and add the handler
+    root_logger = logging.getLogger()
+    root_logger.addHandler(handler)
+    root_logger.setLevel(LogLevel.DEBUG) # Use LogLevel enum or logging constants
+
+    # 4. (Optional) Configure logging_manager mappings
+    logging_manager.logger_fmt = ['app', DOMAIN, TOPIC] # Logger name format
+    logging_manager.default_domain = 'web'            # Default domain if not mapped
+    logging_manager.set_domain_mapping('db', ['myapp.database.Connection']) # Map agent to domain
+
+    # 5. Use in your code
+    class RequestHandler:
+        _agent_name_ = 'myapp.web.RequestHandler' # Optional explicit agent name
+        log_context = None # Can be set per request, e.g., client IP
+
+        def handle(self, request_id):
+            self.log_context = f"ReqID:{request_id}"
+            logger = get_logger(self, topic='requests') # Get context logger
+            logger.info("Handling request...")
+            # ... processing ...
+            logger.debug("Request handled successfully.")
+
+    class DbConnection:
+        _agent_name_ = 'myapp.database.Connection'
+        log_context = None # e.g., DB user
+
+        def query(self, sql):
+            self.log_context = "user:admin"
+            logger = get_logger(self) # Use default topic (None)
+            logger.debug("Executing query: %s", sql) # Standard formatting works too
+            # ... execute ...
+
+    # --- Execution ---
+    handler_instance = RequestHandler()
+    db_conn = DbConnection()
+
+    handler_instance.handle("12345")
+    db_conn.query("SELECT * FROM T")
+
+    # --- Example Output ---
+    # [INFO    ] 2023-10-27... app.web.requests (myapp.web.RequestHandler) - Handling request...
+    # [DEBUG   ] 2023-10-27... app.web.requests (myapp.web.RequestHandler) - Request handled successfully.
+    # [DEBUG   ] 2023-10-27... app.db (myapp.database.Connection) - Executing query: SELECT * FROM T
+
 Enums & Flags
 =============
 .. autoclass:: FormatElement

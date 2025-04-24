@@ -373,7 +373,7 @@ def test_bad_hook_registrations(output: Output, manager: HookManager):
     bad_hook: MyHook = MyHook(output, "BAD-Hook")
 
     # Invalid source type for add_hook
-    with pytest.raises(TypeError, match="Subject must be hookable class or instance, or name"):
+    with pytest.raises(TypeError, match="The type is not registered as hookable"):
         manager.add_hook(MyEvents.CREATE, ANY, bad_hook.callback) # Cannot use ANY as source
     with pytest.raises(TypeError, match="Subject must be hookable class or instance, or name"):
         manager.add_hook(MyEvents.CREATE, 123, bad_hook.callback) # Invalid type

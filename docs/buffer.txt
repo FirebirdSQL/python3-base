@@ -8,8 +8,45 @@ buffer - Memory buffer manager
 Overview
 ========
 
-This module provides a raw memory buffer manager with convenient methods to read/write
-data of various data type.
+This module provides a `MemoryBuffer` class for managing raw memory buffers,
+offering a convenient and consistent API for reading and writing various data types
+(integers of different sizes, strings with different termination/prefixing styles, raw bytes).
+It's particularly useful for tasks involving binary data serialization/deserialization,
+such as implementing network protocols or handling custom file formats.
+
+The underlying memory storage can be customized via a `BufferFactory`. Two factories
+are provided:
+
+- `BytesBufferFactory`: Uses Python's built-in `bytearray`.
+- `CTypesBufferFactory`: Uses `ctypes.create_string_buffer` for potentially different
+  memory characteristics or C-level interoperability.
+
+Example::
+
+    from firebird.base.buffer import MemoryBuffer, ByteOrder
+
+    # Create a buffer (default uses bytearray)
+    buf = MemoryBuffer(10) # Initial size 10 bytes
+
+    # Write data
+    buf.write_short(258)       # Write 2 bytes (0x0102 in little-endian)
+    buf.write_pascal_string("Hi") # Write 1 byte length (2) + "Hi"
+    buf.write(b'\\x0A\\x0B')     # Write raw bytes
+
+    # Reset position to read
+    buf.pos = 0
+
+    # Read data
+    num = buf.read_short()
+    s = buf.read_pascal_string()
+    extra = buf.read(2)
+
+    print(f"Number: {num}")      # Output: Number: 258
+    print(f"String: '{s}'")      # Output: String: 'Hi'
+    print(f"Extra bytes: {extra}") # Output: Extra bytes: b'\\n\\x0b'
+    print(f"Final position: {buf.pos}") # Output: Final position: 7
+    print(f"Raw buffer: {buf.get_raw()}") # Output: Raw buffer: bytearray(b'\\x02\\x01\\x02Hi\\n\\x0b\\x00\\x00\\x00')
+
 
 MemoryBuffer
 ============
@@ -21,3 +58,6 @@ Buffer factories
 .. autoclass:: BytesBufferFactory
 .. autoclass:: CTypesBufferFactory
 
+Functions
+=========
+.. autofunction:: safe_ord

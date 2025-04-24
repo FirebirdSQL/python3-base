@@ -35,9 +35,10 @@
 
 """Firebird Base - Various collection types
 
-This module provides data structures that behave much like builtin `list` and `dict` types,
-but with direct support of operations that can use structured data stored in container, and
-which would normally require utilization of `operator`, `functools` or other means.
+This module provides data structures like `DataList` and `Registry` that behave
+much like builtin `list` and `dict` types, respectively, but with direct support
+of operations that can use structured data stored in container, and which would
+normally require utilization of `operator`, `functools` or other means.
 
 All containers provide next operations:
 
@@ -74,6 +75,10 @@ def make_lambda(expr: str, params: str='item', context: dict[str, Any] | None=No
         expr: Python expression as string.
         params: Comma-separated list of names that should be used as lambda parameters
         context: Dictionary passed as `context` to `eval`.
+
+    Note:
+        Uses `eval`. Ensure that the `expr` string comes from a trusted source
+        if used in security-sensitive contexts.
     """
     return eval(f"lambda {params}:{expr}", context) if context \
            else eval(f"lambda {params}:{expr}") # noqa: S307
@@ -155,7 +160,11 @@ class BaseObjectCollection:
                if L.contains('item.name.startswith("ABC")'):
                    ...
         """
-        return self.find(expr) is not None
+        fce = expr if callable(expr) else make_lambda(expr)
+        for item in self:
+            if fce(item):
+                return True
+        return False
     def report(self, *args) -> Generator[Any, None, None]:
         """Returns generator that yields data produced by expression(s) evaluated on list items.
 
@@ -223,6 +232,9 @@ class BaseObjectCollection:
             expr: Bool expression, a callable accepting one parameter and returnin bool or
                   bool expression as string referencing list item as `item`.
 
+        Note:
+            Functionally equivalent to the `contains` method in this class.
+
         Example:
             .. code-block:: python
 
@@ -237,22 +249,21 @@ class BaseObjectCollection:
 
 class DataList(list[Item], BaseObjectCollection):
     """List of data (objects) with additional functionality.
+
+    Arguments:
+        items:     Sequence to initialize the collection.
+        type_spec: Reject instances that are not instances of specified types.
+        key_expr:  Key expression. Must contain item referrence as `item`, for example
+                   `item.attribute_name`. If **all** classes specified in `type_spec`
+                   are descendants of `.Distinct`, the default value is `item.get_key()`,
+                   otherwise the default is `None`.
+        frozen:    Create frozen list.
+
+    Raises:
+        ValueError: When initialization sequence contains invalid instance.
     """
     def __init__(self, items: Iterable | None=None, type_spec: TypeSpec=UNDEFINED,
                  key_expr: str | None=None, *, frozen: bool=False):
-        """
-        Arguments:
-            items:     Sequence to initialize the collection.
-            type_spec: Reject instances that are not instances of specified types.
-            key_expr:  Key expression. Must contain item referrence as `item`, for example
-                       `item.attribute_name`. If **all** classes specified in `type_spec`
-                       are descendants of `.Distinct`, the default value is `item.get_key()`,
-                       otherwise the default is `None`.
-            frozen:    Create frozen list.
-
-        Raises:
-            ValueError: When initialization sequence contains invalid instance.
-        """
         assert key_expr is None or isinstance(key_expr, str) # noqa: S101
         assert key_expr is None or make_lambda(key_expr) is not None # noqa: S101
         if items is not None:
@@ -281,6 +292,7 @@ class DataList(list[Item], BaseObjectCollection):
         if self.__frozen:
             raise TypeError("Cannot modify frozen DataList")
     def __setitem__(self, index, value) -> None:
+        """Set item[index] = value. Performs type check and frozen check."""
         self.__updchk()
         if isinstance(index, slice):
             for val in value:
@@ -289,9 +301,17 @@ class DataList(list[Item], BaseObjectCollection):
             self.__valchk(value)
         super().__setitem__(index, value)
     def __delitem__(self, index) -> None:
+        """Delete item[index]. Performs frozen check."""
         self.__updchk()
         super().__delitem__(index)
     def __contains__(self, o):
+        """Return key in self. Optimized for frozen lists with a key_expr.
+
+        If the list is frozen and has a key_expr, uses an internal map for
+        O(1) average time complexity. Otherwise, falls back to standard
+        list iteration (O(n)). Handles Distinct instances specifically if
+        key_expr matches 'item.get_key()'.
+        """
         if self.__map is not None:
             if isinstance(o, Distinct) and self.__key_expr == 'item.get_key()':
                 return o.get_key() in self.__map
@@ -301,7 +321,8 @@ class DataList(list[Item], BaseObjectCollection):
         """Insert item before index.
 
         Raises:
-            TypeError: When item is not an instance of allowed class, or list is frozen
+            TypeError: When `item` is not an instance of the allowed `type_spec`,
+                       or if the list is frozen.
         """
         self.__updchk()
         self.__valchk(item)
@@ -310,7 +331,7 @@ class DataList(list[Item], BaseObjectCollection):
         """Remove first occurrence of item.
 
         Raises:
-            ValueError: If the value is not present, or list is frozen
+            ValueError: When `item` is not present, or list is frozen
         """
         self.__updchk()
         super().remove(item)
@@ -318,7 +339,8 @@ class DataList(list[Item], BaseObjectCollection):
         """Add an item to the end of the list.
 
         Raises:
-            TypeError: When item is not an instance of allowed class, or list is frozen
+            TypeError: When `item` is not an instance of the allowed `type_spec`,
+                       or if the list is frozen.
         """
         self.__updchk()
         self.__valchk(item)
@@ -327,7 +349,8 @@ class DataList(list[Item], BaseObjectCollection):
         """Extend the list by appending all the items in the given iterable.
 
         Raises:
-            TypeError: When item is not an instance of allowed class, or list is frozen
+            TypeError: When any `item` in `iterable` is not an instance of the allowed
+                       `type_spec`, or if the list is frozen.
         """
         for item in iterable:
             self.append(item)
@@ -503,21 +526,21 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         - R.remove(item)
         - del R[key]
 
-    Whenever a `key` is required, you can use either a `Distinct` instance, or any value
+    Whenever a `key` is required, you can use either a `.Distinct` instance, or any value
     that represens a key value for instances of stored type.
+
+    Arguments:
+        data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`
+              instances.
     """
     def __init__(self, data: Mapping | Sequence | Registry=None):
-        """
-        Arguments:
-            data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`
-                  instances.
-        """
         self._reg: dict = {}
         if data:
             self.update(data)
     def __len__(self):
         return len(self._reg)
     def __getitem__(self, key):
+        """Return self[key]. Accepts a key value or a `.Distinct` instance."""
         return self._reg[key.get_key() if isinstance(key, Distinct) else key]
     def __setitem__(self, key, value):
         assert isinstance(value, Distinct) # noqa: S101
@@ -529,6 +552,7 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
     def __repr__(self):
         return f"{self.__class__.__name__}([{', '.join(repr(x) for x in self)}])"
     def __contains__(self, item):
+        """Return key in self. Accepts a key value or a `.Distinct` instance."""
         if isinstance(item, Distinct):
             item = item.get_key()
         return item in self._reg
@@ -538,6 +562,10 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         self._reg.clear()
     def get(self, key: Any, default: Any=None) -> Distinct:
         """ D.get(key[,d]) -> D[key] if key in D else d. d defaults to None.
+
+        Arguments:
+            key: The key to retrieve (can be the key value or a `.Distinct` instance).
+            default: Value to return if key is not found.
         """
         return self._reg.get(key.get_key() if isinstance(key, Distinct) else key, default)
     def store(self, item: Distinct) -> Distinct:
@@ -571,9 +599,15 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
     def extend(self, _from: Distinct | Mapping | Sequence) -> None:
         """Store one or more items to the registry.
 
+        Unlike `update`, this method requires that the items (or their keys)
+        do not already exist in the registry.
+
         Arguments:
             _from: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`
                    instances.
+
+        Raises:
+            ValueError: If an item with the same key is already registered.
         """
         if isinstance(_from, Distinct):
             self.store(_from)
@@ -594,8 +628,14 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         c.update(self)
         return c
     def pop(self, key: Any, default: Any=...) -> Distinct:
-        """Remove specified `key` and return the corresponding `.Distinct` object. If `key`
-        is not found, the `default` is returned if given, otherwise `KeyError` is raised.
+        """Remove specified `key` and return the corresponding `.Distinct` object.
+
+        If `key` is not found, the `default` is returned if given, otherwise
+        `KeyError` is raised.
+
+        Arguments:
+            key: The key to remove (can be the key value or a `.Distinct` instance).
+            default: Value to return if key is not found (if not provided, raises `KeyError`).
         """
         if default is ...:
             return self._reg.pop(key.get_key() if isinstance(key, Distinct) else key)

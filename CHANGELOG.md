@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `firebird.base.buffer.MemoryBuffer.get_raw` method.
 - `get_raw` method to `BufferFactory`, `BytesBufferFactory` and `CTypesBufferFactory`.
+- `__repr__` method for `PyCode` and `PyCallable` that will limit output to 50 characters.
 
 ### Changed
 
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Parameter `context` was removed from `firebird.base.trace.traced` decorator.
 - Option `context` was removed from `firebird.base.trace.BaseTraceConfig`.
 - Log function return value as `repr` rather than `str`.
+- Sentinel objects completely reworked. Individual sentinels are now classes derived from `Sentinel`.
 
 ### Fixed
 

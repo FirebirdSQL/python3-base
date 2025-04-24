@@ -304,7 +304,7 @@ def test_builtin_enum():
     assert convert_from_str(ByteOrder, value_str) == value
     assert convert_from_str(ByteOrder, "little") == ByteOrder.LITTLE # Case test
     assert convert_from_str(ByteOrder, "NeTwOrK") == ByteOrder.NETWORK # Case test
-    with pytest.raises(KeyError, match="'invalid_member'"): # Specific error
+    with pytest.raises(ValueError, match="'invalid_member'"): # Specific error
         convert_from_str(ByteOrder, "invalid_member")
 
 def test_builtin_intenum():
@@ -314,7 +314,7 @@ def test_builtin_intenum():
     assert convert_to_str(value) == value_str
     assert convert_from_str(ZMQDomain, value_str) == value
     assert convert_from_str(ZMQDomain, "nOdE") == ZMQDomain.NODE # Case test
-    with pytest.raises(KeyError, match="'invalid_domain'"):
+    with pytest.raises(ValueError, match="'invalid_domain'"):
         convert_from_str(ZMQDomain, "invalid_domain")
 
 def test_builtin_intflag():

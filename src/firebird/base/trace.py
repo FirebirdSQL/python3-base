@@ -34,6 +34,19 @@
 #                 ______________________________________
 
 """firebird-base - Trace/audit for class instances
+
+This module provides trace/audit logging for functions or object methods through context-based
+logging provided by logging module.
+
+The trace logging is performed by traced decorator. You can use this decorator directly,
+or use TracedMixin class to automatically decorate methods of class instances on creation.
+Each decorated callable could log messages before execution, after successful execution or
+on failed execution (when unhandled execption is raised by callable). The trace decorator
+can automatically add agent and context information, and include parameters passed to callable,
+execution time, return value, information about raised exception etc. to log messages.
+
+The trace logging is managed by TraceManager, that allows dynamic configuration of traced
+callables at runtime.
 """
 
 from __future__ import annotations
@@ -64,23 +77,43 @@ from firebird.base.logging import ContextLoggerAdapter, FStrMessage, LogLevel, g
 from firebird.base.strconv import convert_from_str
 from firebird.base.types import DEFAULT, UNLIMITED, Distinct, Error, load
 
-
 class TraceFlag(IntFlag):
-    """`LoggingManager` trace/audit flags.
+    """Flags controlling the behavior of the `traced` decorator and `TraceManager`.
+
+    These flags determine whether tracing is active and which parts of a call
+    (before, after success, after failure) should be logged.
     """
+    #: No tracing enabled by default flags.
     NONE = 0
+    #: Master switch; tracing is performed only if ACTIVE is set.
     ACTIVE = auto()
+    #: Log message before the decorated callable executes.
     BEFORE = auto()
+    #: Log message after the decorated callable successfully returns.
     AFTER = auto()
+    #: Log message if the decorated callable raises an exception.
     FAIL = auto()
 
 @dataclass
 class TracedItem(Distinct):
-    """Class method trace specification.
+    """Holds the trace specification for a single method within a registered class.
+
+    Stored by `TraceManager` for each method configured via `add_trace` or
+    `load_config`. Applied by `trace_object`.
+
+    Arguments:
+        method: The name of the method to be traced.
+        decorator: The decorator callable (usually `traced` or a custom one) to apply.
+        args: Positional arguments to pass to the decorator factory.
+        kwargs: Keyword arguments to pass to the decorator factory.
     """
+    #: The name of the method to be traced.
     method: str
+    #: The decorator callable (usually `traced` or a custom one) to apply.
     decorator: Callable
+    #: Positional arguments to pass to the decorator factory.
     args: list = field(default_factory=list)
+    #: Keyword arguments to pass to the decorator factory.
     kwargs: dict = field(default_factory=dict)
     def get_key(self) -> Hashable:
         """Returns Distinct key for traced item [method]."""
@@ -88,9 +121,18 @@ class TracedItem(Distinct):
 
 @dataclass
 class TracedClass(Distinct):
-    """Traced class registry entry.
+    """Represents a class registered for tracing within the `TraceManager`.
+
+    Holds a registry (`Registry[TracedItem]`) of trace specifications for
+    methods belonging to this class.
+
+    Arguments:
+        cls: The class type registered for tracing.
+        traced: A registry mapping method names to `TracedItem` specifications.
     """
+    #: The class type registered for tracing.
     cls: type
+    #: A registry mapping method names to `TracedItem` specifications.
     traced: Registry = field(default_factory=Registry)
     def get_key(self) -> Hashable:
         """Returns Distinct key for traced item [cls]."""
@@ -104,22 +146,58 @@ class TracedMeta(type):
         return trace_object(super().__call__(*args, **kwargs), strict=True)
 
 class TracedMixin(metaclass=TracedMeta):
-    """Mixin class that automatically registers descendants for trace and instruments
-    instances on creation.
+    """Mixin class to automatically enable tracing for descendants.
+
+    Subclasses inheriting from `TracedMixin` are automatically registered with the
+    `trace_manager` upon definition. When instances of these subclasses are created,
+    their methods are automatically instrumented by `trace_object` according to the
+    currently active trace specifications in the `trace_manager`.
     """
     def __init_subclass__(cls: type, /, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         trace_manager.register(cls)
 
 class traced: # noqa: N801
-    """Base decorator for logging of callables, suitable for trace/audit.
+    """Decorator factory for adding trace/audit logging to callables.
 
-    It's not applied on decorated function/method if `FBASE_TRACE` environment variable is
-    set to False, or if `FBASE_TRACE` is not defined and `__debug__` is False (optimized
-    Python code).
+    Creates a decorator that wraps a function or method to log messages
+    before execution, after successful execution, and/or upon failure,
+    based on configured flags and messages. Integrates with the
+    `firebird.base.logging` context logger.
 
-    Both positional and keyword arguments of decorated callable are available by name for
-    f-string type message interpolation.
+    Note:
+        The decorator is *only applied* if tracing is globally enabled via
+        the `FBASE_TRACE` environment variable or if `__debug__` is true
+        (i.e., Python is not run with -O). If disabled globally, the original
+        un-decorated function is returned. Runtime behavior (whether logs
+        are actually emitted) is further controlled by `TraceManager.flags`.
+
+    Arguments:
+        agent: Agent identifier for logging context (object or string).
+               If `DEFAULT`, uses `self` for methods or `'function'` otherwise.
+        topic: Logging topic (default: 'trace').
+        msg_before: Format string (f-string style) for log message before execution.
+                    If `DEFAULT`, a standard message is generated.
+        msg_after: Format string for log message after successful execution. Available
+                   context includes `_etime_` (execution time string) and `_result_`
+                   (return value, if `has_result` is true). If `DEFAULT`, a standard
+                   message is generated.
+        msg_failed: Format string for log message on exception. Available context includes
+                    `_etime_` and `_exc_` (exception string). If `DEFAULT`, a standard
+                    message is generated.
+        flags: `TraceFlag` values to override `TraceManager.flags` for this specific
+               decorator instance. Allows fine-grained control per traced callable.
+        level: `LogLevel` for trace messages (default: `LogLevel.DEBUG`).
+        max_param_length: Max length for string representation of parameters/result
+                          in logs. Longer values are truncated (default: `UNLIMITED`).
+        extra: Dictionary of extra data to add to the `LogRecord`.
+        callback: Optional callable `func(agent) -> bool`. If provided, it's called
+                  before logging to check if tracing is permitted for this specific call.
+        has_result: Boolean or `DEFAULT`. If True, include result in `msg_after`.
+                    If `DEFAULT`, inferred from function's return type annotation
+                    (considered True unless annotation is `None`).
+        with_args: If True (default), make function arguments available by name for
+                   interpolation in `msg_before`.
     """
     def __init__(self, *, agent: Any=DEFAULT, topic: str='trace',
                  msg_before: str=DEFAULT, msg_after: str=DEFAULT, msg_failed: str=DEFAULT,
@@ -127,26 +205,6 @@ class traced: # noqa: N801
                  max_param_length: int=UNLIMITED, extra: dict | None=None,
                  callback: Callable[[Any], bool] | None=None, has_result: bool=DEFAULT,
                  with_args: bool=True):
-        """
-        Arguments:
-            agent: Agent identification
-            topic: Trace/audit logging topic
-            msg_before: Trace/audit message logged before decorated function
-            msg_after: Trace/audit message logged after decorated function
-            msg_failed: Trace/audit message logged when decorated function raises an exception
-            flags: Trace flags override
-            level: Logging level for trace/audit messages
-            max_param_length: Max. length of parameters (longer will be trimmed)
-            extra: Extra data for `LogRecord`
-            callback: Callback function that gets the agent identification as argument,
-               and must return True/False indicating whether trace is allowed.
-            has_result: Indicator whether function has result value. If True, `_result_`
-               is available for interpolation in `msg_after`. The `DEFAULT` value means,
-               that value for this argument should be decided from function return value
-               annotation.
-            with_args: If True, function arguments are available for interpolation in
-               `msg_before`.
-        """
         #: Trace/audit message logged before decorated function
         self.msg_before: str = msg_before
         #: Trace/audit message logged after decorated function
@@ -178,37 +236,39 @@ class traced: # noqa: N801
         """
         return True
     def set_before_msg(self, fn: Callable, sig: Signature) -> None:
-        """Sets the DEFAULT before message f-string template.
-        """
+        """Generate the default log message template for before execution."""
         if self.with_args:
             self.msg_before = f">>> {fn.__name__}({', '.join(f'{{{x}=}}' for x in sig.parameters if x != 'self')})"
         else:
             self.msg_before = f">>> {fn.__name__}"
     def set_after_msg(self, fn: Callable, sig: Signature) -> None: # noqa: ARG002
-        """Sets the DEFAULT after message f-string template.
-        """
+        """Generate the default log message template for successful execution."""
         self.msg_after = f"<<< {fn.__name__}[{{_etime_}}] Result: {{_result_!r}}" \
             if self.has_result else f"<<< {fn.__name__}[{{_etime_}}]"
     def set_fail_msg(self, fn: Callable, sig: Signature) -> None: # noqa: ARG002
-        """Sets the DEFAULT fail message f-string template.
-        """
+        """Generate the default log message template for failed execution."""
         self.msg_failed = f"<-- {fn.__name__}[{{_etime_}}] {{_exc_}}"
     def log_before(self, logger: ContextLoggerAdapter, params: dict) -> None:
-        """Executed before decorated callable.
-        """
+        """Log the 'before' message using the configured template and logger."""
         logger.log(self.level, FStrMessage(self.msg_before, params))
     def log_after(self, logger: ContextLoggerAdapter, params: dict) -> None:
-        """Executed after decorated callable.
-        """
+        """Log the 'after' message using the configured template and logger."""
         logger.log(self.level, FStrMessage(self.msg_after, params))
     def log_failed(self, logger: ContextLoggerAdapter, params: dict) -> None:
-        """Executed when decorated callable raises an exception.
-        """
+        """Log the 'failed' message using the configured template and logger."""
         logger.log(self.level, FStrMessage(self.msg_failed, params))
     def __call__(self, fn: Callable):
         @wraps(fn)
         def wrapper(*args, **kwargs):
+            """The actual wrapper function applied to the decorated callable.
+
+            Checks runtime flags, prepares parameters, logs messages according
+            to flags (before/after/fail), measures execution time, and handles
+            exceptions for logging purposes before re-raising them.
+            """
+            # Combine global flags with decorator-specific overrides
             flags = trace_manager.flags | self.flags
+            # Check if ACTIVE flag is set AND at least one logging flag (BEFORE/AFTER/FAIL) is set
             if enabled := ((TraceFlag.ACTIVE in flags) and int(flags) > 1):
                 params = {}
                 bound = sig.bind_partial(*args, **kwargs)
@@ -274,7 +334,10 @@ class traced: # noqa: N801
         return wrapper
 
 class BaseTraceConfig(Config):
-    """Base configuration for trace.
+    """Base class defining common configuration options for trace settings.
+
+    Used as a base for global trace config, per-class config, and per-method config.
+    Corresponds typically to settings within a section of a configuration file.
     """
     def __init__(self, name: str):
         super().__init__(name)
@@ -311,7 +374,11 @@ class BaseTraceConfig(Config):
                        "If True, function arguments are available for interpolation in `msg_before`")
 
 class TracedMethodConfig(BaseTraceConfig):
-    """Configuration of traced Python method.
+    """Defines the structure for a configuration section specifying trace
+    settings specific to a single class method.
+
+    Used within `TracedClassConfig.special` list. The section name itself is
+    referenced in the parent `TracedClassConfig` section.
     """
     def __init__(self, name: str):
         super().__init__(name)
@@ -320,7 +387,11 @@ class TracedMethodConfig(BaseTraceConfig):
             StrOption('method', "Class method name", required=True)
 
 class TracedClassConfig(BaseTraceConfig):
-    """Configuration of traced Python class.
+    """Defines the structure for a configuration section specifying trace
+    settings for a Python class and its methods.
+
+    The section name itself is referenced in the main `TraceConfig` section.
+    See the module documentation for an example INI structure.
     """
     def __init__(self, name: str):
         super().__init__(name)
@@ -342,7 +413,10 @@ class TracedClassConfig(BaseTraceConfig):
                        default=True)
 
 class TraceConfig(BaseTraceConfig):
-    """Trace manager configuration.
+    """Defines the structure for the main trace configuration section (typically '[trace]').
+
+    Holds global default trace settings and lists the sections defining specific
+    traced classes. See the module documentation for an example INI structure.
     """
     def __init__(self, name: str):
         super().__init__(name)
@@ -361,16 +435,21 @@ class TraceManager:
     """Trace manager.
     """
     def __init__(self):
-        #: Decorator that should be used for trace instrumentation (via `add_trace`),
-        #: default: `traced`.
+        #: Decorator factory used by `add_trace` (default: `traced`). Can be replaced.
         self.decorator: Callable = traced
+        #: Internal registry storing `TracedClass` specifications.
         self._traced: Registry = Registry()
+        #: Current runtime trace flags, controlling overall behavior.
         self._flags: TraceFlag = TraceFlag.NONE
+        # Initialize flags based on environment variables (FBASE_TRACE_*) and __debug__
+        # Active flag
         self.trace_active = convert_from_str(bool, os.getenv('FBASE_TRACE', str(__debug__)))
+        # Specific logging flags
         if convert_from_str(bool, os.getenv('FBASE_TRACE_BEFORE', 'no')): # pragma: no cover
             self.set_flag(TraceFlag.BEFORE)
         if convert_from_str(bool, os.getenv('FBASE_TRACE_AFTER', 'no')): # pragma: no cover
             self.set_flag(TraceFlag.AFTER)
+        # Note: FAIL is enabled by default unless FBASE_TRACE_FAIL is explicitly 'no'
         if convert_from_str(bool, os.getenv('FBASE_TRACE_FAIL', 'yes')):
             self.set_flag(TraceFlag.FAIL)
     def is_registered(self, cls: type) -> bool:
@@ -393,13 +472,18 @@ class TraceManager:
         if cls not in self._traced:
             self._traced.store(TracedClass(cls))
     def add_trace(self, cls: type, method: str, / , *args, **kwargs) -> None:
-        """Add/update trace specification for class method.
+        """Store or update the trace specification for a specific class method.
+
+        Registers how a method should be decorated (using `self.decorator`) when
+        `trace_object` is called on an instance of `cls` or its registered descendants.
+        This specification can be overridden or augmented by settings loaded via
+        `load_config`.
 
         Arguments:
-            cls: Registered traced class
-            method: Method name
-            args: Positional arguments for decorator
-            kwargs: Keyword arguments for decorator
+            cls: Registered traced class type.
+            method: The name of the method within `cls` to trace.
+            *args: Positional arguments for the decorator factory (`self.decorator`).
+            **kwargs: Keyword arguments for the decorator factory (`self.decorator`).
         """
         self._traced[cls].traced.update(TracedItem(method, self.decorator, args, kwargs))
     def remove_trace(self, cls: type, method: str) -> None:
@@ -411,19 +495,23 @@ class TraceManager:
         """
         del self._traced[cls].traced[method]
     def trace_object(self, obj: Any, *, strict: bool=False) -> Any:
-        """Instruments object's methods with decorators according to trace configuration.
+        """Apply registered trace decorators to the methods of an object instance.
+
+        Iterates through the trace specifications (`TracedItem`) registered for the
+        object's class (via `add_trace` or `load_config`). For each specification,
+        it wraps the corresponding method on the `obj` instance using the specified
+        decorator and arguments. Modifies the object *in place*.
 
         Arguments:
-            strict: Determines the response if the object class is not registered for trace.
-                    Raises exception when True, or return the instance as is when False [default].
-
-        Only methods registered with `.add_trace()` are instrumented.
+            obj: The object instance whose methods should be instrumented.
+            strict: If True, raise TypeError if `obj`'s class is not registered.
+                    If False (default), return `obj` unmodified if not registered.
 
         Returns:
-            Decorated instance.
+            The (potentially modified) object instance `obj`.
 
         Raises:
-            TypeError: When object class is not registered and `strict` is True.
+            TypeError: If `obj`'s class is not registered and `strict` is True.
         """
         if (trace := os.getenv('FBASE_TRACE')) is not None:
             if not convert_from_str(bool, trace):
@@ -439,18 +527,26 @@ class TraceManager:
             setattr(obj, item.method, item.decorator(*item.args, **item.kwargs)(getattr(obj, item.method)))
         return obj
     def load_config(self, config: ConfigParser, section: str='trace') -> None:
-        """Update trace from configuration.
+        """Load and apply trace configurations from a `ConfigParser` instance.
+
+        Parses the specified `section` (and referenced sub-sections) using the
+        `TraceConfig`, `TracedClassConfig`, and `TracedMethodConfig` structures.
+        Updates the `TraceManager`'s flags and trace specifications (`add_trace`).
 
         Arguments:
-            config:  ConfigParser instance with trace configuration.
-            section: Name of ConfigParser section that should be used to get trace
-                     configuration.
-
-        Uses `.TraceConfig`, `.TracedClassConfig` and `.TracedMethodConfig` to process
-        the configuration.
+            config:  `ConfigParser` instance containing the trace configuration.
+            section: Name of the main trace configuration section (default: 'trace').
 
         Note:
-            Does not `.clear()` existing trace specifications.
+            This method *adds to or updates* existing trace specifications. It does
+            not clear previous configurations unless the loaded configuration explicitly
+            overwrites specific settings.
+
+        Raises:
+            Error: If configuration references a class that is not registered and
+                   `autoregister` is False, or if the class cannot be loaded via `load()`.
+            KeyError, ValueError: If the configuration file structure is invalid or
+                                  contains invalid values according to the `Option` types.
         """
         def build_kwargs(from_cfg: BaseTraceConfig) -> dict[str, Any]:
             result = {}
@@ -527,12 +623,12 @@ class TraceManager:
         else:
             self._flags &= ~TraceFlag.ACTIVE
 
-#: Trace manager
+#: Trace manager singleton instance.
 trace_manager: TraceManager = TraceManager()
 
-#: shortcut for `trace_manager.add_trace()`
+#: Shortcut for `trace_manager.add_trace()`
 add_trace = trace_manager.add_trace
-#: shortcut for `trace_manager.remove_trace()`
+#: Shortcut for `trace_manager.remove_trace()`
 remove_trace = trace_manager.remove_trace
-#: shortcut for `trace_manager.trace_object()`
+#: Shortcut for `trace_manager.trace_object()`
 trace_object = trace_manager.trace_object
