@@ -72,16 +72,16 @@ from collections.abc import Callable, Hashable
 from dataclasses import dataclass
 from decimal import Decimal, DecimalException
 from enum import Enum, IntEnum, IntFlag
-from typing import Any
+from typing import Any, TypeAlias
 from uuid import UUID
 
 from .collections import Registry
 from .types import MIME, Distinct, ZMQAddress
 
 #: Function that converts typed value to its string representation.
-TConvertToStr = Callable[[Any], str]
+TConvertToStr: TypeAlias = Callable[[Any], str]
 #: Function that converts string representation of typed value to typed value.
-TConvertFromStr = Callable[[type, str], Any]
+TConvertFromStr: TypeAlias = Callable[[type, str], Any]
 
 @dataclass
 class Convertor(Distinct):
@@ -115,14 +115,14 @@ class Convertor(Distinct):
         return f'{self.cls.__module__}.{self.cls.__name__}'
 
 _convertors: Registry = Registry()
-_classes = {}
+_classes: dict[str, type] = {}
 
 # Convertors
 
 #: Valid string literals for True value.
-TRUE_STR = ['yes', 'true', 'on', 'y', '1']
+TRUE_STR: list[str] = ['yes', 'true', 'on', 'y', '1']
 #: Valid string literals for False value.
-FALSE_STR = ['no', 'false', 'off', 'n', '0']
+FALSE_STR: list[str] = ['no', 'false', 'off', 'n', '0']
 
 def any2str(value: Any) -> str:
     """Converts value to string using `str(value)`.
@@ -150,9 +150,8 @@ def str2any(cls: type, value: str) -> Any:
     """
     return cls(value)
 
-def register_convertor(cls: type, *,
-                       to_str: TConvertToStr=any2str,
-                       from_str: TConvertFromStr=str2any):
+def register_convertor(cls: type, *, to_str: TConvertToStr=any2str,
+                       from_str: TConvertFromStr=str2any) -> None:
     """Registers convertor function(s) for a specific data type.
 
     If `to_str` or `from_str` are not provided, default convertors (`any2str`,
@@ -213,7 +212,7 @@ def register_class(cls: type) -> None:
         raise TypeError(f"Class '{cls.__name__}' already registered as '{_classes[cls.__name__]!r}'")
     _classes[cls.__name__] = cls
 
-def _get_convertor(cls: type | str) -> Convertor:
+def _get_convertor(cls: type | str) -> Convertor | None:
     if isinstance(cls, str):
         cls = _classes.get(cls, cls)
     if isinstance(cls, str):
@@ -270,8 +269,8 @@ def has_convertor(cls: type | str) -> bool:
     return _get_convertor(cls) is not None
 
 def update_convertor(cls: type | str, *,
-                     to_str: TConvertToStr=None,
-                     from_str: TConvertFromStr=None):
+                     to_str: TConvertToStr | None=None,
+                     from_str: TConvertFromStr | None=None) -> None:
     """Update the `to_str` and/or `from_str` functions for an existing convertor.
 
     Arguments:
@@ -292,7 +291,7 @@ def update_convertor(cls: type | str, *,
            update_convertor(bool, to_str=lambda v: 'TRUE' if v else 'FALSE')
            print(convert_to_str(True)) # Output: TRUE
     """
-    conv = get_convertor(cls)
+    conv: Convertor = get_convertor(cls)
     if to_str:
         conv.to_str = to_str
     if from_str:
@@ -420,7 +419,7 @@ def get_convertor(cls: type | str) -> Convertor:
         raise TypeError(f"Type '{cls.__name__ if isinstance(cls, type) else cls}' has no Convertor")
     return conv
 
-def _register():
+def _register() -> None:
     """Internal function for registration of builtin converters."""
 
     def bool2str(value: bool) -> str: # noqa: FBT001

@@ -53,11 +53,12 @@ package and potentially other Firebird Python projects. It includes:
 from __future__ import annotations
 
 import sys
+import types
 from abc import ABC, ABCMeta, abstractmethod
 from collections.abc import Callable, Hashable
 from enum import Enum, IntEnum
 from importlib import import_module
-from typing import Any, AnyStr, ClassVar, cast
+from typing import Any, AnyStr, ClassVar, Self, cast
 from weakref import WeakValueDictionary
 
 # Exceptions
@@ -100,7 +101,7 @@ class Error(Exception):
         super().__init__(*args)
         for name, value in kwargs.items():
             setattr(self, name, value)
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any | None:
         # Prevent AttributeError for unset attributes, default to None.
         # Explicitly raise AttributeError for __notes__ to allow standard
         # exception note handling to work correctly.
@@ -119,7 +120,7 @@ class SingletonMeta(type):
     returned without calling the constructor, otherwise the instance is created normally
     and stored in cache for later use.
     """
-    def __call__(cls: Singleton, *args, **kwargs):
+    def __call__(cls: type[Singleton], *args, **kwargs) -> Singleton:
         name = f"{cls.__module__}.{cls.__qualname__}"
         obj = _singletons_.get(name)
         if obj is None:
@@ -174,14 +175,15 @@ class _SentinelMeta(type):
       or potentially a functional call (though class definition is preferred).
     - Neuters `__call__` inherited from `type` to prevent unintended behavior.
     """
-    def __new__(metaclass, name, bases, namespace):
-        def __new__(cls, *args, **kwargs):
+
+    def __new__(metaclass, name, bases, namespace): # noqa: N804
+        def __new__(cls, *args, **kwargs): # noqa: N807, ARG001
             raise TypeError(f'Cannot initialise or subclass sentinel {cls.__name__!r}')
         cls = super().__new__(metaclass, name, bases, namespace)
         # We are creating a sentinel, neuter it appropriately
         if type(metaclass) is metaclass:
-            cls_call = getattr(cls, '__call__', None)
-            metaclass_call = getattr(metaclass, '__call__', None)
+            cls_call = getattr(cls, '__call__', None) # noqa B004
+            metaclass_call = getattr(metaclass, '__call__', None) # noqa B004
             # If the class did not provide it's own `__call__`
             # and therefore inherited the `__call__` belongining
             # to it's metaclass, get rid of it.
@@ -197,7 +199,7 @@ class _SentinelMeta(type):
             raise TypeError(f'{metaclass.__name__!r} must also be derived from when provided as a metaclass')
         cls.__class__ = cls
         return cls
-    def __call__(cls, name, bases=None, namespace=None, /, *, repr=None):
+    def __call__(cls, name, bases=None, namespace=None, /, *, repr=None) -> type[Sentinel]: # noqa: A002
         # Attempts to subclass/initialise derived classes will end up
         # arriving here.
         # In these cases, we simply redirect to `__new__`
@@ -208,7 +210,7 @@ class _SentinelMeta(type):
         # If a custom `repr` was provided, create an appropriate
         # `__repr__` method to be added to the sentinel class
         if repr is not None:
-            def __repr__(cls):
+            def __repr__(cls): # noqa: ARG001, N807
                 return repr
             namespace['__repr__'] =__repr__
         return cls.__new__(cls, name, bases, namespace)
@@ -322,7 +324,7 @@ class UNLIMITED(Sentinel):
 class UNKNOWN(Sentinel):
     "Sentinel that denotes unknown value"
 
-class NOT_FOUND(Sentinel):
+class NOT_FOUND(Sentinel): # noqa: N801
     "Sentinel that denotes a condition when value was not found"
 
 class UNDEFINED(Sentinel):
@@ -376,9 +378,9 @@ class Distinct(ABC):
         The key must be hashable. It determines equality and hashing
         behavior unless `__eq__` or `__hash__` are explicitly overridden.
         """
-    def __hash(self):
+    def __hash(self) -> int:
         return hash(self.get_key())
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(other, Distinct):
             return self.get_key() == other.get_key()
         return False
@@ -391,7 +393,7 @@ class CachedDistinctMeta(ABCMeta):
     caching mechanism based on the key extracted by `cls.extract_key()`.
     Ensures that only one instance exists per unique key.
     """
-    def __call__(cls: CachedDistinct, *args, **kwargs):
+    def __call__(cls: type[CachedDistinct], *args, **kwargs) -> CachedDistinct:
         key = cls.extract_key(*args, **kwargs)
         obj = cls._instances_.get(key)
         if obj is None:
@@ -448,7 +450,7 @@ class CachedDistinct(Distinct, metaclass=CachedDistinctMeta):
         cls._instances_ = WeakValueDictionary()
     @classmethod
     @abstractmethod
-    def extract_key(cls, *args, **kwargs) -> Hashable:
+    def extract_key(cls: type[CachedDistinct], *args, **kwargs) -> Hashable:
         """Returns key from arguments passed to `__init__()`.
 
         Important:
@@ -509,9 +511,9 @@ class ZMQAddress(str):
         except ValueError as e:
             print(e)                    # Output: Protocol specification required
     """
-    def __new__(cls, value: AnyStr):
+    def __new__(cls, value: AnyStr, encoding: str = 'utf8') -> Self:
         if isinstance(value, bytes):
-            value = cast(bytes, value).decode('utf8')
+            value = cast(bytes, value).decode(encoding)
         if '://' in value:
             protocol, _ = value.split('://', 1)
             if protocol.upper() not in ZMQTransport._member_map_:
@@ -586,7 +588,7 @@ class MIME(str):
     """
     #: Supported base MIME types
     MIME_TYPES: ClassVar[list[str]] = ['text', 'image', 'audio', 'video', 'application', 'multipart', 'message']
-    def __new__(cls, value: str):
+    def __new__(cls, value: str) -> Self:
         dfm = list(value.split(';'))
         mime_type: str = dfm.pop(0).strip()
         if (i := mime_type.find('/')) == -1:
@@ -669,8 +671,8 @@ class PyExpr(str):
             print(e)              # Output: invalid syntax (<string>, line 1) or similar
 
     """
-    _expr_ = None # Compiled code object
-    def __new__(cls, value: str):
+    _expr_: types.CodeType = None # Compiled code object
+    def __new__(cls, value: str) -> Self:
         new = str.__new__(cls, value)
         # Validate by compiling in 'eval' mode
         new._expr_ = compile(value, '<PyExpr>', 'eval')
@@ -701,7 +703,7 @@ class PyExpr(str):
         # Return the defined function
         return ns['expr']
     @property
-    def expr(self):
+    def expr(self) -> types.CodeType:
         """The compiled expression code object, ready for `eval()`."""
         return self._expr_
 
@@ -742,8 +744,8 @@ class PyCode(str):
         except SyntaxError as e:
             print(e)             # Output: unexpected EOF while parsing (<string>, line 1) or similar
     """
-    _code_: compile = None # Compiled code object
-    def __new__(cls, value: str):
+    _code_: types.CodeType = None # Compiled code object
+    def __new__(cls, value: str) -> Self:
         # Validate by compiling in 'exec' mode
         code = compile(value, '<PyCode>', 'exec')
         new = str.__new__(cls, value)
@@ -755,7 +757,7 @@ class PyCode(str):
         ellipsis = "..." if len(self) > limit else ""
         return f"PyCode('{self[:limit]}{ellipsis}')"
     @property
-    def code(self):
+    def code(self) -> types.CodeType:
         """The compiled Python code object, ready for `exec()`."""
         return self._code_
 
@@ -820,7 +822,7 @@ class PyCallable(str):
     _callable_: Callable | type = None
     #: Name of the defined function or class.
     name: str = None
-    def __new__(cls, value: str):
+    def __new__(cls, value: str) -> Self:
         callable_name = None
         for line in value.split('\n'):
             if line.lower().startswith('def '):
@@ -845,7 +847,7 @@ class PyCallable(str):
 
         if callable_name not in ns:
             # This might happen if the parsed name doesn't match the actual definition
-            raise ValueError(f"Could not find defined callable named '{callable_name}' after execution. Check definition.")
+            raise ValueError(f"Could not find defined callable named '{callable_name}' after execution. Check definition.") # noqa: E501
 
         new = str.__new__(cls, value)
         new._callable_ = ns[callable_name]
@@ -853,7 +855,7 @@ class PyCallable(str):
         # Copy docstring if present
         new.__doc__ = getattr(new._callable_, '__doc__', None)
         return new
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> Any:
         """Calls the wrapped function or instantiates the wrapped class."""
         return self._callable_(*args, **kwargs)
     def __repr__(self) -> str:
@@ -864,7 +866,7 @@ class PyCallable(str):
         return f"PyCallable('{string}{ellipsis}')"
 
 # Metaclasses
-def conjunctive(name, bases, attrs):
+def conjunctive(name, bases, attrs) -> type:
     """Returns a metaclass that is conjunctive descendant of all metaclasses used by parent
     classes. It's necessary to create a class with multiple inheritance, where multiple
     parent classes use different metaclasses.

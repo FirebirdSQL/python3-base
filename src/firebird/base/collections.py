@@ -60,15 +60,15 @@ referencing the collection item(s), or lambda functions.
 
 from __future__ import annotations
 
-import copy as std_copy
-from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Sequence
 from operator import attrgetter
-from typing import Any, cast
+from typing import Any, TypeAlias, TypeVar, cast
 
 from .types import UNDEFINED, Distinct, Error, Sentinel
 
+_T = TypeVar("_T")
 
-def make_lambda(expr: str, params: str='item', context: dict[str, Any] | None=None):
+def make_lambda(expr: str, params: str='item', context: dict[str, Any] | None=None) -> Callable[..., Any]:
     """Makes lambda function from expression.
 
     Arguments:
@@ -87,13 +87,13 @@ def make_lambda(expr: str, params: str='item', context: dict[str, Any] | None=No
 #: Collection Item
 Item = Any
 #: Collection Item type specification
-TypeSpec = type | tuple[type]
+TypeSpec: TypeAlias = type | tuple[type, ...]
 #: Collection Item sort expression
-ItemExpr = str | Callable[[Item], Item]
+ItemExpr: TypeAlias = str | Callable[[Item], Any]
 #: Filter expression
-FilterExpr = str | Callable[[Item], bool]
+FilterExpr: TypeAlias = str | Callable[[Item], bool]
 #: Check expression
-CheckExpr = str | Callable[[Item, Any], bool]
+CheckExpr: TypeAlias = str | Callable[[Item, Any], bool]
 
 class BaseObjectCollection:
     """Base class for collection of objects.
@@ -128,7 +128,7 @@ class BaseObjectCollection:
         """
         fce = expr if callable(expr) else make_lambda(expr)
         return (item for item in self if not fce(item))
-    def find(self, expr: FilterExpr, default: Any=None) -> Item:
+    def find(self, expr: FilterExpr, default: _T=None) -> Item | _T:
         """Returns first item for which `expr` is evaluated as True, or default.
 
         Arguments:
@@ -291,7 +291,7 @@ class DataList(list[Item], BaseObjectCollection):
     def __updchk(self) -> None:
         if self.__frozen:
             raise TypeError("Cannot modify frozen DataList")
-    def __setitem__(self, index, value) -> None:
+    def __setitem__(self, index: int | slice, value: Item | Iterable[Item]) -> None:
         """Set item[index] = value. Performs type check and frozen check."""
         self.__updchk()
         if isinstance(index, slice):
@@ -300,11 +300,11 @@ class DataList(list[Item], BaseObjectCollection):
         else:
             self.__valchk(value)
         super().__setitem__(index, value)
-    def __delitem__(self, index) -> None:
+    def __delitem__(self, index: int | slice) -> None:
         """Delete item[index]. Performs frozen check."""
         self.__updchk()
         super().__delitem__(index)
-    def __contains__(self, o):
+    def __contains__(self, o) -> bool:
         """Return key in self. Optimized for frozen lists with a key_expr.
 
         If the list is frozen and has a key_expr, uses an internal map for
@@ -345,7 +345,7 @@ class DataList(list[Item], BaseObjectCollection):
         self.__updchk()
         self.__valchk(item)
         super().append(item)
-    def extend(self, iterable: Iterable) -> None:
+    def extend(self, iterable: Iterable[Item]) -> None:
         """Extend the list by appending all the items in the given iterable.
 
         Raises:
@@ -354,7 +354,8 @@ class DataList(list[Item], BaseObjectCollection):
         """
         for item in iterable:
             self.append(item)
-    def sort(self, attrs: list | None=None, expr: ItemExpr | None=None, *, reverse: bool=False) -> None:
+    def sort(self, attrs: list[str] | tuple[str, ...] | None=None,
+             expr: ItemExpr | None=None, *, reverse: bool=False) -> None:
         """Sort items in-place, optionaly using attribute values as key or key expression.
 
         Arguments:
@@ -453,7 +454,7 @@ class DataList(list[Item], BaseObjectCollection):
             else:
                 i += 1
         return l
-    def get(self, key: Any, default: Any=None) -> Item:
+    def get(self, key: Any, default: _T=None) -> Item | _T:
         """Returns item with given key using default key expression. Returns `default`
         value if item is not found.
 
@@ -489,7 +490,7 @@ class DataList(list[Item], BaseObjectCollection):
         """
         return self.__frozen
     @property
-    def key_expr(self) -> Item:
+    def key_expr(self) -> Item | None:
         """Key expression.
         """
         return self.__key_expr
@@ -533,25 +534,25 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         data: Either a `.Distinct` instance, or sequence or mapping of `.Distinct`
               instances.
     """
-    def __init__(self, data: Mapping | Sequence | Registry=None):
-        self._reg: dict = {}
+    def __init__(self, data: Mapping[Any, Distinct] | Sequence[Distinct] | Registry=None):
+        self._reg: dict[Any, Distinct] = {}
         if data:
             self.update(data)
     def __len__(self):
         return len(self._reg)
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> Distinct:
         """Return self[key]. Accepts a key value or a `.Distinct` instance."""
         return self._reg[key.get_key() if isinstance(key, Distinct) else key]
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Any, value: Distinct) -> None:
         assert isinstance(value, Distinct) # noqa: S101
         self._reg[key.get_key() if isinstance(key, Distinct) else key] = value
-    def __delitem__(self, key):
+    def __delitem__(self, key: Any) -> None:
         del self._reg[key.get_key() if isinstance(key, Distinct) else key]
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Distinct]:
         return iter(self._reg.values())
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}([{', '.join(repr(x) for x in self)}])"
-    def __contains__(self, item):
+    def __contains__(self, item: Any) -> bool:
         """Return key in self. Accepts a key value or a `.Distinct` instance."""
         if isinstance(item, Distinct):
             item = item.get_key()
@@ -560,7 +561,7 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         """Remove all items from registry.
         """
         self._reg.clear()
-    def get(self, key: Any, default: Any=None) -> Distinct:
+    def get(self, key: Any, default: _T=None) -> Distinct | _T:
         """ D.get(key[,d]) -> D[key] if key in D else d. d defaults to None.
 
         Arguments:
@@ -580,11 +581,11 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
             raise ValueError(f"Item already registered, key: '{key}'")
         self._reg[key] = item
         return item
-    def remove(self, item: Distinct):
+    def remove(self, item: Distinct) -> None:
         """Removes item from registry (same as: del R[item]).
         """
         del self._reg[item.get_key()]
-    def update(self, _from: Distinct | Mapping | Sequence) -> None:
+    def update(self, _from: Distinct | Mapping[Any, Distinct] | Sequence[Distinct]) -> None:
         """Update items in the registry.
 
         Arguments:
@@ -596,7 +597,7 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
         else:
             for item in cast(Mapping, _from).values() if hasattr(_from, 'values') else _from:
                 self[item] = item
-    def extend(self, _from: Distinct | Mapping | Sequence) -> None:
+    def extend(self, _from: Distinct | Mapping[Any, Distinct] | Sequence[Distinct]) -> None:
         """Store one or more items to the registry.
 
         Unlike `update`, this method requires that the items (or their keys)
@@ -617,17 +618,8 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
     def copy(self) -> Registry:
         """Shalow copy of the registry.
         """
-        if self.__class__ is Registry:
-            return Registry(self)
-        data = self._reg
-        try:
-            self._reg = {}
-            c = std_copy.copy(self)
-        finally:
-            self._reg = data
-        c.update(self)
-        return c
-    def pop(self, key: Any, default: Any=...) -> Distinct:
+        return self.__class__(self)
+    def pop(self, key: Any, default: _T=...) -> Distinct | _T:
         """Remove specified `key` and return the corresponding `.Distinct` object.
 
         If `key` is not found, the `default` is returned if given, otherwise
@@ -653,4 +645,4 @@ class Registry(BaseObjectCollection, Mapping[Any, Distinct]):
             self.remove(item)
             return item
         except StopIteration:
-            raise KeyError()
+            raise KeyError() # noqa: B904

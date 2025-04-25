@@ -111,21 +111,21 @@ from .collections import Registry
 from .types import Distinct
 
 #: Name of well-known EMPTY protobuf message (for use with `.create_message()`)
-PROTO_EMPTY = 'google.protobuf.Empty'
+PROTO_EMPTY: str = 'google.protobuf.Empty'
 #: Name of well-known ANY protobuf message (for use with `.create_message()`)
-PROTO_ANY = 'google.protobuf.Any'
+PROTO_ANY: str = 'google.protobuf.Any'
 #: Name of well-known DURATION protobuf message (for use with `.create_message()`)
-PROTO_DURATION = 'google.protobuf.Duration'
+PROTO_DURATION: str = 'google.protobuf.Duration'
 #: Name of well-known TIMESTAMP protobuf message (for use with `.create_message()`)
-PROTO_TIMESTAMP = 'google.protobuf.Timestamp'
+PROTO_TIMESTAMP: str = 'google.protobuf.Timestamp'
 #: Name of well-known STRUCT protobuf message (for use with `.create_message()`)
-PROTO_STRUCT = 'google.protobuf.Struct'
+PROTO_STRUCT: str = 'google.protobuf.Struct'
 #: Name of well-known VALUE protobuf message (for use with `.create_message()`)
-PROTO_VALUE = 'google.protobuf.Value'
+PROTO_VALUE: str = 'google.protobuf.Value'
 #: Name of well-known LISTVALUE protobuf message (for use with `.create_message()`)
-PROTO_LISTVALUE = 'google.protobuf.ListValue'
+PROTO_LISTVALUE: str = 'google.protobuf.ListValue'
 #: Name of well-known FIELDMASK protobuf message (for use with `.create_message()`)
-PROTO_FIELDMASK = 'google.protobuf.FieldMask'
+PROTO_FIELDMASK: str = 'google.protobuf.FieldMask'
 
 # Classes
 @dataclass(eq=True, order=True, frozen=True)
@@ -143,7 +143,7 @@ class ProtoMessageType(Distinct):
     name: str
     #: The callable (generated message class) used to create instances.
     constructor: Callable
-    def get_key(self) -> Any:
+    def get_key(self) -> str:
         """Returns the message name, used as the key in the registry."""
         return self.name
 
@@ -181,10 +181,10 @@ class ProtoEnumType(Distinct):
     """
     #: The `google.protobuf.descriptor.EnumDescriptor` for the enum type.
     descriptor: EnumDescriptor
-    def get_key(self) -> Any:
+    def get_key(self) -> str:
         """Returns the full enum name, used as the key in the registry."""
         return self.name
-    def __getattr__(self, name):
+    def __getattr__(self, name: str):
         """Return the integer value corresponding to the enum member name `name`.
 
         Arguments:
@@ -199,19 +199,19 @@ class ProtoEnumType(Distinct):
         if name in self.descriptor.values_by_name:
             return self.descriptor.values_by_name[name].number
         raise AttributeError(f"Enum {self.name} has no value with name '{name}'")
-    def keys(self):
+    def keys(self) -> list[str]:
         """Return a list of the string names in the enum.
 
         These are returned in the order they were defined in the .proto file.
         """
         return [value_descriptor.name for value_descriptor in self.descriptor.values]
-    def values(self):
+    def values(self) -> list[int]:
         """Return a list of the integer values in the enum.
 
         These are returned in the order they were defined in the .proto file.
         """
         return [value_descriptor.number for value_descriptor in self.descriptor.values]
-    def items(self):
+    def items(self) -> list[tuple[str, int]]:
         """Return a list of the (name, value) pairs of the enum.
 
         These are returned in the order they were defined in the .proto file.
@@ -243,7 +243,7 @@ _msgreg: Registry = Registry()
 #: Internal registry storing ProtoEnumType instances.
 _enumreg: Registry = Registry()
 
-def struct2dict(struct: StructProto) -> dict:
+def struct2dict(struct: StructProto) -> dict[str, Any]:
     """Unpack a `google.protobuf.Struct` message into a Python dictionary.
 
     Uses `google.protobuf.json_format.MessageToDict`.
@@ -256,7 +256,7 @@ def struct2dict(struct: StructProto) -> dict:
     """
     return json_format.MessageToDict(struct)
 
-def dict2struct(value: dict) -> StructProto:
+def dict2struct(value: dict[str, Any]) -> StructProto:
     """Pack a Python dictionary into a `google.protobuf.Struct` message.
 
     Arguments:

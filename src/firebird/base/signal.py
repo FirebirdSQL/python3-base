@@ -60,7 +60,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import partial
 from inspect import Signature, ismethod
-from weakref import WeakKeyDictionary, ref
+from typing import Any
+from weakref import ReferenceType, WeakKeyDictionary, ref
 
 
 class Signal:
@@ -94,7 +95,7 @@ class Signal:
                                                  return_annotation=Signature.empty)
         #: Toggle to block / unblock signal transmission
         self.block: bool = False
-        self._slots: list[Callable] = []
+        self._slots: list[Callable | ReferenceType[Callable]] = []
         self._islots: WeakKeyDictionary = WeakKeyDictionary()
     def __call__(self, *args, **kwargs):
         """Shortcut for `emit(*args, **kwargs)`."""
@@ -178,7 +179,7 @@ class Signal:
             new_slot_ref = ref(slot)
             if new_slot_ref not in self._slots:
                 self._slots.append(new_slot_ref)
-    def disconnect(self, slot) -> None:
+    def disconnect(self, slot: Callable) -> None:
         """Disconnect a previously connected slot from the signal.
 
         Attempts to remove the specified slot. Does nothing if the slot
@@ -236,7 +237,7 @@ class signal: # noqa: N801
     """
     def __init__(self, fget, doc=None):
         self._sig_ = Signature.from_callable(fget)
-        self._map = WeakKeyDictionary()
+        self._map: WeakKeyDictionary[Any, Signal] = WeakKeyDictionary()
         if doc is None and fget is not None:
             doc = fget.__doc__
         self.__doc__ = doc
@@ -255,8 +256,8 @@ class _EventSocket:
     """Internal EventSocket handler.
     """
     def __init__(self, slot: Callable | None=None):
-        self._slot: Callable = None
-        self._weak = False
+        self._slot: Callable | None = None
+        self._weak: bool | ReferenceType[Callable] = False
         if slot is not None:
             if isinstance(slot, partial) or slot.__name__ == '<lambda>':
                 self._slot = slot
@@ -328,8 +329,8 @@ class eventsocket: # noqa: N801
         Similar to `Signal`, functions and methods are stored using weak references
         where appropriate to prevent memory leaks. Lambdas/partials are stored directly.
     """
-    _empty = _EventSocket()
-    def __init__(self, fget, doc=None):
+    _empty: _EventSocket = _EventSocket()
+    def __init__(self, fget: Callable, doc: str | None=None):
         s = Signature.from_callable(fget)
         # Remove 'self' from list of parameters
         self._sig: Signature = s.replace(parameters=[v for k,v in s.parameters.items()

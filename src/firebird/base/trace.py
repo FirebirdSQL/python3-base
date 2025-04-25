@@ -77,6 +77,7 @@ from firebird.base.logging import ContextLoggerAdapter, FStrMessage, LogLevel, g
 from firebird.base.strconv import convert_from_str
 from firebird.base.types import DEFAULT, UNLIMITED, Distinct, Error, load
 
+
 class TraceFlag(IntFlag):
     """Flags controlling the behavior of the `traced` decorator and `TraceManager`.
 
@@ -112,9 +113,9 @@ class TracedItem(Distinct):
     #: The decorator callable (usually `traced` or a custom one) to apply.
     decorator: Callable
     #: Positional arguments to pass to the decorator factory.
-    args: list = field(default_factory=list)
+    args: list[Any] = field(default_factory=list)
     #: Keyword arguments to pass to the decorator factory.
-    kwargs: dict = field(default_factory=dict)
+    kwargs: dict[str, Any] = field(default_factory=dict)
     def get_key(self) -> Hashable:
         """Returns Distinct key for traced item [method]."""
         return self.method
@@ -199,20 +200,20 @@ class traced: # noqa: N801
         with_args: If True (default), make function arguments available by name for
                    interpolation in `msg_before`.
     """
-    def __init__(self, *, agent: Any=DEFAULT, topic: str='trace',
-                 msg_before: str=DEFAULT, msg_after: str=DEFAULT, msg_failed: str=DEFAULT,
-                 flags: TraceFlag=TraceFlag.NONE, level: LogLevel=LogLevel.DEBUG,
-                 max_param_length: int=UNLIMITED, extra: dict | None=None,
-                 callback: Callable[[Any], bool] | None=None, has_result: bool=DEFAULT,
-                 with_args: bool=True):
+    def __init__(self, *, agent: Any | DEFAULT=DEFAULT, topic: str='trace',
+                 msg_before: str | DEFAULT=DEFAULT, msg_after: str | DEFAULT=DEFAULT,
+                 msg_failed: str | DEFAULT=DEFAULT, flags: TraceFlag=TraceFlag.NONE,
+                 level: LogLevel=LogLevel.DEBUG, max_param_length: int | UNLIMITED=UNLIMITED,
+                 extra: dict | None=None, callback: Callable[[Any], bool] | None=None,
+                 has_result: bool | DEFAULT=DEFAULT, with_args: bool=True):
         #: Trace/audit message logged before decorated function
-        self.msg_before: str = msg_before
+        self.msg_before: str | DEFAULT = msg_before
         #: Trace/audit message logged after decorated function
-        self.msg_after: str = msg_after
+        self.msg_after: str | DEFAULT = msg_after
         #: Trace/audit message logged when decorated function raises an exception
-        self.msg_failed: str = msg_failed
+        self.msg_failed: str | DEFAULT = msg_failed
         #: Agent identification
-        self.agent: Any = agent
+        self.agent: Any | DEFAULT = agent
         #: Trace/audit logging topic
         self.topic: str = topic
         #: Trace flags override
@@ -220,15 +221,15 @@ class traced: # noqa: N801
         #: Logging level for trace/audit messages
         self.level: LogLevel = level
         #: Max. length of parameters (longer will be trimmed)
-        self.max_len: int = max_param_length
+        self.max_len: int | UNLIMITED = max_param_length
         #: Extra data for `LogRecord`
-        self.extra: dict = extra
+        self.extra: dict[str, Any] = extra
         #: Callback function that gets the agent identification as argument,
         #: and must return True/False indicating whether trace is allowed.
         self.callback: Callable[[Any], bool] = self.__callback if callback is None else callback
         #: Indicator whether function has result value. If True, `_result_` is available
         #: for interpolation in `msg_after`.
-        self.has_result: bool = has_result
+        self.has_result: bool | DEFAULT= has_result
         #: If True, function arguments are available for interpolation in `msg_before`
         self.with_args: bool = with_args
     def __callback(self, agent: Any) -> bool: # noqa: ARG002
@@ -257,9 +258,9 @@ class traced: # noqa: N801
     def log_failed(self, logger: ContextLoggerAdapter, params: dict) -> None:
         """Log the 'failed' message using the configured template and logger."""
         logger.log(self.level, FStrMessage(self.msg_failed, params))
-    def __call__(self, fn: Callable):
+    def __call__(self, fn: Callable) -> Callable:
         @wraps(fn)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             """The actual wrapper function applied to the decorated callable.
 
             Checks runtime flags, prepares parameters, logs messages according
@@ -443,7 +444,7 @@ class TraceManager:
         self._flags: TraceFlag = TraceFlag.NONE
         # Initialize flags based on environment variables (FBASE_TRACE_*) and __debug__
         # Active flag
-        self.trace_active = convert_from_str(bool, os.getenv('FBASE_TRACE', str(__debug__)))
+        self.trace_active: bool = convert_from_str(bool, os.getenv('FBASE_TRACE', str(__debug__)))
         # Specific logging flags
         if convert_from_str(bool, os.getenv('FBASE_TRACE_BEFORE', 'no')): # pragma: no cover
             self.set_flag(TraceFlag.BEFORE)

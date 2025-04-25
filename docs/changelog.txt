@@ -16,6 +16,7 @@ Version 2.0.0 (unreleased)
   - Change: Sentinel objects completely reworked. Individual sentinels are now classes
     derived from `.Sentinel`.
   - Added: `__repr__` method for `.PyCode` and `.PyCallable` that will limit output to 50 characters.
+  - Added: Optional `encoding` parameter for `ZMQAddress` constructor.
 
 * `~firebird.base.buffer` module:
 

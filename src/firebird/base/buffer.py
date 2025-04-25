@@ -246,7 +246,7 @@ class MemoryBuffer:
     def _ensure_space(self, size: int) -> None:
         if len(self.raw) < self.pos + size:
             self.resize(self.pos + size)
-    def _check_space(self, size: int):
+    def _check_space(self, size: int) -> None:
         if len(self.raw) < self.pos + size:
             raise BufferError("Insufficient buffer size")
     def clear(self) -> None:
@@ -508,7 +508,7 @@ class MemoryBuffer:
             UnicodeDecodeError: If the read bytes cannot be decoded using `encoding`.
         """
         return self.read(self.read_short()).decode(encoding, errors)
-    def read_bytes(self) -> bytes:
+    def read_bytes(self) -> bytes | bytearray:
         """Read content of binary cluster (2 bytes data length followed by data).
 
 

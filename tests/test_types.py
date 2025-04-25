@@ -389,6 +389,10 @@ def test_zmqaddress_type():
     assert addr_bytes.address == "@my-bytes-address"
     assert addr_bytes.protocol == ZMQTransport.IPC
     assert addr_bytes.domain == ZMQDomain.NODE
+    addr_bytes = ZMQAddress(b"ipc://@my-bytes-address", encoding='ascii')
+    assert addr_bytes.address == "@my-bytes-address"
+    assert addr_bytes.protocol == ZMQTransport.IPC
+    assert addr_bytes.domain == ZMQDomain.NODE
 
     # Error Handling
     with pytest.raises(ValueError, match="Unknown protocol 'onion'"):

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `firebird.base.buffer.MemoryBuffer.get_raw` method.
 - `get_raw` method to `BufferFactory`, `BytesBufferFactory` and `CTypesBufferFactory`.
 - `__repr__` method for `PyCode` and `PyCallable` that will limit output to 50 characters.
+- Optional `encoding` parameter for `ZMQAddress` constructor.
 
 ### Changed
 

@@ -288,7 +288,7 @@ class DirectoryScheme:
         self.force_home: bool = force_home
         _h = os.getenv(f"{self.name.upper()}_HOME")
         self.__home: Path = Path(_h) if _h is not None else Path.cwd()
-        home = self.home
+        home: Path = self.home
         self.dir_map: dict[str, Path] = {'config': home / 'config',
                                          'run_data': home / 'run_data',
                                          'logs': home / 'logs',
@@ -551,6 +551,8 @@ def get_directory_scheme(app_name: str, version: str | None=None, *, force_home:
                                                                  force_home=force_home)
 
 T = TypeVar("T")
+E = TypeVar("E", bound=Enum)
+F = TypeVar("F", bound=Flag)
 
 class Option(Generic[T], ABC):
     """Generic abstract base class for configuration options.
@@ -562,8 +564,8 @@ class Option(Generic[T], ABC):
         required: True if option must have a value.
         default: Default option value.
     """
-    def __init__(self, name: str, datatype: T, description: str, *, required: bool=False,
-                 default: T=None):
+    def __init__(self, name: str, datatype: type[T], description: str, *, required: bool=False,
+                 default: T | None =None):
         assert name and isinstance(name, str), "name required" # noqa: S101
         assert datatype and isinstance(datatype, type), "datatype required" # noqa: S101
         assert description and isinstance(description, str), "description required" # noqa: S101
@@ -571,7 +573,7 @@ class Option(Generic[T], ABC):
         #: Option name.
         self.name: str = name
         #: Option datatype.
-        self.datatype: T = datatype
+        self.datatype: type[T] = datatype
         #: Option description. Can span multiple lines.
         self.description: str = description
         #: True if option must have a value.
@@ -580,7 +582,7 @@ class Option(Generic[T], ABC):
         self.default: T = default
         if default is not None:
             self.set_value(default)
-    def _check_value(self, value: T) -> None:
+    def _check_value(self, value: T | None) -> None:
         if value is None and self.required:
             raise ValueError(f"Value is required for option '{self.name}'.")
         if value is not None and not isinstance(value, self.datatype):
@@ -686,11 +688,11 @@ class Option(Generic[T], ABC):
         """Returns value as string.
         """
     @abstractmethod
-    def get_value(self) -> T:
+    def get_value(self) -> T | None:
         """Returns current option value.
         """
     @abstractmethod
-    def set_value(self, value: T) -> None:
+    def set_value(self, value: T | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -745,8 +747,8 @@ class Config:
     def __init__(self, name: str, *, optional: bool=False, description: str | None=None):
         self._name: str = name
         self._optional: bool = optional
-        self._description: str = description if description is not None else self.__doc__
-    def __setattr__(self, name, value):
+        self._description: str | None = description if description is not None else self.__doc__
+    def __setattr__(self, name, value) -> None:
         for attr in vars(self).values():
             if isinstance(attr, Option) and attr.name == name:
                 raise ValueError("Cannot assign values to option itself, use 'option.value' instead")
@@ -926,7 +928,7 @@ class StrOption(Option[str]):
         starting with `|`.
     """
     def __init__(self, name: str, description: str, *, required: bool=False, default: str | None=None):
-        self._value: str = None
+        self._value: str | None = None
         super().__init__(name, str, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -966,11 +968,11 @@ class StrOption(Option[str]):
         """Returns value as string.
         """
         return self._value
-    def get_value(self) -> str:
+    def get_value(self) -> str | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: str) -> None:
+    def set_value(self, value: str | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1006,7 +1008,7 @@ class StrOption(Option[str]):
         """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: str = property(get_value, set_value, doc="Current option value")
+    value: str | None = property(get_value, set_value, doc="Current option value")
 
 class IntOption(Option[int]):
     """Configuration option with integer value.
@@ -1020,7 +1022,7 @@ class IntOption(Option[int]):
     """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: int | None=None, signed: bool=False):
-        self._value: int = None
+        self._value: int | None = None
         self.__signed: bool = signed
         super().__init__(name, int, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
@@ -1051,11 +1053,11 @@ class IntOption(Option[int]):
         """Returns value as string.
         """
         return str(self._value)
-    def get_value(self) -> int:
+    def get_value(self) -> int | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: int) -> None:
+    def set_value(self, value: int | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1100,7 +1102,7 @@ class IntOption(Option[int]):
                 opt.as_sint64 = self._value
             else:
                 opt.as_uint64 = self._value
-    value: int = property(get_value, set_value, doc="Current option value")
+    value: int | None = property(get_value, set_value, doc="Current option value")
 
 class FloatOption(Option[float]):
     """Configuration option with float value.
@@ -1113,7 +1115,7 @@ class FloatOption(Option[float]):
     """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: float | None=None):
-        self._value: float = None
+        self._value: float | None = None
         super().__init__(name, float, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -1140,11 +1142,11 @@ class FloatOption(Option[float]):
         """Returns value as string.
         """
         return str(self._value)
-    def get_value(self) -> float:
+    def get_value(self) -> float | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: float) -> None:
+    def set_value(self, value: float | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1183,7 +1185,7 @@ class FloatOption(Option[float]):
         """
         if self._value is not None:
             proto.options[self.name].as_double = self._value
-    value: float = property(get_value, set_value, doc="Current option value")
+    value: float | None = property(get_value, set_value, doc="Current option value")
 
 class DecimalOption(Option[Decimal]):
     """Configuration option with decimal.Decimal value.
@@ -1196,7 +1198,7 @@ class DecimalOption(Option[Decimal]):
     """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: Decimal | None=None):
-        self._value: Decimal = None
+        self._value: Decimal | None = None
         super().__init__(name, Decimal, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -1226,11 +1228,11 @@ class DecimalOption(Option[Decimal]):
         """Returns value as string.
         """
         return str(self._value)
-    def get_value(self) -> Decimal:
+    def get_value(self) -> Decimal | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: Decimal) -> None:
+    def set_value(self, value: Decimal | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1269,7 +1271,7 @@ class DecimalOption(Option[Decimal]):
         """
         if self._value is not None:
             proto.options[self.name].as_string = str(self._value)
-    value: Decimal = property(get_value, set_value, doc="Current option value")
+    value: Decimal | None = property(get_value, set_value, doc="Current option value")
 
 class BoolOption(Option[bool]):
     """Configuration option with boolean value.
@@ -1282,7 +1284,7 @@ class BoolOption(Option[bool]):
     """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: bool | None=None):
-        self._value: bool = None
+        self._value: bool | None = None
         self.from_str = get_convertor(bool).from_str
         super().__init__(name, bool, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
@@ -1312,11 +1314,11 @@ class BoolOption(Option[bool]):
         """Returns value as string.
         """
         return str(self._value)
-    def get_value(self) -> bool:
+    def get_value(self) -> bool | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: bool) -> None: # noqa: FBT001
+    def set_value(self, value: bool | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1355,7 +1357,7 @@ class BoolOption(Option[bool]):
         """
         if self._value is not None:
             proto.options[self.name].as_bool = self._value
-    value: bool = property(get_value, set_value, doc="Current option value")
+    value: bool | None = property(get_value, set_value, doc="Current option value")
 
 class ZMQAddressOption(Option[ZMQAddress]):
     """Configuration option with `.ZMQAddress` value.
@@ -1368,7 +1370,7 @@ class ZMQAddressOption(Option[ZMQAddress]):
     """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: ZMQAddress=None):
-        self._value: ZMQAddress = None
+        self._value: ZMQAddress | None = None
         super().__init__(name, ZMQAddress, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -1395,11 +1397,11 @@ class ZMQAddressOption(Option[ZMQAddress]):
         """Returns value as string.
         """
         return self._value
-    def get_value(self) -> ZMQAddress:
+    def get_value(self) -> ZMQAddress | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: ZMQAddress) -> None:
+    def set_value(self, value: ZMQAddress | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1435,9 +1437,9 @@ class ZMQAddressOption(Option[ZMQAddress]):
         """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: ZMQAddress = property(get_value, set_value, doc="Current option value")
+    value: ZMQAddress | None = property(get_value, set_value, doc="Current option value")
 
-class EnumOption(Option[Enum]):
+class EnumOption(Option[E], Generic[E]):
     """Configuration option with enum value.
 
     Arguments:
@@ -1448,11 +1450,11 @@ class EnumOption(Option[Enum]):
         allowed: List of allowed Enum members. When not defined, all members of enum type are
                  allowed.
     """
-    def __init__(self, name: str, enum_class: Enum, description: str, *, required: bool=False,
-                 default: Enum | None=None, allowed: list | None=None):
-        self._value: Enum = None
+    def __init__(self, name: str, enum_class: type[E], description: str, *, required: bool=False,
+                 default: E | None=None, allowed: list | None=None):
+        self._value: E | None = None
         #: List of allowed enum values.
-        self.allowed: Sequence = enum_class if allowed is None else allowed
+        self.allowed: Sequence[E] = enum_class if allowed is None else allowed
         self._members: dict = {i.name.lower(): i for i in self.allowed}
         super().__init__(name, enum_class, description, required=required, default=default)
     def _get_value_description(self) -> str:
@@ -1487,11 +1489,11 @@ class EnumOption(Option[Enum]):
         """Returns value as string.
         """
         return self._value.name
-    def get_value(self) -> Enum:
+    def get_value(self) -> E | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: Enum) -> None:
+    def set_value(self, value: E | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1529,9 +1531,9 @@ class EnumOption(Option[Enum]):
         """
         if self._value is not None:
             proto.options[self.name].as_string = self._value.name
-    value: Enum = property(get_value, set_value, doc="Current option value")
+    value: E | None = property(get_value, set_value, doc="Current option value")
 
-class FlagOption(Option[Flag]):
+class FlagOption(Option[F], Generic[F]):
     """Configuration option with flag value.
 
     Arguments:
@@ -1542,11 +1544,11 @@ class FlagOption(Option[Flag]):
         allowed: List of allowed Flag members. When not defined, all members of flag type are
                  allowed.
     """
-    def __init__(self, name: str, flag_class: Flag, description: str, *, required: bool=False,
-                 default: Flag | None=None, allowed: list | None=None):
-        self._value: Flag = None
+    def __init__(self, name: str, flag_class: type[F], description: str, *, required: bool=False,
+                 default: F | None=None, allowed: list | None=None):
+        self._value: F | None = None
         #: List of allowed flag values.
-        self.allowed: Sequence = flag_class if allowed is None else allowed
+        self.allowed: Sequence[F] = flag_class if allowed is None else allowed
         self._members: dict = {i.name.lower(): i for i in self.allowed}
         super().__init__(name, flag_class, description, required=required, default=default)
     def _get_value_description(self) -> str:
@@ -1587,11 +1589,11 @@ class FlagOption(Option[Flag]):
         if len(members) == 1 and members[0]._name_ is None:
             return f'{members[0]._value_}'
         return ' | '.join([str(m._name_ or m._value_) for m in members])
-    def get_value(self) -> Flag:
+    def get_value(self) -> F | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: Flag) -> None:
+    def set_value(self, value: F | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1634,7 +1636,7 @@ class FlagOption(Option[Flag]):
         """
         if self._value is not None:
             proto.options[self.name].as_uint64 = self._value.value
-    value: Flag = property(get_value, set_value, doc="Current option value")
+    value: F | None = property(get_value, set_value, doc="Current option value")
 
 class UUIDOption(Option[UUID]):
     """Configuration option with UUID value.
@@ -1647,7 +1649,7 @@ class UUIDOption(Option[UUID]):
     """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: UUID | None=None):
-        self._value: UUID = None
+        self._value: UUID | None = None
         super().__init__(name, UUID, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -1674,11 +1676,11 @@ class UUIDOption(Option[UUID]):
         """Returns value as string.
         """
         return 'None' if self._value is None else self._value.hex
-    def get_value(self) -> UUID:
+    def get_value(self) -> UUID | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: UUID) -> None:
+    def set_value(self, value: UUID | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1713,7 +1715,7 @@ class UUIDOption(Option[UUID]):
         """
         if self._value is not None:
             proto.options[self.name].as_bytes = self._value.bytes
-    value: UUID = property(get_value, set_value, doc="Current option value")
+    value: UUID | None = property(get_value, set_value, doc="Current option value")
 
 class MIMEOption(Option[MIME]):
     """Configuration option with MIME type specification value.
@@ -1725,7 +1727,7 @@ class MIMEOption(Option[MIME]):
         default: Default option value.
     """
     def __init__(self, name: str, description: str, *, required: bool=False, default: MIME=None):
-        self._value: MIME = None
+        self._value: MIME | None = None
         super().__init__(name, MIME, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -1752,11 +1754,11 @@ class MIMEOption(Option[MIME]):
         """Returns value as string.
         """
         return 'None' if self._value is None else self._value
-    def get_value(self) -> MIME:
+    def get_value(self) -> MIME | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: MIME) -> None:
+    def set_value(self, value: MIME | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1788,7 +1790,7 @@ class MIMEOption(Option[MIME]):
         """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: MIME = property(get_value, set_value, doc="Current option value")
+    value: MIME | None = property(get_value, set_value, doc="Current option value")
 
 class ListOption(Option[list]):
     """Configuration option with list of values.
@@ -1812,7 +1814,7 @@ class ListOption(Option[list]):
     """
     def __init__(self, name: str, item_type: type | Sequence[type], description: str,
                  *, required: bool=False, default: list | None=None, separator: str | None=None):
-        self._value: list = None
+        self._value: list | None = None
         #: Datatypes of list items. If there is more than one type, each value in
         #: config file must have format: `type_name:value_as_str`.
         self.item_types: Sequence[type] = item_type if isinstance(item_type, Sequence) else (item_type, )
@@ -1897,11 +1899,11 @@ class ListOption(Option[list]):
         if sep is None:
             sep = '\n' if sum(len(i) for i in result) > 80 else ',' # noqa: PLR2004
         return sep.join(result)
-    def get_value(self) -> list:
+    def get_value(self) -> list | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: list) -> None:
+    def set_value(self, value: list | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -1952,8 +1954,9 @@ class PyExprOption(Option[PyExpr]):
         required: True if option must have a value.
         default: Default option value.
     """
-    def __init__(self, name: str, description: str, *, required: bool=False, default: PyExpr=None):
-        self._value: PyExpr = None
+    def __init__(self, name: str, description: str, *, required: bool=False,
+                 default: PyExpr | None=None):
+        self._value: PyExpr | None = None
         super().__init__(name, PyExpr, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -1991,11 +1994,11 @@ class PyExprOption(Option[PyExpr]):
         """Returns value as string.
         """
         return self._value
-    def get_value(self) -> PyExpr:
+    def get_value(self) -> PyExpr | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: PyExpr) -> None:
+    def set_value(self, value: PyExpr | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -2031,7 +2034,7 @@ class PyExprOption(Option[PyExpr]):
         """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: PyExpr = property(get_value, set_value, doc="Current option value")
+    value: PyExpr | None = property(get_value, set_value, doc="Current option value")
 
 class PyCodeOption(Option[PyCode]):
     """String configuration option with Python code value.
@@ -2049,8 +2052,9 @@ class PyCodeOption(Option[PyCode]):
         with any number of subsequent whitespace characters that are between `|` and first
         non-whitespace character on first line starting with `|`.
     """
-    def __init__(self, name: str, description: str, *, required: bool=False, default: PyCode=None):
-        self._value: PyCode = None
+    def __init__(self, name: str, description: str, *, required: bool=False,
+                 default: PyCode | None=None):
+        self._value: PyCode | None = None
         super().__init__(name, PyCode, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -2089,11 +2093,11 @@ class PyCodeOption(Option[PyCode]):
         """Returns value as string.
         """
         return self._value
-    def get_value(self) -> PyCode:
+    def get_value(self) -> PyCode | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: PyCode) -> None:
+    def set_value(self, value: PyCode | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -2129,7 +2133,7 @@ class PyCodeOption(Option[PyCode]):
         """
         if self._value is not None:
             proto.options[self.name].as_string = self._value
-    value: PyCode = property(get_value, set_value, doc="Current option value")
+    value: PyCode | None = property(get_value, set_value, doc="Current option value")
 
 class PyCallableOption(Option[PyCallable]):
     """String configuration option with Python callable value.
@@ -2150,7 +2154,7 @@ class PyCallableOption(Option[PyCallable]):
     """
     def __init__(self, name: str, description: str, signature: Signature | Callable | str,
                  * , required: bool=False, default: PyCallable | None=None):
-        self._value: PyCallable = None
+        self._value: PyCallable | None = None
         #: Callable signature.
         if isinstance(signature, str):
             if not signature.startswith('def'):
@@ -2198,11 +2202,11 @@ class PyCallableOption(Option[PyCallable]):
         """Returns value as string.
         """
         return self._value
-    def get_value(self) -> PyCallable:
+    def get_value(self) -> PyCallable | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: PyCallable) -> None:
+    def set_value(self, value: PyCallable | None) -> None:
         """Set new option value.
 
         Arguments:
@@ -2775,7 +2779,7 @@ class PathOption(Option[str]):
     """
     def __init__(self, name: str, description: str, *, required: bool=False,
                  default: Path | None=None):
-        self._value: Path = None
+        self._value: Path | None = None
         super().__init__(name, Path, description, required=required, default=default)
     def clear(self, *, to_default: bool=True) -> None:
         """Clears the option value.
@@ -2802,11 +2806,11 @@ class PathOption(Option[str]):
         """Returns value as string.
         """
         return str(self._value)
-    def get_value(self) -> Path:
+    def get_value(self) -> Path | None:
         """Returns current option value.
         """
         return self._value
-    def set_value(self, value: Path) -> None:
+    def set_value(self, value: Path | None) -> None:
         """Set new option value.
 
         Arguments:

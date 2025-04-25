@@ -54,7 +54,7 @@ that might be filtered out due to log levels.
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from enum import Enum, IntEnum
 from typing import Any
 
@@ -65,9 +65,9 @@ class FormatElement(Enum):
     TOPIC = 2
 
 #: Sentinel representing the domain element in `LoggingManager.logger_fmt`.
-DOMAIN = FormatElement.DOMAIN
+DOMAIN: FormatElement = FormatElement.DOMAIN
 #: Sentinel representing the topic element in `LoggingManager.logger_fmt`.
-TOPIC = FormatElement.TOPIC
+TOPIC: FormatElement = FormatElement.TOPIC
 
 class LogLevel(IntEnum):
     """Mirrors standard `logging` levels for convenience and type hinting.
@@ -101,17 +101,17 @@ class FStrMessage:
                                 item_id=123, user="Alice"))
         # Formatting only happens if DEBUG level is enabled for the logger/handler.
     """
-    def __init__(self, fmt, /, *args, **kwargs):
-        self.fmt = fmt
-        self.args = args
-        self.kwargs = kwargs
+    def __init__(self, fmt: str, /, *args, **kwargs):
+        self.fmt: str = fmt
+        self.args: tuple[Any, ...] = args
+        self.kwargs: dict[str, Any] = kwargs
         if (args and len(args) == 1 and isinstance(args[0], Mapping) and args[0]):
             self.kwargs = args[0]
         else:
             self.kwargs = kwargs
             if args:
                 self.kwargs['args'] = args
-    def __str__(self):
+    def __str__(self) -> str:
         return eval(f'f"""{self.fmt}"""', globals(), self.kwargs) # noqa: S307
 
 class BraceMessage:
@@ -127,11 +127,11 @@ class BraceMessage:
         logger.warning(BraceMessage(("Message with coordinates: ({point.x:.2f}, {point.y:.2f})",
                                      point=point))
     """
-    def __init__(self, fmt, /, *args, **kwargs):
-        self.fmt = fmt
-        self.args = args
-        self.kwargs = kwargs
-    def __str__(self):
+    def __init__(self, fmt: str, /, *args, **kwargs):
+        self.fmt: str = fmt
+        self.args: tuple[Any, ...] = args
+        self.kwargs: dict[str, Any] = kwargs
+    def __str__(self) -> str:
         return self.fmt.format(*self.args, **self.kwargs)
 
 class DollarMessage:
@@ -146,10 +146,10 @@ class DollarMessage:
         logger.info(DollarMessage("Task $name completed with status $status",
                                   name='Cleanup', status='Success'))
     """
-    def __init__(self, fmt, /, **kwargs):
-        self.fmt = fmt
-        self.kwargs = kwargs
-    def __str__(self):
+    def __init__(self, fmt: str, /, **kwargs):
+        self.fmt: str = fmt
+        self.kwargs: dict[str, Any] = kwargs
+    def __str__(self) -> str:
         from string import Template
         return Template(self.fmt).substitute(**self.kwargs)
 
@@ -170,7 +170,7 @@ class ContextFilter(logging.Filter):
         handler.addFilter(ContextFilter())
         # ... add handler to logger ...
     """
-    def filter(self, record):
+    def filter(self, record) -> bool:
         for attr in ('domain', 'topic', 'agent', 'context'):
             if not hasattr(record, attr):
                 setattr(record, attr, None)
@@ -190,14 +190,14 @@ class ContextLoggerAdapter(logging.LoggerAdapter):
         agent: The original agent object or string passed to `get_logger`.
         agent_name: The resolved string name for the agent.
     """
-    def __init__(self, logger, domain: str, topic: str, agent: Any, agent_name: str):
+    def __init__(self, logger, domain: str | None, topic: str | None, agent: Any, agent_name: str):
         self.agent = agent
         super().__init__(logger,
                          {'domain': domain,
                           'topic': topic,
                           'agent': agent_name}
                          )
-    def process(self, msg, kwargs):
+    def process(self, msg: Any, kwargs: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
         """Process the logging message and keyword arguments passed in to
         a logging call to insert contextual information.
 
@@ -228,12 +228,12 @@ class LoggingManager:
         self._agent_map: dict[str, str] = {}
         self.__logger_fmt: list[str | FormatElement] = []
         self.__default_domain: str | None = None
-        self._logger_factory = logging.getLogger
-    def get_logger_factory(self):
+        self._logger_factory: Callable = logging.getLogger
+    def get_logger_factory(self) -> Callable:
         """Return a callable which is used to create a Logger.
         """
         return self._logger_factory
-    def set_logger_factory(self, factory):
+    def set_logger_factory(self, factory) -> None:
         """Set a callable which is used to create a Logger.
 
         Parameters:
@@ -314,7 +314,7 @@ class LoggingManager:
     @default_domain.setter
     def default_domain(self, value: str | None) -> None:
         self.__default_domain = None if value is None else str(value)
-    def _get_logger_name(self, domain: str, topic: str | None) -> str:
+    def _get_logger_name(self, domain: str | None, topic: str | None) -> str:
         """Returns `logging.Logger` name.
         """
         result = []
@@ -382,7 +382,7 @@ class LoggingManager:
             > logging_manager.get_agent_name(logging_manager)
             'firebird.base.logging.LoggingManager'
         """
-        agent_name = agent
+        agent_name: Any = agent
         if not isinstance(agent, str):
             if not (agent_name := getattr(agent, '_agent_name_', None)):
                 agent_name = f'{agent.__class__.__module__}.{agent.__class__.__qualname__}'

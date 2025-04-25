@@ -230,11 +230,11 @@ class HookManager(Singleton):
     remove, and retrieve callbacks based on event and source specifications.
     """
     def __init__(self):
-        self.obj_map: WeakKeyDictionary = WeakKeyDictionary()
+        self.obj_map: WeakKeyDictionary[Any, str] = WeakKeyDictionary()
         self.hookables: dict[type, set[Any]] = {}
         self.hooks: Registry = Registry()
         self.flags: HookFlag = HookFlag.NONE
-    def _update_flags(self, event: Any, cls: Any, obj: Any) -> None:
+    def _update_flags(self, event: Any, cls: type, obj: Any) -> None:
         if event is ANY:
             self.flags |= HookFlag.ANY_EVENT
         if cls is not ANY:
@@ -312,7 +312,8 @@ class HookManager(Singleton):
             ValueError: If `event` is not `ANY` and is not declared as a supported event
                         by the specified `source` class (during `register_class`).
         """
-        cls = obj = ANY
+        cls: type = ANY
+        obj: Any = ANY
         if isinstance(source, type):
             if source in self.hookables:
                 cls = source
@@ -359,13 +360,14 @@ class HookManager(Singleton):
 
             This method does nothing if no matching hook registration is found.
         """
-        cls = obj = ANY
+        cls: type = ANY
+        obj: Any = ANY
         if isinstance(source, type):
             cls = source
         else:
             obj = source
         key = (event, cls, obj)
-        hook: Hook = self.hooks.get(key)
+        hook: Hook | None = self.hooks.get(key)
         if hook is not None:
             hook.callbacks.remove(callback)
             if not hook.callbacks:
@@ -424,7 +426,8 @@ class HookManager(Singleton):
            If `source` is a class or name directly, only relevant parts of the
            above logic apply.
         """
-        result = []
+        result: list[Callable] = []
+        hook: Hook | None
         if isinstance(source, type):
             if HookFlag.CLASS in self.flags:
                 if (hook := self.hooks.get((event, source, ANY))) is not None:
