@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 #
 #   PROGRAM/MODULE: firebird-base
-#   FILE:           test/test_hooks.py
+#   FILE:           tests/test_hooks.py
 #   DESCRIPTION:    Tests for firebird.base.hooks
 #   CREATED:        14.5.2020
 #

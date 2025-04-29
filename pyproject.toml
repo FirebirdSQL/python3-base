@@ -54,6 +54,11 @@ packages = ["src/firebird"]
 dependencies = [
 ]
 
+[tool.hatch.envs.hatch-test]
+extra-args = ["-vv"]
+dependencies = [
+]
+
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.11", "3.12", "3.13"]
 

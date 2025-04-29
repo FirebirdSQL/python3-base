@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 #
 # PROGRAM/MODULE: firebird-base
-# FILE:           test/test_trace.py
+# FILE:           tests/test_trace.py
 # DESCRIPTION:    Tests for firebird.base.trace
 # CREATED:        21.5.2020
 #

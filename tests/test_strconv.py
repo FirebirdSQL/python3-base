@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 #
 #   PROGRAM/MODULE: firebird-base
-#   FILE:           test/test_strconv.py
+#   FILE:           tests/test_strconv.py
 #   DESCRIPTION:    Tests for firebird.base.strconv
 #   CREATED:        21.1.2025
 #

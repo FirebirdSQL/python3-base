@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 #
 # PROGRAM/MODULE: firebird-base
-# FILE:           test/test_protobuf.py
+# FILE:           tests/test_protobuf.py
 # DESCRIPTION:    Tests for firebird.base.protobuf
 # CREATED:        21.5.2020
 #

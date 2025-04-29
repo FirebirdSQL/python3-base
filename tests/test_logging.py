@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 #
 # PROGRAM/MODULE: firebird-base
-# FILE:           test/test_logging.py
+# FILE:           tests/test_logging.py
 # DESCRIPTION:    Tests for firebird.base.logging
 # CREATED:        21.5.2020
 #

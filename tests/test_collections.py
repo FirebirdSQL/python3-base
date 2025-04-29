@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 #
 # PROGRAM/MODULE: firebird-base
-# FILE:           test/test_collections.py
+# FILE:           tests/test_collections.py
 # DESCRIPTION:    Tests for firebird.base.collections
 # CREATED:        20.9.2019
 #
