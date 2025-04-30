@@ -64,7 +64,7 @@ class SimpleEnum(IntEnum):
     READY      = 1
     RUNNING    = 2
 
-class TestParamBase:
+class ParamBase:
     """Base class for test parameter sets."""
     # Values used in tests
     DEFAULT_VAL = []
@@ -118,7 +118,7 @@ class TestParamBase:
 
 # --- Parameter Sets for Different List Item Types ---
 
-class StrParams(TestParamBase):
+class StrParams(ParamBase):
     """Parameters for ListOption[str]."""
     DEFAULT_VAL = ["DEFAULT_value"]
     PRESENT_VAL = ["present_value_1", "present_value_2"]
@@ -148,7 +148,7 @@ option_name =
 option_name =
 """
 
-class IntParams(TestParamBase):
+class IntParams(ParamBase):
     """Parameters for ListOption[int]."""
     DEFAULT_VAL = [0]
     PRESENT_VAL = [10, 20]
@@ -177,7 +177,7 @@ option_name = invalid
 option_name =
 """
 
-class FloatParams(TestParamBase):
+class FloatParams(ParamBase):
     """Parameters for ListOption[float]."""
     DEFAULT_VAL = [0.0]
     PRESENT_VAL = [10.1, 20.2]
@@ -206,7 +206,7 @@ option_name = invalid
 option_name =
 """
 
-class DecimalParams(TestParamBase):
+class DecimalParams(ParamBase):
     """Parameters for ListOption[Decimal]."""
     DEFAULT_VAL = [Decimal("0.0")]
     PRESENT_VAL = [Decimal("10.1"), Decimal("20.2")]
@@ -235,7 +235,7 @@ option_name = invalid
 option_name =
 """
 
-class BoolParams(TestParamBase):
+class BoolParams(ParamBase):
     """Parameters for ListOption[bool]."""
     DEFAULT_VAL = [False] # From "0"
     PRESENT_VAL = [True, False]
@@ -264,7 +264,7 @@ option_name = this is not a bool
 option_name =
 """
 
-class UUIDParams(TestParamBase):
+class UUIDParams(ParamBase):
     """Parameters for ListOption[UUID]."""
     DEFAULT_VAL = [UUID("eeb7f94a-256d-11ea-ad1d-5404a6a1fd6e")]
     PRESENT_VAL = [UUID("0a7fd53a-256e-11ea-ad1d-5404a6a1fd6e"),
@@ -297,7 +297,7 @@ option_name = this is not an uuid
 option_name =
 """
 
-class MIMEParams(TestParamBase):
+class MIMEParams(ParamBase):
     """Parameters for ListOption[MIME]."""
     DEFAULT_VAL = [MIME("application/octet-stream")]
     PRESENT_VAL = [MIME("text/plain;charset=utf-8"), MIME("text/csv")]
@@ -328,7 +328,7 @@ option_name = wrong mime specification
 option_name =
 """
 
-class ZMQAddressParams(TestParamBase):
+class ZMQAddressParams(ParamBase):
     """Parameters for ListOption[ZMQAddress]."""
     DEFAULT_VAL = [ZMQAddress("tcp://127.0.0.1:*")]
     PRESENT_VAL = [ZMQAddress("ipc://@my-address"), ZMQAddress("inproc://my-address"), ZMQAddress("tcp://127.0.0.1:9001")]
@@ -357,7 +357,7 @@ option_name = bad_value
 option_name =
 """
 
-class MultiTypeParams(TestParamBase):
+class MultiTypeParams(ParamBase):
     """Parameters for ListOption with multiple item types."""
     DEFAULT_VAL = ["DEFAULT_value"] # From str:DEFAULT_value
     PRESENT_VAL = [1, 1.1, Decimal("1.01"), True,
@@ -413,7 +413,7 @@ params = [StrParams, IntParams, FloatParams, DecimalParams, BoolParams, UUIDPara
           MIMEParams, ZMQAddressParams, MultiTypeParams]
 
 @pytest.fixture(params=params)
-def test_params(base_conf: ConfigParser, request) -> TestParamBase:
+def test_params(base_conf: ConfigParser, request) -> ParamBase:
     """Fixture providing parameterized test data for ListOption tests."""
     param_class = request.param
     data = param_class()
@@ -425,7 +425,7 @@ def test_params(base_conf: ConfigParser, request) -> TestParamBase:
 
 # --- Test Cases ---
 
-def test_simple(test_params: TestParamBase):
+def test_simple(test_params: ParamBase):
     """Tests basic ListOption: init, load, value access, clear, default handling."""
     opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description")
 
@@ -479,7 +479,7 @@ def test_simple(test_params: TestParamBase):
             opt.value = [test_params.NEW_VAL[0], 123] # Assign int to str list
 
 
-def test_required(test_params: TestParamBase):
+def test_required(test_params: ParamBase):
     """Tests ListOption with the 'required' flag."""
     opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description", required=True)
 
@@ -511,7 +511,7 @@ def test_required(test_params: TestParamBase):
     assert opt.value == test_params.NEW_VAL
     opt.validate()
 
-def test_bad_value(test_params: TestParamBase):
+def test_bad_value(test_params: ParamBase):
     """Tests loading invalid list string values."""
     opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description")
 
@@ -552,7 +552,7 @@ def test_bad_value(test_params: TestParamBase):
             assert excinfo.value.args == test_params.BAD_MSG
 
 
-def test_default(test_params: TestParamBase):
+def test_default(test_params: ParamBase):
     """Tests ListOption with a defined default list value."""
     opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description",
                             default=test_params.DEFAULT_OPT_VAL)
@@ -591,7 +591,7 @@ def test_default(test_params: TestParamBase):
     opt.value.append(test_params.DEFAULT_VAL[0]) # Modify the current value list
     assert opt.default == test_params.DEFAULT_OPT_VAL # Original default should be unchanged
 
-def test_proto(test_params: TestParamBase, proto: ConfigProto):
+def test_proto(test_params: ParamBase, proto: ConfigProto):
     """Tests serialization to and deserialization from Protobuf messages."""
     opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description",
                             default=test_params.DEFAULT_OPT_VAL)
@@ -650,7 +650,7 @@ def test_proto(test_params: TestParamBase, proto: ConfigProto):
             assert excinfo.value.args == test_params.BAD_MSG
 
 
-def test_get_config(test_params: TestParamBase):
+def test_get_config(test_params: ParamBase):
     """Tests the get_config method for generating config file string representation."""
     opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description",
                             default=test_params.DEFAULT_OPT_VAL)
@@ -694,7 +694,7 @@ option_name = {test_params.LONG_PRINT}
     opt.set_value(None)
     assert opt.get_config(plain=True) == "option_name = <UNDEFINED>\n"
 
-def test_separator_override(test_params: TestParamBase):
+def test_separator_override(test_params: ParamBase):
     """Tests ListOption with an explicit separator."""
     # Use semicolon as separator
     opt = config.ListOption("option_name", test_params.ITEM_TYPE, "description",
