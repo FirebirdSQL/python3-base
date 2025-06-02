@@ -404,9 +404,8 @@ class TracedClassConfig(BaseTraceConfig):
             ListOption('methods', str, "Names of traced class methods")
         #: Configuration sections with extended config of traced class methods
         self.special: ConfigListOption = \
-            ConfigListOption('special',
-                             "Configuration sections with extended config of traced class methods",
-                             TracedMethodConfig)
+            ConfigListOption('special', TracedMethodConfig,
+                             "Configuration sections with extended config of traced class methods")
         #: Wherher configuration should be applied also to all registered descendant classes [default: True].
         self.apply_to_descendants: BoolOption = \
             BoolOption('apply_to_descendants',
@@ -428,9 +427,9 @@ class TraceConfig(BaseTraceConfig):
                        default=True)
         #: Configuration sections with traced Python classes [required].
         self.classes: ConfigListOption = \
-            ConfigListOption('classes',
+            ConfigListOption('classes', TracedClassConfig,
                              "Configuration sections with traced Python classes",
-                             TracedClassConfig, required=True)
+                             required=True)
 
 class TraceManager:
     """Trace manager.

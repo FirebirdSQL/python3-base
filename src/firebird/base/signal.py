@@ -331,20 +331,18 @@ class eventsocket: # noqa: N801
     """
     _empty: _EventSocket = _EventSocket()
     def __init__(self, fget: Callable, doc: str | None=None):
-        s = Signature.from_callable(fget)
-        # Remove 'self' from list of parameters
-        self._sig: Signature = s.replace(parameters=[v for k,v in s.parameters.items()
-                                                     if k.lower() != 'self'])
+        # Store callable for later signature inspection
+        self._callable = fget
         # Key: instance of class where this eventsocket instance is used to define a property
         # Value: _EventSocket
         self._map = WeakKeyDictionary()
         if doc is None and fget is not None:
             doc = fget.__doc__
         self.__doc__ = doc
-    def _kw_test(self, sig: Signature) -> bool:
-        p = sig.parameters
+    def _kw_test(self, given: Signature, expected: Signature) -> bool:
+        p = given.parameters
         result = False
-        for k in set(p).difference(set(self._sig.parameters)):
+        for k in set(p).difference(set(expected.parameters)):
             result = True
             if p[k].default is Signature.empty:
                 return False
@@ -361,10 +359,15 @@ class eventsocket: # noqa: N801
         if not callable(value):
             raise ValueError(f"Connection to non-callable '{value.__class__.__name__}' object failed")
         # Verify signatures
-        sig = Signature.from_callable(value)
-        if str(sig) != str(self._sig):
+        expected_sig: Signature = Signature.from_callable(self._callable, eval_str=True)
+        # Remove 'self' from list of parameters
+        expected_sig = expected_sig.replace(parameters=[v for k,v in expected_sig.parameters.items()
+                                                        if k.lower() != 'self'])
+
+        given_sig = Signature.from_callable(value, eval_str=True)
+        if str(given_sig) != str(expected_sig):
             # Check if the difference is only in keyword arguments with defaults.
-            if not self._kw_test(sig):
+            if not self._kw_test(given_sig, expected_sig):
                 raise ValueError("Callable signature does not match the event signature")
         self._map[obj] = _EventSocket(value)
     def __delete__(self, obj):

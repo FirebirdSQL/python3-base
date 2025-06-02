@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.1] - 2025-06-02
+
+### Fixed
+
+- Issue with trace configuration.
+- Issues with `_decompose`.
+- Signature match in `eventsocket`.
+
 ## [2.0.0] - 2025-04-30
 
 ### Added

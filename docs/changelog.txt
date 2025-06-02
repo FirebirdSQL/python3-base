@@ -2,6 +2,13 @@
 Changelog
 #########
 
+Version 2.0.1
+=============
+
+* Fix: for trace configuration.
+* Fix: issues with `_decompose`.
+* Fix: Signature match in `.eventsocket`.
+
 Version 2.0.0
 =============
 
