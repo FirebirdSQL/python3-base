@@ -101,7 +101,7 @@ from configparser import (
     NoSectionError,
 )
 from decimal import Decimal, DecimalException
-from enum import Enum, Flag
+from enum import Enum, Flag, _high_bit
 from inspect import Parameter, Signature, signature
 from pathlib import Path
 from typing import Any, Generic, TypeVar, cast, get_type_hints
@@ -174,12 +174,6 @@ def _decompose(flag, value):
         # we have the breakdown, don't need the value member itself
         members.pop(0)
     return members, not_covered
-
-def _power_of_two(value):
-    "Check if value is a power of two (internal helper for FlagOption)."
-    if value < 1:
-        return False
-    return value == 2 ** (value.bit_length() - 1)
 
 class EnvExtendedInterpolation(ExtendedInterpolation):
     """.. versionadded:: 1.8.0

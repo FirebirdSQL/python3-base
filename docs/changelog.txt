@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 2.0.2
+=============
+
+* Fix: "quick fingers" issue with `_decompose` fix.
+
 Version 2.0.1
 =============
 

@@ -459,6 +459,7 @@ class TraceManager:
     def clear(self) -> None:
         """Removes all trace specifications.
         """
+        cls: TracedClass
         for cls in self._traced:
             cls.traced.clear()
     def register(self, cls: type) -> None:
@@ -523,6 +524,7 @@ class TraceManager:
             if strict:
                 raise TypeError(f"Class '{obj.__class__.__name__}' not registered for trace!")
             return obj
+        item: TracedItem
         for item in entry.traced:
             setattr(obj, item.method, item.decorator(*item.args, **item.kwargs)(getattr(obj, item.method)))
         return obj
@@ -582,6 +584,7 @@ class TraceManager:
             cls_kwargs = {}
             cls_kwargs.update(global_kwargs)
             cls_kwargs.update(build_kwargs(cls_cfg))
+            cls_desc: TracedClass
             if (cls_desc := self._traced.find(partial(with_name, cls_name))) is None:
                 if cfg.autoregister.value:
                     cls = load(':'.join(cls_name.rsplit('.', 1)))
