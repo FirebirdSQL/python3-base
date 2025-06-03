@@ -21,7 +21,7 @@ Topic covered by `firebird-base` package:
 - Callback system based on Signals and Slots, and "Delphi events".
 
 
-.. note:: Requires Python 3.8+
+.. note:: Requires Python 3.11+
 
 .. tip:: You can download docset for Dash_ (MacOS) or Zeal_ (Windows / Linux) documentation
    readers from releases_ at github.
