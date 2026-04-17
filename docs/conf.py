@@ -21,7 +21,7 @@ from firebird.base.__about__ import __version__
 # -- Project information -----------------------------------------------------
 
 project = "Firebird-base"
-copyright = "2020-2025, The Firebird Project"
+copyright = "2020-2026, The Firebird Project"
 author = "Pavel Císař"
 
 # The short X.Y version
