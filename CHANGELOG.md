@@ -5,11 +5,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [2.0.3] - 2026-04-17
+
+### Fixed
+
+- Problem with `entry_points` in `protobuf` module under Python 3.14
+
 ## [2.0.2] - 2025-06-02
 
 ### Fixed
 
-- Fix: "quick fingers" issue with `_decompose` fix.
+- "quick fingers" issue with `_decompose` fix.
 
 ## [2.0.1] - 2025-06-02
 

@@ -54,6 +54,17 @@ packages = ["src/firebird"]
 dependencies = [
 ]
 
+[tool.hatch.envs.gdocs]
+dependencies = [
+  "great-docs",
+]
+
+[tool.hatch.envs.gdocs.scripts]
+init = "great-docs init"
+scan = "great-docs scan"
+build = "great-docs build"
+preview = "great-docs preview"
+
 [tool.hatch.envs.hatch-test]
 extra-args = ["-vv"]
 dependencies = [
@@ -62,7 +73,7 @@ dependencies = [
 ]
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.11", "3.12", "3.13"]
+python = ["3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.doc]
 detached = false

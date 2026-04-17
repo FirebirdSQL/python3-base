@@ -443,7 +443,7 @@ def load_registered(group: str) -> None: # pragma: no cover
          load_registered('firebird.base.protobuf')
          # Now messages/enums registered via entry points are available
     """
-    for desc in (entry.load() for entry in entry_points().get(group, [])):
+    for desc in (entry.load() for entry in entry_points().select(group=group)):
         register_decriptor(desc)
 
 for well_known in [any_pb2, struct_pb2, duration_pb2, empty_pb2, timestamp_pb2, field_mask_pb2]:
