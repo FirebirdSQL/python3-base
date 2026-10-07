@@ -33,9 +33,7 @@
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________
 
-"""firebird-base - Context-based logging
-
-This module provides context-based logging system built on top of standard `logging` module.
+"""This module provides context-based logging system built on top of standard `logging` module.
 It also solves the common logging management problem when various modules use hard-coded
 separate loggers, and provides several types of message wrappers that allow lazy message
 interpolation using f-string, brace (`str.format`) or dollar (`string.Template`) formats.
@@ -64,10 +62,10 @@ class FormatElement(Enum):
     DOMAIN = 1
     TOPIC = 2
 
-#: Sentinel representing the domain element in `LoggingManager.logger_fmt`.
 DOMAIN: FormatElement = FormatElement.DOMAIN
-#: Sentinel representing the topic element in `LoggingManager.logger_fmt`.
+"Sentinel representing the domain element in `LoggingManager.logger_fmt`."
 TOPIC: FormatElement = FormatElement.TOPIC
+"Sentinel representing the topic element in `LoggingManager.logger_fmt`."
 
 class LogLevel(IntEnum):
     """Mirrors standard `logging` levels for convenience and type hinting.
@@ -91,15 +89,16 @@ class FStrMessage:
     formatted by a handler, improving performance if the message might be
     filtered out by log level settings.
 
-    Note:
+    Danger:
         Uses `eval()` internally. Ensure the format string and arguments
         do not contain untrusted user input.
 
-    Example::
-
+    Example:
+        ```python
         logger.debug(FStrMessage("Processing item {item_id} for user {user!r}",
                                 item_id=123, user="Alice"))
         # Formatting only happens if DEBUG level is enabled for the logger/handler.
+        ```
     """
     def __init__(self, fmt: str, /, *args, **kwargs):
         self.fmt: str = fmt
@@ -120,12 +119,13 @@ class BraceMessage:
     Defers the call to `str.format()` until the message is actually formatted
     by a handler, improving performance for potentially filtered messages.
 
-    Example::
-
+    Example:
+        ```python
         logger.warning(BraceMessage("Connection failed: host={0}, port={1}",
                                     'server.com', 8080))
         logger.warning(BraceMessage(("Message with coordinates: ({point.x:.2f}, {point.y:.2f})",
                                      point=point))
+        ```
     """
     def __init__(self, fmt: str, /, *args, **kwargs):
         self.fmt: str = fmt
@@ -140,11 +140,12 @@ class DollarMessage:
     Defers the substitution using `string.Template` until the message is actually
     formatted by a handler, improving performance for potentially filtered messages.
 
-    Example::
-
+    Example:
+        ```python
         from string import Template # Not strictly needed for caller
         logger.info(DollarMessage("Task $name completed with status $status",
                                   name='Cleanup', status='Success'))
+        ```
     """
     def __init__(self, fmt: str, /, **kwargs):
         self.fmt: str = fmt
@@ -164,11 +165,12 @@ class ContextFilter(logging.Filter):
         Attach an instance of this filter to `logging.Handler` objects to ensure
         formatters expecting these fields do not raise `AttributeError`.
 
-    Example::
-
+    Example:
+        ```python
         handler = logging.StreamHandler()
         handler.addFilter(ContextFilter())
         # ... add handler to logger ...
+        ```
     """
     def filter(self, record) -> bool:
         for attr in ('domain', 'topic', 'agent', 'context'):
@@ -179,9 +181,9 @@ class ContextFilter(logging.Filter):
 class ContextLoggerAdapter(logging.LoggerAdapter):
     """Logger adapter injecting context (`domain`, `topic`, `agent`, `context`) info.
 
-    Wraps a standard `logging.Logger`. When a logging method (e.g., `info`, `debug`)
+    Wraps a standard [logging.Logger][]. When a logging method (e.g., `info`, `debug`)
     is called, it adds the context information into the `extra` dictionary, making
-    it available as attributes on the resulting `logging.LogRecord`.
+    it available as attributes on the resulting [logging.LogRecord][].
 
     Parameters:
         logger: The standard `logging.Logger` instance to wrap.
@@ -262,13 +264,14 @@ class LoggingManager:
         The final `logging.Logger` name is constructed by joining elements of this list with
         dots, and with sentinels replaced with `domain` and `topic` names.
 
-        Example::
-
+        Example:
+           ```python
            logger_fmt = ['app', DOMAIN, TOPIC]
            domain = 'database'
            topic = 'trace'
 
            Logger name will be: "app.database.trace"
+           ```
         """
         return self.__logger_fmt
     @logger_fmt.setter
@@ -376,11 +379,12 @@ class LoggingManager:
            name determined in steps 1 or 2.
         4. Ensures the final result is a string.
 
-        Example::
-
+        Example:
+            ```
             > from firebird.base.logging import logging_manager
             > logging_manager.get_agent_name(logging_manager)
             'firebird.base.logging.LoggingManager'
+            ```
         """
         agent_name: Any = agent
         if not isinstance(agent, str):
@@ -502,13 +506,13 @@ class LoggingManager:
         logger = self._logger_factory(self._get_logger_name(domain, topic))
         return ContextLoggerAdapter(logger, domain, topic, agent, agent_name)
 
-#: Context logging manager.
 logging_manager: LoggingManager = LoggingManager()
-#: Shortcut to global `.LoggingManager.get_logger` function.
+"Context logging manager."
 get_logger = logging_manager.get_logger
-#: Shortcut to global `.LoggingManager.get_agent_name` function.
+"Shortcut to global `LoggingManager.get_logger` function."
 get_agent_name = logging_manager.get_agent_name
-#: Shortcut to global `.LoggingManager.set_domain_mapping` function.
+"Shortcut to global `LoggingManager.get_agent_name` function."
 set_domain_mapping = logging_manager.set_domain_mapping
-#: Shortcut to global `.LoggingManager.set_agent_mapping` function.
+"Shortcut to global `LoggingManager.set_domain_mapping` function."
 set_agent_mapping = logging_manager.set_agent_mapping
+"Shortcut to global `LoggingManager.set_agent_mapping` function."

@@ -34,20 +34,22 @@
 #                 Tom Bulled (new Sentinels)
 #                 ______________________________________
 
-"""Firebird Base - Core Types and Utilities
-
-This module provides fundamental building blocks used across the `firebird-base`
+"""This module provides fundamental building blocks used across the `firebird-base`
 package and potentially other Firebird Python projects. It includes:
 
-- A custom base exception class (`Error`).
-- Utilities for creating Singletons (`Singleton`).
-- A robust implementation for Sentinel objects (`Sentinel`) and common predefined sentinels.
-- Base classes for objects with distinct identities based on keys (`Distinct`, `CachedDistinct`).
-- Enumerations for specific concepts (`ByteOrder`, `ZMQTransport`, `ZMQDomain`).
-- Enhanced string types with validation and added functionality (`ZMQAddress`, `MIME`,
-  `PyExpr`, `PyCode`, `PyCallable`).
-- Metaclass utilities (`conjunctive`).
-- Helper functions (`load`).
+- A custom base exception class ([Error][firebird.base.types.Error]).
+- Utilities for creating Singletons ([Singleton][firebird.base.types.Singleton]).
+- A robust implementation for Sentinel objects ([Sentinel][firebird.base.types.Sentinel])
+  and common predefined sentinels.
+- Base classes for objects with distinct identities based on keys
+  ([Distinct][firebird.base.types.Distinct], [CachedDistinct][firebird.base.types.CachedDistinct]).
+- Enumerations for specific concepts ([ByteOrder][firebird.base.types.ByteOrder],
+  [ZMQTransport][firebird.base.types.ZMQTransport], [ZMQDomain][firebird.base.types.ZMQDomain]).
+- Enhanced string types with validation and added functionality ([ZMQAddress][firebird.base.types.ZMQAddress],
+  [MIME][firebird.base.types.MIME], [PyExpr][firebird.base.types.PyExpr], [PyCode][firebird.base.types.PyCode],
+  [PyCallable][firebird.base.types.PyCallable]).
+- Metaclass utilities ([conjunctive][firebird.base.types.conjunctive]).
+- Helper functions ([load][firebird.base.types.load]).
 """
 
 from __future__ import annotations
@@ -66,13 +68,13 @@ from weakref import WeakValueDictionary
 class Error(Exception):
     """Exception intended as a base for application-related errors.
 
-    Unlike the standard `Exception`, this class accepts arbitrary keyword
+    Unlike the standard [Exception][], this class accepts arbitrary keyword
     arguments during initialization. These keyword arguments are stored as
     attributes on the exception instance.
 
-    Attribute lookup on instances of `Error` (or its subclasses) will return
+    Attribute lookup on instances of [Error][firebird.base.types.Error] (or its subclasses) will return
     `None` for any attribute that was not explicitly set via keyword arguments
-    during `__init__`, preventing `AttributeError` for common checks.
+    during `__init__`, preventing [AttributeError][] for common checks.
 
     Important:
         Attribute lookup on this class never fails, as all attributes that are not actually
@@ -80,8 +82,8 @@ class Error(Exception):
         since Python 3.11) is explicitly excluded from this behavior to ensure
         compatibility.
 
-    Example::
-
+    Example:
+        ```python
         try:
             if condition:
                 raise Error("Error message", err_code=1)
@@ -92,9 +94,10 @@ class Error(Exception):
                 ...
             elif e.err_code == 1:
                 ...
+        ```
 
     Note:
-        Warnings are not errors and should typically derive from `Warning`,
+        Warnings are not errors and should typically derive from [Warning][],
         not this class.
     """
     def __init__(self, *args, **kwargs):
@@ -114,7 +117,7 @@ class Error(Exception):
 _singletons_ = {}
 
 class SingletonMeta(type):
-    """Metaclass for `Singleton` classes.
+    """Metaclass for [Singleton][firebird.base.types.Singleton] classes.
 
     Manages internal cache of class instances. If instance for a class is in cache, it's
     returned without calling the constructor, otherwise the instance is created normally
@@ -131,17 +134,17 @@ class SingletonMeta(type):
 class Singleton(metaclass=SingletonMeta):
     """Base class for singletons.
 
-    Ensures that only one instance of a class derived from `Singleton` exists.
+    Ensures that only one instance of a class derived from [Singleton][firebird.base.types.Singleton] exists.
     Subsequent attempts to 'create' an instance will return the existing one.
 
     Important:
         If a descendant class's `__init__` method accepts arguments, these
-        arguments are only used the *first* time the instance is created.
-        Subsequent calls that retrieve the cached instance will *not* invoke
+        arguments are only used the **first** time the instance is created.
+        Subsequent calls that retrieve the cached instance will **not** invoke
         `__init__` again.
 
-    Example::
-
+    Example:
+        ```python
         class MyService(Singleton):
             def __init__(self, config_param=None):
                 if hasattr(self, '_initialized'): # Prevent re-init
@@ -158,6 +161,7 @@ class Singleton(metaclass=SingletonMeta):
 
         print(service1 is service2) # Output: True
         service2.do_something()     # Output: Doing something with config: config1
+        ```
     """
 
 # Sentinels
@@ -235,13 +239,13 @@ class Sentinel(_SentinelMeta, metaclass=_SentinelMeta):
     1.  **By Subclassing:** Inherit directly from `Sentinel`. The name of the
         subclass becomes the sentinel's identity.
 
-        .. code-block:: python
+        ```python
+        class DEFAULT(Sentinel):
+            "Represents a default value placeholder."
 
-            class DEFAULT(Sentinel):
-                "Represents a default value placeholder."
-
-            class ALL(Sentinel):
-                "Represents all possible values."
+        class ALL(Sentinel):
+            "Represents all possible values."
+        ```
 
         This creates classes `DEFAULT` and `ALL`, each acting as a unique
         sentinel object.
@@ -249,11 +253,11 @@ class Sentinel(_SentinelMeta, metaclass=_SentinelMeta):
     2.  **Using the Functional Call:** Use the `Sentinel` base class itself
         as a factory function.
 
-        .. code-block:: python
-
-            # Signature: Sentinel(name: str, *, repr: str | None = None) -> Sentinel
-            NOT_FOUND = Sentinel("NOT_FOUND", repr="<Value Not Found>")
-            UNKNOWN = Sentinel("UNKNOWN")
+        ```python
+        # Signature: Sentinel(name: str, *, repr: str | None = None) -> Sentinel
+        NOT_FOUND = Sentinel("NOT_FOUND", repr="<Value Not Found>")
+        UNKNOWN = Sentinel("UNKNOWN")
+        ```
 
         - The required `name` argument (e.g., `"NOT_FOUND"`) specifies the
           `__name__` of the dynamically created sentinel class.
@@ -271,7 +275,7 @@ class Sentinel(_SentinelMeta, metaclass=_SentinelMeta):
 
     - Each sentinel is a unique object (a class behaving as a singleton).
     - Sentinels are identified using the `is` operator.
-    - They cannot be instantiated (e.g., `DEFAULT()` raises `TypeError`).
+    - They cannot be instantiated (e.g., `DEFAULT()` raises [TypeError][]).
     - They cannot be subclassed further after their initial definition.
     - `str(MySentinel)` returns the sentinel's name (`MySentinel.__name__`).
     - `repr(MySentinel)` returns the custom `repr` if provided via the
@@ -279,33 +283,32 @@ class Sentinel(_SentinelMeta, metaclass=_SentinelMeta):
 
     **Example Usage:**
 
-    .. code-block:: python
+    ```python
+    # Define using subclassing
+    class DEFAULT_SETTING(Sentinel):
+        "Indicates a setting should use its compiled-in default."
 
-        # Define using subclassing
-        class DEFAULT_SETTING(Sentinel):
-            "Indicates a setting should use its compiled-in default."
+    # Define using functional call with custom repr
+    NOT_APPLICABLE = Sentinel("NOT_APPLICABLE", repr="<N/A>")
 
-        # Define using functional call with custom repr
-        NOT_APPLICABLE = Sentinel("NOT_APPLICABLE", repr="<N/A>")
+    def get_config(key, user_override=NOT_APPLICABLE):
+        if user_override is NOT_APPLICABLE:
+            # User did not provide an override, check stored config
+            value = read_stored_config(key, default=DEFAULT_SETTING)
+            if value is DEFAULT_SETTING:
+                return get_hardcoded_default(key)
+            return value
+        else:
+            # User provided an override (which could be None)
+            return user_override
 
-        def get_config(key, user_override=NOT_APPLICABLE):
-            if user_override is NOT_APPLICABLE:
-                # User did not provide an override, check stored config
-                value = read_stored_config(key, default=DEFAULT_SETTING)
-                if value is DEFAULT_SETTING:
-                    return get_hardcoded_default(key)
-                return value
-            else:
-                # User provided an override (which could be None)
-                return user_override
+    config1 = get_config("timeout") # Uses stored or hardcoded default
+    config2 = get_config("retries", user_override=None) # Explicitly set to None
+    config3 = get_config("feature_flag", user_override=NOT_APPLICABLE) # Same as providing nothing
 
-        config1 = get_config("timeout") # Uses stored or hardcoded default
-        config2 = get_config("retries", user_override=None) # Explicitly set to None
-        config3 = get_config("feature_flag", user_override=NOT_APPLICABLE) # Same as providing nothing
-
-        print(repr(DEFAULT_SETTING)) # Output: DEFAULT_SETTING
-        print(repr(NOT_APPLICABLE))  # Output: <N/A>
-
+    print(repr(DEFAULT_SETTING)) # Output: DEFAULT_SETTING
+    print(repr(NOT_APPLICABLE))  # Output: <N/A>
+    ```
     """
     # Note: The actual implementation relies on _SentinelMeta for the behaviors described.
     # The methods like __str__, __repr__, name property are defined on the metaclass.
@@ -353,23 +356,22 @@ class Distinct(ABC):
     `get_key()`, are equal. The hash of an instance is derived from the
     hash of its key by default.
 
-    .. important::
+    Important:
+        If used with `@dataclass`, it must be defined with `eq=False`
+        to prevent overriding the custom `__eq__` and `__hash__` methods:
 
-       If used with `@dataclass`, it must be defined with `eq=False`
-       to prevent overriding the custom `__eq__` and `__hash__` methods:
+        Example:
+            ```python
+            from dataclasses import dataclass
 
-       .. code-block:: python
+            @dataclass(eq=False)
+            class MyDistinctData(Distinct):
+                id: int
+                name: str
 
-           from dataclasses import dataclass
-
-           @dataclass(eq=False)
-           class MyDistinctData(Distinct):
-               id: int
-               name: str
-
-               def get_key(self) -> Hashable:
-                   return self.id
-
+                def get_key(self) -> Hashable:
+                    return self.id
+            ```
     """
     @abstractmethod
     def get_key(self) -> Hashable:
@@ -402,26 +404,26 @@ class CachedDistinctMeta(ABCMeta):
         return obj
 
 class CachedDistinct(Distinct, metaclass=CachedDistinctMeta):
-    """Abstract `Distinct` descendant that caches instances.
+    """Abstract [Distinct][firebird.base.types.Distinct] descendant that caches instances.
 
-    Behaves like `Distinct`, but ensures only one instance is created per
-    unique key. Subsequent attempts to create an instance with the same key
+    Behaves like [Distinct][firebird.base.types.Distinct], but ensures only one instance
+    is created per unique key. Subsequent attempts to create an instance with the same key
     (as determined by `extract_key` from the constructor arguments) will
     return the cached instance instead of creating a new one.
 
-    Instances are stored in a class-level `~weakref.WeakValueDictionary`,
+    Instances are stored in a class-level [weakref.WeakValueDictionary][],
     allowing them to be garbage-collected if no longer referenced elsewhere.
 
     Requires implementation of both `get_key()` (for instance equality/hashing)
     and `extract_key()` (for retrieving the key from constructor arguments
-    *before* instance creation). These two methods should conceptually return
+    **before** instance creation). These two methods should conceptually return
     the same identifier for a given object identity.
 
-    .. important::
+    Important:
         Like `Distinct`, if used with `@dataclass`, define with `eq=False`.
 
-    Example::
-
+    Example:
+        ```python
         from dataclasses import dataclass
 
         @dataclass(eq=False) # Important!
@@ -444,6 +446,7 @@ class CachedDistinct(Distinct, metaclass=CachedDistinctMeta):
         print(user1 is user3)  # Output: True (cached instance returned)
         print(user1 == user3)  # Output: True (equality based on get_key)
         print(user1 is user2)  # Output: False
+        ```
     """
     def __init_subclass__(cls: type, /, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
@@ -460,7 +463,7 @@ class CachedDistinct(Distinct, metaclass=CachedDistinctMeta):
 
 # Enums
 class ByteOrder(Enum):
-    """Byte order for storing numbers in binary `.MemoryBuffer`.
+    """Byte order for storing numbers in binary [MemoryBuffer][firebird.base.buffer.MemoryBuffer].
     """
     LITTLE = 'little'
     BIG = 'big'
@@ -495,8 +498,8 @@ class ZMQAddress(str):
     Raises:
         ValueError: When string value passed to constructor is not a valid ZMQ endpoint address.
 
-    Example::
-
+    Example:
+        ```python
         addr_str = "tcp://127.0.0.1:5555"
         zmq_addr = ZMQAddress(addr_str)
 
@@ -510,6 +513,7 @@ class ZMQAddress(str):
             invalid = ZMQAddress("myfile.txt")
         except ValueError as e:
             print(e)                    # Output: Protocol specification required
+        ```
     """
     def __new__(cls, value: AnyStr, encoding: str = 'utf8') -> Self:
         if isinstance(value, bytes):
@@ -550,7 +554,7 @@ class ZMQAddress(str):
         return ZMQDomain.NETWORK
 
 class MIME(str):
-    """MIME type specification string (e.g., 'text/plain; charset=utf-8').
+    """MIME type specification string (e.g., `text/plain; charset=utf-8`).
 
     Behaves like `str`, but validates the input format (`type/subtype[;params]`)
     upon creation and provides convenient read-only properties to access parts
@@ -560,8 +564,8 @@ class MIME(str):
         ValueError: If the input string is not a valid MIME type specification
                     (missing '/', unsupported type, invalid parameters).
 
-    Example::
-
+    Example:
+        ```python
         mime1_str = "application/json"
         mime1 = MIME(mime1_str)
         print(mime1)            # Output: application/json
@@ -584,7 +588,7 @@ class MIME(str):
             invalid_mime = MIME("myapp/data") # 'myapp' is not a standard type
         except ValueError as e:
             print(e) # Output: MIME type 'myapp' not supported
-
+        ```
     """
     #: Supported base MIME types
     MIME_TYPES: ClassVar[list[str]] = ['text', 'image', 'audio', 'video', 'application', 'multipart', 'message']
@@ -637,14 +641,14 @@ class PyExpr(str):
 
     Behaves like `str`, but validates that the content is a syntactically
     valid Python expression during initialization by attempting to compile it
-    in 'eval' mode. Provides access to the compiled code object and a helper
+    in `eval` mode. Provides access to the compiled code object and a helper
     to create a callable function from the expression.
 
     Raises:
         SyntaxError: If the string value is not a valid Python expression.
 
-    Example::
-
+    Example:
+        ```python
         expr_str = "a + b * 2"
         py_expr = PyExpr(expr_str)
 
@@ -669,7 +673,7 @@ class PyExpr(str):
             invalid_expr = PyExpr("a = 5") # Assignment is not an expression
         except SyntaxError as e:
             print(e)              # Output: invalid syntax (<string>, line 1) or similar
-
+        ```
     """
     _expr_: types.CodeType = None # Compiled code object
     def __new__(cls, value: str) -> Self:
@@ -712,14 +716,14 @@ class PyCode(str):
 
     Behaves like `str`, but validates that the content is a syntactically
     valid Python code block (potentially multiple statements) during
-    initialization by attempting to compile it in 'exec' mode. Provides access
+    initialization by attempting to compile it in `exec` mode. Provides access
     to the compiled code object.
 
     Raises:
         SyntaxError: If the string value is not a valid Python code block.
 
-    Example::
-
+    Example:
+        ```python
         code_str = '''
         import math
         result = math.sqrt(x * y)
@@ -743,6 +747,7 @@ class PyCode(str):
             invalid_code = PyCode("print('Hello'")
         except SyntaxError as e:
             print(e)             # Output: unexpected EOF while parsing (<string>, line 1) or similar
+        ```
     """
     _code_: types.CodeType = None # Compiled code object
     def __new__(cls, value: str) -> Self:
@@ -768,17 +773,17 @@ class PyCallable(str):
     valid Python function or class definition during initialization. It compiles
     and executes the definition to capture the resulting callable object.
 
-    Instances of `PyCallable` are themselves callable, acting as a proxy to the
+    Instances of [PyCallable][firebird.base.types.PyCallable] are themselves callable, acting as a proxy to the
     defined function or class.
 
     Raises:
-        ValueError: If the string does not contain a recognizable 'def ' or 'class '
+        ValueError: If the string does not contain a recognizable `def ` or `class`
                     definition at the top level.
         SyntaxError: If the string contains syntactically invalid Python code.
         NameError: If the definition relies on names not available during its execution.
 
-    Example::
-
+    Example:
+        ```python
         func_str = '''
         def greet(name):
             "Greets the person."
@@ -818,6 +823,7 @@ class PyCallable(str):
             invalid = PyCallable("def my_func(x:")
         except SyntaxError as e:
             print(e)             # Output: invalid syntax (<string>, line 1) or similar
+        ```
     """
     _callable_: Callable | type = None
     #: Name of the defined function or class.
@@ -872,7 +878,7 @@ def conjunctive(name, bases, attrs) -> type:
     parent classes use different metaclasses.
 
     Example:
-
+        ```python
         class A(type): pass
 
         class B(type): pass
@@ -882,6 +888,7 @@ def conjunctive(name, bases, attrs) -> type:
         class BB(metaclass=B):pass
 
         class CC(AA, BB, metaclass=Conjunctive): pass
+        ```
     """
     basemetaclasses = []
     for base in bases:
@@ -908,8 +915,8 @@ def load(spec: str) -> Any:
         ImportError: If the module cannot be imported.
         AttributeError: If the specified object cannot be found within the module.
 
-    Example::
-
+    Example:
+        ```python
         # Assuming 'my_package/my_module.py' contains: class MyClass: pass
         MyClassRef = load("my_package.my_module:MyClass")
         instance = MyClassRef()
@@ -917,6 +924,7 @@ def load(spec: str) -> Any:
         # Load a function
         pprint_func = load("pprint:pprint")
         pprint_func({"a": 1})
+        ```
     """
     module_spec, name = spec.split(':')
     if module_spec in sys.modules:

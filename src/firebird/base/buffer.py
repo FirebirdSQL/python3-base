@@ -34,9 +34,7 @@
 #                 ______________________________________
 
 
-"""Firebird Base - Memory buffer manager
-
-This module provides a `MemoryBuffer` class for managing raw memory buffers,
+"""This module provides a `MemoryBuffer` class for managing raw memory buffers,
 offering a convenient and consistent API for reading and writing various data types
 (integers of different sizes, strings with different termination/prefixing styles, raw bytes).
 It's particularly useful for tasks involving binary data serialization/deserialization,
@@ -44,12 +42,13 @@ such as implementing network protocols or handling custom file formats.
 
 The underlying memory storage can be customized via a `BufferFactory`. Two factories
 are provided:
+
 - `BytesBufferFactory`: Uses Python's built-in `bytearray`.
 - `CTypesBufferFactory`: Uses `ctypes.create_string_buffer` for potentially different
   memory characteristics or C-level interoperability.
 
-Example::
-
+Example:
+    ```python
     from firebird.base.buffer import MemoryBuffer, ByteOrder
 
     # Create a buffer (default uses bytearray)
@@ -73,9 +72,8 @@ Example::
     print(f"Extra bytes: {extra}") # Output: Extra bytes: b'\\n\\x0b'
     print(f"Final position: {buf.pos}") # Output: Final position: 7
     print(f"Raw buffer: {buf.get_raw()}") # Output: Raw buffer: bytearray(b'\\x02\\x01\\x02Hi\\n\\x0b\\x00\\x00\\x00')
+    ```
 """
-
-
 
 from __future__ import annotations
 
@@ -102,22 +100,22 @@ class BufferFactory(Protocol): # pragma: no cover
                   is bytes to specify a potentially different final size.
 
         Returns:
-            The created mutable buffer object (e.g., `bytearray`, `ctypes.c_char_Array`).
+            The created mutable buffer object (e.g., [bytearray][], [ctypes.c_char_Array][]).
         """
     def clear(self, buffer: Any) -> None:
         """Fill the buffer entirely with null bytes (zeros).
 
-        Argument:
+        Arguments:
             buffer: A memory buffer previously created by this factory's `create()` method.
         """
     def get_raw(self, buffer: Any) -> bytes | bytearray:
-        """Return the buffer's content as a standard `bytes` or `bytearray`.
+        """Return the buffer's content as a standard [bytes][] or [bytearray][].
 
         This method is necessary to provide a consistent way to access the raw
         byte sequence, as the buffer object returned by `create` might be of a
-        different type (e.g., `ctypes` arrays have a `.raw` attribute).
+        different type (e.g., [ctypes][] arrays have a `raw` attribute).
 
-        Argument:
+        Arguments:
             buffer: A memory buffer previously created by this factory's `create()` method.
 
         Returns:
@@ -125,10 +123,10 @@ class BufferFactory(Protocol): # pragma: no cover
         """
 
 class BytesBufferFactory:
-    """Buffer factory using Python's `bytearray` for storage."""
+    """Buffer factory using Python's [bytearray][] for storage."""
     def create(self, init_or_size: int | bytes, size: int | None=None) -> bytearray:
         """This function creates a mutable character buffer. The returned object is a
-        `bytearray`.
+        [bytearray][].
 
         Arguments:
             init_or_size: Must be an integer which specifies the size of the array,
@@ -136,13 +134,13 @@ class BytesBufferFactory:
             size: Size of the array.
 
         Important:
-            Although arguments are the same as for `ctypes.create_string_buffer`,
+            Although arguments are the same as for [ctypes.create_string_buffer][],
             the behavior is different when new buffer is initialized from bytes:
 
             1. If there are more bytes than specified `size`, this function copies only
-               `size` bytes into new buffer. The `~ctypes.create_string_buffer` raises
+               `size` bytes into new buffer. The [ctypes.create_string_buffer][] raises
                an excpetion.
-            2. Unlike `~ctypes.create_string_buffer` when `size` is NOT specified,
+            2. Unlike [ctypes.create_string_buffer][] when `size` is NOT specified,
                the buffer is NOT made one item larger than its length so that the last
                element in the array is a NUL termination character.
         """
@@ -161,10 +159,10 @@ class BytesBufferFactory:
         return buffer
 
 class CTypesBufferFactory:
-    """Buffer factory using `ctypes.create_string_buffer` (array of c_char)."""
+    """Buffer factory using [ctypes.create_string_buffer][] (array of `c_char`)."""
     def create(self, init_or_size: int | bytes, size: int | None=None) -> bytearray:
-        """This function creates a `ctypes` mutable character buffer. The returned object
-        is an array of `ctypes.c_char`.
+        """This function creates a [ctypes][] mutable character buffer. The returned object
+        is an array of [ctypes.c_char][].
 
         Arguments:
             init_or_size: Must be an integer which specifies the size of the array,
@@ -172,13 +170,13 @@ class CTypesBufferFactory:
             size: Size of the array.
 
         Important:
-            Although arguments are the same as for `ctypes.create_string_buffer`,
+            Although arguments are the same as for [ctypes.create_string_buffer][],
             the behavior is different when new buffer is initialized from bytes:
 
             1. If there are more bytes than specified `size`, this function copies only
-               `size` bytes into new buffer. The `~ctypes.create_string_buffer` raises
+               `size` bytes into new buffer. The [ctypes.create_string_buffer][] raises
                an excpetion.
-            2. Unlike `~ctypes.create_string_buffer` when `size` is NOT specified,
+            2. Unlike [ctypes.create_string_buffer][] when `size` is NOT specified,
                the buffer is NOT made one item larger than its length so that the last
                element in the array is a NUL termination character.
         """
@@ -194,7 +192,7 @@ class CTypesBufferFactory:
 
         Arguments:
             buffer: The ctypes buffer.
-            init: The byte value to fill with (default 0).
+            init: The byte value to fill with.
         """
         memset(buffer, init, len(buffer))
     def get_raw(self, buffer: Any) -> bytes | bytearray:
@@ -230,19 +228,19 @@ class MemoryBuffer:
     def __init__(self, init: int | bytes, size: int | None=None, *,
                  factory: type[BufferFactory]=BytesBufferFactory, eof_marker: int | None=None,
                  max_size: int | Sentinel=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
-        #: Buffer factory instance used by manager [default: `BytesBufferFactory`].
         self.factory: BufferFactory = factory()
-        #: The memory buffer. The actual data type of buffer depends on `buffer factory`,
-        #: but it must provide direct acces to cells, slices and length like `bytearray`.
+        "Buffer factory instance used by manager [default: `BytesBufferFactory`]."
         self.raw: bytearray = self.factory.create(init, size)
-        #: Current position in buffer, i.e. the next read/writen byte would be at this position.
+        """The memory buffer. The actual data type of buffer depends on `buffer factory`,
+        but it must provide direct acces to cells, slices and length like `bytearray`."""
         self.pos: int = 0
-        #: Value that indicates the end of data. Could be None.
+        "Current position in buffer, i.e. the next read/writen byte would be at this position."
         self.eof_marker: int = eof_marker
-        #: The buffer couldn't grow beyond specified number of bytes [default: `.UNLIMITED`].
+        "Value that indicates the end of data. Could be None."
         self.max_size: int | Sentinel = max_size
-        #: The byte order used to read/write numbers [default: `.LITTLE`].
+        "The buffer couldn't grow beyond specified number of bytes [default: `UNLIMITED`]."
         self.byteorder: ByteOrder = byteorder
+        "The byte order used to read/write numbers [default: `LITTLE`]."
     def _ensure_space(self, size: int) -> None:
         if len(self.raw) < self.pos + size:
             self.resize(self.pos + size)
@@ -282,7 +280,7 @@ class MemoryBuffer:
             return True
         return False
     def get_raw(self) -> bytes | bytearray:
-        """Return the underlying buffer's content as `bytes` or `bytearray`.
+        """Return the underlying buffer's content as [bytes][] or [bytearray][].
 
         Use this method for generic access to the raw buffer content instead of
         accessing the `raw` attribute directly, as the type of `raw` can vary
@@ -321,7 +319,7 @@ class MemoryBuffer:
             size: Value size in bytes.
             signed: Write as signed or unsigned integer.
 
-        Raise:
+        Raises:
             BufferError: If resizing is needed but exceeds `max_size`.
         """
         self.write(value.to_bytes(size, self.byteorder.value, signed=signed))
@@ -331,7 +329,7 @@ class MemoryBuffer:
         Arguments:
             value: The integer value to write.
 
-        Raise:
+        Raises:
             BufferError: If resizing is needed but exceeds `max_size`.
         """
         self.write_number(value, 2)
@@ -341,7 +339,7 @@ class MemoryBuffer:
         Arguments:
             value: The integer value to write.
 
-        Raise:
+        Raises:
             BufferError: If resizing is needed but exceeds `max_size`.
         """
         self.write_number(value, 4)
@@ -351,7 +349,7 @@ class MemoryBuffer:
         Arguments:
             value: The integer value to write.
 
-        Raise:
+        Raises:
             BufferError: If resizing is needed but exceeds `max_size`.
         """
         self.write_number(value, 8)
@@ -360,10 +358,10 @@ class MemoryBuffer:
 
         Arguments:
             value: The string to write.
-            encoding: Encoding to use (default: 'ascii').
-            errors: Encoding error handling scheme (default: 'strict').
+            encoding: Encoding to use.
+            errors: Encoding error handling scheme.
 
-        Raise:
+        Raises:
             BufferError: If resizing is needed but exceeds `max_size`.
             UnicodeEncodeError: If `value` cannot be encoded using `encoding`.
         """
@@ -374,10 +372,10 @@ class MemoryBuffer:
 
         Arguments:
             value: The string to write.
-            encoding: Encoding to use (default: 'ascii').
-            errors: Encoding error handling scheme (default: 'strict').
+            encoding: Encoding to use.
+            errors: Encoding error handling scheme.
 
-        Raise:
+        Raises:
             BufferError: If resizing is needed but exceeds `max_size`.
         """
         value = value.encode(encoding, errors)
@@ -388,10 +386,10 @@ class MemoryBuffer:
 
         Arguments:
             value: The string to write.
-            encoding: Encoding to use (default: 'ascii').
-            errors: Encoding error handling scheme (default: 'strict').
+            encoding: Encoding to use.
+            errors: Encoding error handling scheme.
 
-        Raise:
+        Raises:
             BufferError: If resizing is needed but exceeds `max_size`.
         """
         value = value.encode(encoding, errors)
@@ -404,7 +402,7 @@ class MemoryBuffer:
 
         Arguments:
             size: Number of bytes to read. If negative, reads all data from the
-                  current position to the end of the buffer (default: -1).
+                  current position to the end of the buffer.
         Returns:
            The bytes read.
 
@@ -417,14 +415,14 @@ class MemoryBuffer:
         result = self.raw[self.pos: self.pos + size]
         self.pos += size
         return result
-    def read_number(self, size: int, *, signed=False) -> int:
+    def read_number(self, size: int, *, signed: bool=False) -> int:
         """Read a number of `size` bytes from current position using `self.byteorder`.
 
         Advances the position by `size`.
 
         Arguments:
             size: The number of bytes representing the number.
-            signed: Whether to interpret the bytes as a signed integer (default: False).
+            signed: Whether to interpret the bytes as a signed integer.
 
         Returns:
            The integer value read.
@@ -462,8 +460,8 @@ class MemoryBuffer:
         Advances the position past the null terminator.
 
         Arguments:
-            encoding: Encoding to use for decoding (default: 'ascii').
-            errors: Decoding error handling scheme (default: 'strict').
+            encoding: Encoding to use for decoding.
+            errors: Decoding error handling scheme.
 
         Returns:
             The decoded string (excluding the null terminator).
@@ -482,8 +480,8 @@ class MemoryBuffer:
         """Read Pascal string (1 byte length followed by string data).
 
         Arguments:
-            encoding: Encoding to use for decoding (default: 'ascii').
-            errors: Decoding error handling scheme (default: 'strict').
+            encoding: Encoding to use for decoding.
+            errors: Decoding error handling scheme.
 
         Returns:
             The decoded string.
@@ -497,8 +495,8 @@ class MemoryBuffer:
         """Read sized string (2 byte length followed by data).
 
         Arguments:
-            encoding: Encoding to use for decoding (default: 'ascii').
-            errors: Decoding error handling scheme (default: 'strict').
+            encoding: Encoding to use for decoding.
+            errors: Decoding error handling scheme.
 
         Returns:
             The decoded string.

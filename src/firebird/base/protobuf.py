@@ -34,20 +34,20 @@
 #                 ______________________________________.
 
 
-"""Firebird Base - Registry for Google Protocol Buffer messages and enums
-
-This module provides a central registry for Google Protocol Buffer message types
+"""This module provides a central registry for Google Protocol Buffer message types
 and enum types generated from `.proto` files. It allows creating message instances
 and accessing enum information using their fully qualified names (e.g.,
 "my.package.MyMessage", "my.package.MyEnum") without needing to directly import
 the corresponding generated `_pb2.py` modules throughout the codebase.
 
 Benefits:
+
 *   Decouples code using protobuf messages from the specific generated modules.
 *   Provides a single point for managing and discovering available message/enum types.
 *   Facilitates dynamic loading of protobuf definitions via entry points.
 
 Core Features:
+
 *   Register message/enum types using their file DESCRIPTOR object.
 *   Create new message instances by name using `create_message()`.
 *   Access enum descriptors and values by name using `get_enum_type()`.
@@ -56,6 +56,7 @@ Core Features:
 *   Helpers for common types like `google.protobuf.Struct`.
 
 Example:
+    ```python
     # Assume you have my_proto_pb2.py generated from my_proto.proto
     # containing:
     # message Sample { required string name = 1; }
@@ -92,7 +93,7 @@ Example:
 
         except KeyError as e:
             print(f"Error accessing registered proto type: {e}")
-
+    ```
 """
 
 from __future__ import annotations
@@ -110,22 +111,22 @@ from google.protobuf.struct_pb2 import Struct as StructProto
 from .collections import Registry
 from .types import Distinct
 
-#: Name of well-known EMPTY protobuf message (for use with `.create_message()`)
 PROTO_EMPTY: str = 'google.protobuf.Empty'
-#: Name of well-known ANY protobuf message (for use with `.create_message()`)
+"Name of well-known EMPTY protobuf message (for use with `create_message()`)"
 PROTO_ANY: str = 'google.protobuf.Any'
-#: Name of well-known DURATION protobuf message (for use with `.create_message()`)
+"Name of well-known ANY protobuf message (for use with `create_message()`)"
 PROTO_DURATION: str = 'google.protobuf.Duration'
-#: Name of well-known TIMESTAMP protobuf message (for use with `.create_message()`)
+"Name of well-known DURATION protobuf message (for use with `create_message()`)"
 PROTO_TIMESTAMP: str = 'google.protobuf.Timestamp'
-#: Name of well-known STRUCT protobuf message (for use with `.create_message()`)
+"Name of well-known TIMESTAMP protobuf message (for use with `create_message()`)"
 PROTO_STRUCT: str = 'google.protobuf.Struct'
-#: Name of well-known VALUE protobuf message (for use with `.create_message()`)
+"Name of well-known STRUCT protobuf message (for use with `create_message()`)"
 PROTO_VALUE: str = 'google.protobuf.Value'
-#: Name of well-known LISTVALUE protobuf message (for use with `.create_message()`)
+"Name of well-known VALUE protobuf message (for use with `create_message()`)"
 PROTO_LISTVALUE: str = 'google.protobuf.ListValue'
-#: Name of well-known FIELDMASK protobuf message (for use with `.create_message()`)
+"Name of well-known LISTVALUE protobuf message (for use with `create_message()`)"
 PROTO_FIELDMASK: str = 'google.protobuf.FieldMask'
+"Name of well-known FIELDMASK protobuf message (for use with `create_message()`)"
 
 # Classes
 @dataclass(eq=True, order=True, frozen=True)
@@ -139,10 +140,10 @@ class ProtoMessageType(Distinct):
         name: Fully qualified message type name (e.g., "package.Message").
         constructor: The callable (generated message class) used to create instances.
     """
-    #: Fully qualified message type name (e.g., "package.Message").
     name: str
-    #: The callable (generated message class) used to create instances.
+    "Fully qualified message type name (e.g., 'package.Message')."
     constructor: Callable
+    "The callable (generated message class) used to create instances."
     def get_key(self) -> str:
         """Returns the message name, used as the key in the registry."""
         return self.name
@@ -158,8 +159,8 @@ class ProtoEnumType(Distinct):
     Arguments:
         descriptor: The `google.protobuf.descriptor.EnumDescriptor` for the enum type.
 
-    Example::
-
+    Example:
+        ```python
         # Assuming 'my_proto.Status' enum (UNKNOWN=0, OK=1) is registered
         status_enum = get_enum_type('my_proto.Status')
 
@@ -178,9 +179,10 @@ class ProtoEnumType(Distinct):
             print(status_enum.get_value_name(99))
         except KeyError as e:
             print(e) # Output: "Enum my_proto.Status has no name defined for value 99"
+        ```
     """
-    #: The `google.protobuf.descriptor.EnumDescriptor` for the enum type.
     descriptor: EnumDescriptor
+    "The `google.protobuf.descriptor.EnumDescriptor` for the enum type."
     def get_key(self) -> str:
         """Returns the full enum name, used as the key in the registry."""
         return self.name
@@ -202,19 +204,19 @@ class ProtoEnumType(Distinct):
     def keys(self) -> list[str]:
         """Return a list of the string names in the enum.
 
-        These are returned in the order they were defined in the .proto file.
+        These are returned in the order they were defined in the `.proto` file.
         """
         return [value_descriptor.name for value_descriptor in self.descriptor.values]
     def values(self) -> list[int]:
         """Return a list of the integer values in the enum.
 
-        These are returned in the order they were defined in the .proto file.
+        These are returned in the order they were defined in the `.proto` file.
         """
         return [value_descriptor.number for value_descriptor in self.descriptor.values]
     def items(self) -> list[tuple[str, int]]:
         """Return a list of the (name, value) pairs of the enum.
 
-        These are returned in the order they were defined in the .proto file.
+        These are returned in the order they were defined in the `.proto` file.
         """
         return [(value_descriptor.name, value_descriptor.number)
                 for value_descriptor in self.descriptor.values]
@@ -339,7 +341,7 @@ def get_enum_type(name: str) -> ProtoEnumType:
     Provides access to enum members and values via the wrapper object.
 
     Arguments:
-        Fully qualified name of the registered protobuf enum type.
+        name: Fully qualified name of the registered protobuf enum type.
 
     Returns:
         The `ProtoEnumType` instance for the requested enum.
@@ -389,7 +391,7 @@ def get_enum_value_name(enum_type_name: str, value: int) -> str:
     """
     return get_enum_type(enum_type_name).get_value_name(value)
 
-def register_decriptor(file_descriptor) -> None:
+def register_decriptor(file_descriptor: 'google.protobuf.descriptor.FileDescriptor') -> None:
     """Register all message and enum types defined within a protobuf file descriptor.
 
     This is the primary mechanism for adding types to the registry. The descriptor
@@ -420,28 +422,29 @@ def load_registered(group: str) -> None: # pragma: no cover
         group: The name of the entry-point group to scan (e.g., 'firebird.base.protobuf').
 
     Example:
-        ::
+        ```ini
+        # setup.cfg:
 
-           # setup.cfg:
+        [options.entry_points]
+        firebird.base.protobuf =
+            firebird.base.lib_a = firebird.base.lib_a_pb2:DESCRIPTOR
+            firebird.base.lib_b = firebird.base.lib_b_pb2:DESCRIPTOR
+            firebird.base.lib_c = firebird.base.lib_c_pb2:DESCRIPTOR
 
-           [options.entry_points]
-           firebird.base.protobuf =
-               firebird.base.lib_a = firebird.base.lib_a_pb2:DESCRIPTOR
-               firebird.base.lib_b = firebird.base.lib_b_pb2:DESCRIPTOR
-               firebird.base.lib_c = firebird.base.lib_c_pb2:DESCRIPTOR
+        # pyproject.toml
 
-           # pyproject.toml
+        [project.entry-points."firebird.base.protobuf"]
+        "firebird.base.lib_a" = "firebird.base.lib_a_pb2:DESCRIPTOR"
+        "firebird.base.lib_b" = "firebird.base.lib_b_pb2:DESCRIPTOR"
+        "firebird.base.lib_c" = "firebird.base.lib_c_pb2:DESCRIPTOR"
+        ```
 
-           [project.entry-points."firebird.base.protobuf"]
-           "firebird.base.lib_a" = "firebird.base.lib_a_pb2:DESCRIPTOR"
-           "firebird.base.lib_b" = "firebird.base.lib_b_pb2:DESCRIPTOR"
-           "firebird.base.lib_c" = "firebird.base.lib_c_pb2:DESCRIPTOR"
-
-    Usage::
-
-         # In your application's startup code:
-         load_registered('firebird.base.protobuf')
-         # Now messages/enums registered via entry points are available
+    Usage:
+        ```
+        # In your application's startup code:
+        load_registered('firebird.base.protobuf')
+        # Now messages/enums registered via entry points are available
+        ```
     """
     for desc in (entry.load() for entry in entry_points().select(group=group)):
         register_decriptor(desc)

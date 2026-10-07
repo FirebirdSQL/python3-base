@@ -56,7 +56,7 @@ dependencies = [
 
 [tool.hatch.envs.gdocs]
 dependencies = [
-  "great-docs",
+  "great-docs @ git+https://github.com/posit-dev/great-docs",
 ]
 
 [tool.hatch.envs.gdocs.scripts]
@@ -90,6 +90,16 @@ docset = [
   "cd docs ; doc2dash -u https://firebird-base.readthedocs.io/en/latest/ -f -i ./_static/fb-favicon.png -n firebird-base ./_build/html/",
   "cd docs; VERSION=`hatch version` ; tar --exclude='.DS_Store' -cvzf ../dist/firebird-base-$VERSION-docset.tgz firebird-base.docset",
 ]
+
+[tool.hatch.envs.zensical]
+detached = false
+dependencies = [
+  "zensical",
+  "mkdocstrings-python",
+]
+[tool.hatch.envs.zensical.scripts]
+build = "cd zendocs && zensical build {args}"
+serve = "cd zendocs && zensical serve {args}"
 
 [tool.ruff]
 target-version = "py311"

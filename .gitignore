@@ -139,6 +139,4 @@ docs/firebird-base.docset/
 
 # Other local files and directories
 local/
-
-# Great Docs build directory (ephemeral, do not commit)
-great-docs/
+zendocs/

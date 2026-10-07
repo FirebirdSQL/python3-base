@@ -33,140 +33,10 @@
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________
 
-"""Firebird Base - Hook manager
-
-This module provides a general framework for callbacks and "hookable" events,
+"""This module provides a general framework for callbacks and "hookable" events,
 implementing a variation of the publish-subscribe pattern. It allows different
 parts of an application to register interest in events triggered by specific
 objects or classes and execute custom code (callbacks) when those events occur.
-
-Architecture
-------------
-
-The callback extension mechanism is based on the following:
-
-* The `Event source` provides one or more "hookable events" that work like connection points.
-  The event source represents "origin of event" and is always identified by class, class
-  instance or name. Event sources that are identified by classes (or their instances) must
-  be registered along with events they provide.
-* `Event` is typically linked to particular event source, but it's not mandatory and it's
-  possible to define global events. Event is represented as value of any type, that must
-  be unique in used context (particular event source or global).
-
-  Each event should be properly documented along with required signature for callback
-  function.
-* `Event provider` is a class or function that implements the event for event source, and
-  asks the `.hook_manager` for list of event consumers (callbacks) registered for particular
-  event and source.
-* `Event consumer` is a function or class method that implements the callback for particular
-  event. The callback must be registered in `.hook_manager` before it could be called by
-  event providers.
-
-
-The architecture supports multiple usage strategies:
-
-* If event provider uses class instance to identify the event source, it's possible to
-  register callbacks to all instances (by registering to class), or particular instance(s).
-* It's possible to register callback to particular instance by name, if instance is associated
-  with name by `register_name()` function.
-* It's possible to register callback to `.ANY` event from particular source, or particular
-  event from `.ANY` source, or even to `.ANY` event from `.ANY` source.
-
-Example
--------
-
-.. code-block:: python
-
-   from __future__ import annotations
-   from enum import Enum, auto
-   from firebird.base.types import *
-   from firebird.base.hooks import hook_manager
-
-   class MyEvents(Enum):
-       "Sample definition of events"
-       CREATE = auto()
-       ACTION = auto()
-
-   class MyHookable:
-       "Example of hookable class, i.e. a class that calls hooks registered for events."
-       def __init__(self, name: str):
-           self.name: str = name
-           for hook in hook_manager.get_callbacks(MyEvents.CREATE, self):
-               try:
-                   hook(self, MyEvents.CREATE)
-               except Exception as e:
-                   print(f"{self.name}.CREATE hook call outcome: ERROR ({e.args[0]})")
-               else:
-                   print(f"{self.name}.CREATE hook call outcome: OK")
-       def action(self):
-           print(f"{self.name}.ACTION!")
-           for hook in hook_manager.get_callbacks(MyEvents.ACTION, self):
-               try:
-                   hook(self, MyEvents.ACTION)
-               except Exception as e:
-                   print(f"{self.name}.ACTION hook call outcome: ERROR ({e.args[0]})")
-               else:
-                   print(f"{self.name}.ACTION hook call outcome: OK")
-
-   class MyHook:
-       "Example of hook implementation"
-       def __init__(self, name: str):
-           self.name: str = name
-       def callback(self, subject: MyHookable, event: MyEvents):
-           print(f"Hook {self.name} event {event.name} called by {subject.name}")
-       def err_callback(self, subject: MyHookable, event: MyEvents):
-           self.callback(subject, event)
-           raise Exception("Error in hook")
-
-
-   # Example code that installs and uses hooks
-
-   hook_manager.register_class(MyHookable, MyEvents)
-   hook_A: MyHook = MyHook('Hook-A')
-   hook_B: MyHook = MyHook('Hook-B')
-   hook_C: MyHook = MyHook('Hook-C')
-
-   print("Install hooks")
-   hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_A.callback)
-   hook_manager.add_hook(MyEvents.CREATE, MyHookable, hook_B.err_callback)
-   hook_manager.add_hook(MyEvents.ACTION, MyHookable, hook_C.callback)
-
-   print("Create event sources, emits CREATE")
-   src_A: MyHookable = MyHookable('Source-A')
-   src_B: MyHookable = MyHookable('Source-B')
-
-   print("Install instance hooks")
-   hook_manager.add_hook(MyEvents.ACTION, src_A, hook_A.callback)
-   hook_manager.add_hook(MyEvents.ACTION, src_B, hook_B.callback)
-
-   print("And action!")
-   src_A.action()
-   src_B.action()
-
-Output from sample code::
-
-   Install hooks
-   Create event sources, emits CREATE
-   Hook Hook-A event CREATE called by Source-A
-   Source-A.CREATE hook call outcome: OK
-   Hook Hook-B event CREATE called by Source-A
-   Source-A.CREATE hook call outcome: ERROR (Error in hook)
-   Hook Hook-A event CREATE called by Source-B
-   Source-B.CREATE hook call outcome: OK
-   Hook Hook-B event CREATE called by Source-B
-   Source-B.CREATE hook call outcome: ERROR (Error in hook)
-   Install instance hooks
-   And action!
-   Source-A.ACTION!
-   Hook Hook-A event ACTION called by Source-A
-   Source-A.ACTION hook call outcome: OK
-   Hook Hook-C event ACTION called by Source-A
-   Source-A.ACTION hook call outcome: OK
-   Source-B.ACTION!
-   Hook Hook-B event ACTION called by Source-B
-   Source-B.ACTION hook call outcome: OK
-   Hook Hook-C event ACTION called by Source-B
-   Source-B.ACTION hook call outcome: OK
 """
 
 from __future__ import annotations
@@ -194,14 +64,14 @@ class Hook(Distinct):
         instance: The specific instance or instance name this hook targets. `ANY` if targeting a class or globally.
         callbacks: A list of callable functions to be executed when the specified event occurs for the specified source.
     """
-    #: The specific event this hook subscribes to (can be `ANY`).
     event: Any
-    #: The specific class this hook targets. `ANY` if targeting an instance/name directly or globally.
+    "The specific event this hook subscribes to (can be `ANY`)."
     cls: type = ANY
-    #: The specific instance or instance name this hook targets. `ANY` if targeting a class or globally.
+    "The specific class this hook targets. `ANY` if targeting an instance/name directly or globally."
     instance: Any = ANY
-    #: A list of callable functions to be executed when the specified event occurs for the specified source.
+    "The specific instance or instance name this hook targets. `ANY` if targeting a class or globally."
     callbacks: list[Callable] = field(default_factory=list)
+    "A list of callable functions to be executed when the specified event occurs for the specified source."
     def get_key(self) -> Any:
         """Returns the unique key for this hook registration used by the Registry.
 
@@ -217,10 +87,15 @@ class HookFlag(Flag):
     speed up `get_callbacks` by avoiding unnecessary checks.
     """
     NONE = 0
-    INSTANCE = auto()   # A hook targets a specific object instance
-    CLASS = auto()      # A hook targets a class (applies to all instances)
-    NAME = auto()       # A hook targets a registered instance name
-    ANY_EVENT = auto()  # A hook targets ANY event
+    "NONE value"
+    INSTANCE = auto()
+    "A hook targets a specific object instance"
+    CLASS = auto()
+    "A hook targets a class (applies to all instances)"
+    NAME = auto()
+    "A hook targets a registered instance name"
+    ANY_EVENT = auto()
+    "A hook targets ANY event"
 
 class HookManager(Singleton):
     """Manages the registration and retrieval of hooks (callbacks).
@@ -293,7 +168,7 @@ class HookManager(Singleton):
                       - A hookable class (registered via `register_class`): The callback
                         will trigger for this event from *any* instance of this class.
                       - An instance of a hookable class: The callback will trigger
-                        only for this event from *this specific* instance.
+                        only for this event from **this specific** instance.
                       - A string name (registered via `register_name`): The callback
                         will trigger only for this event from the instance associated
                         with this name.
@@ -356,7 +231,7 @@ class HookManager(Singleton):
         Important:
             To successfully remove a hook, all arguments (`event`, `source`, `callback`)
             must *exactly* match the values used in the original `add_hook()` call.
-            Comparing function objects requires using the *same* function object.
+            Comparing function objects requires using the **same** function object.
 
             This method does nothing if no matching hook registration is found.
         """
@@ -459,14 +334,14 @@ class HookManager(Singleton):
                         result.extend(cast(Hook, hook).callbacks)
         return result
 
-#: Hook manager singleton instance.
 hook_manager: HookManager = HookManager()
+"Hook manager singleton instance."
 
-#: Shortcut for `hook_manager.register_class()`
 register_class = hook_manager.register_class
-#: shortcut for `hook_manager.register_name()`
+"Shortcut for `hook_manager.register_class()`"
 register_name = hook_manager.register_name
-#: shortcut for `hook_manager.add_hook()`
+"shortcut for `hook_manager.register_name()`"
 add_hook = hook_manager.add_hook
-#: shortcut for `hook_manager.get_callbacks()`
+"shortcut for `hook_manager.add_hook()`"
 get_callbacks = hook_manager.get_callbacks
+"shortcut for `hook_manager.get_callbacks()`"

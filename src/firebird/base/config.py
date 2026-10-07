@@ -34,9 +34,7 @@
 #                 ______________________________________.
 
 
-"""Firebird Base - Classes for configuration definitions
-
-Complex applications (and some library modules like `logging`) could be often parametrized
+"""Complex applications (and some library modules like `logging`) could be often parametrized
 via configuration. This module provides a framework for unified structured configuration
 that supports:
 
@@ -49,8 +47,8 @@ that supports:
 *   Serialization/deserialization using Google protobuf messages (`ConfigProto`).
 *   Platform-specific application directory schemes (`DirectoryScheme`).
 
-Example::
-
+Example:
+    ```python
     from firebird.base.config import Config, StrOption, IntOption, load_config
     from configparser import ConfigParser
     import io
@@ -81,6 +79,7 @@ Example::
 
     # Get config file representation
     print(my_config.get_config())
+    ```
 """
 
 from __future__ import annotations
@@ -114,7 +113,7 @@ from .types import MIME, Error, PyCallable, PyCode, PyExpr, ZMQAddress
 PROTO_CONFIG = 'firebird.base.ConfigProto'
 
 def has_verticals(value: str) -> bool:
-    """Returns True if lines in multiline string contains leading '|' character.
+    """Returns True if lines in multiline string contains leading `'|'` character.
     Used to detect if special vertical bar indentation was used.
     """
     return any(1 for line in value.split('\n') if line.startswith('|'))
@@ -126,11 +125,11 @@ def has_leading_spaces(value: str) -> bool:
     return any(1 for line in value.split('\n') if line.startswith(' '))
 
 def unindent_verticals(value: str) -> str:
-    """Removes leading '|' character and calculated indent from each relevant line.
+    """Removes leading `'|'` character and calculated indent from each relevant line.
 
     This reverses the vertical bar notation used to preserve leading whitespace
-    in multiline string options when read by `ConfigParser`, which normally strips
-    leading whitespace from continuation lines.
+    in multiline string options when read by [configparser.ConfigParser][], which normally
+    strips leading whitespace from continuation lines.
     """
     lines = []
     indent = None
@@ -176,15 +175,14 @@ def _decompose(flag, value):
     return members, not_covered
 
 class EnvExtendedInterpolation(ExtendedInterpolation):
-    """.. versionadded:: 1.8.0
-
-    Modified version of `configparser.ExtendedInterpolation` class that adds special
+    """Modified version of `configparser.ExtendedInterpolation` class that adds special
     handling for "env" section that returns value of specified environment variable,
     or empty string if such variable is not defined.
 
-    Example::
-
+    Example:
+       ```
        ${env:path} is reference to PATH environment variable.
+       ```
     """
     def _interpolate_some(self, parser, option, accum, rest, section, map, # noqa: A002
                           depth):
@@ -260,14 +258,15 @@ class DirectoryScheme:
         force_home: When True, general directories (i.e. all except user-specific and
             TMP) would be always based on HOME directory.
 
-    Example::
-
+    Example:
+        ```python
         scheme = get_directory_scheme("MyApp", "1.0")
         config_path = scheme.config / "settings.ini"
         log_file = scheme.logs / "app.log"
         user_cache_dir = scheme.user_cache
         print(f"Config dir: {scheme.config}")
         print(f"User cache: {user_cache_dir}")
+        ```
     """
     def __init__(self, name: str, version: str | None=None, *, force_home: bool=False):
         self.name: str = name
@@ -301,7 +300,7 @@ class DirectoryScheme:
             When new value is assigned, the general directories (i.e. all except user-specific
             and TMP) are redefined as subdirectories of new home path ONLY when HOME was
             initially defined using `<app_name>_HOME` environment variable, or instance
-            was created with `force_home` = True.
+            was created with `force_home = True`.
 
             However, all paths could be still changed individually to any value.
         """
@@ -414,7 +413,7 @@ class DirectoryScheme:
 
 
 class WindowsDirectoryScheme(DirectoryScheme):
-    """Directory scheme conforming to Windows standards (e.g., APPDATA, PROGRAMDATA).
+    """Directory scheme conforming to Windows standards (e.g., `APPDATA`, `PROGRAMDATA`).
 
     If HOME is defined using "<app_name>_HOME" environment variable, or `force_home` parameter
     is True, only user-specific directories and TMP are set according to platform standars,
@@ -557,16 +556,16 @@ class Option(Generic[T], ABC):
         assert datatype and isinstance(datatype, type), "datatype required" # noqa: S101
         assert description and isinstance(description, str), "description required" # noqa: S101
         assert default is None or isinstance(default, datatype), "default has wrong data type" # noqa: S101
-        #: Option name.
         self.name: str = name
-        #: Option datatype.
+        "Option name."
         self.datatype: type[T] = datatype
-        #: Option description. Can span multiple lines.
+        "Option datatype."
         self.description: str = description
-        #: True if option must have a value.
+        "Option description. Can span multiple lines."
         self.required: bool = required
-        #: Default option value.
+        "True if option must have a value."
         self.default: T = default
+        "Default option value."
         if default is not None:
             self.set_value(default)
     def _check_value(self, value: T | None) -> None:
@@ -613,12 +612,11 @@ class Option(Generic[T], ABC):
         lines.append(f'{nodef}{self.name} = {value}\n')
         return lines
     def load_config(self, config: ConfigParser, section: str) -> None:
-        """Update option value from `~configparser.ConfigParser` instance.
+        """Update option value from [configparser.ConfigParser][] instance.
 
         Arguments:
             config:  ConfigParser instance.
-            section: Name of ConfigParser section that should be used to get new option
-               value.
+            section: Name of ConfigParser section that should be used to get new option value.
 
         Raises:
             ValueError: When option value cannot be loadded.
@@ -638,7 +636,7 @@ class Option(Generic[T], ABC):
             raise Error(f"Missing value for required option '{self.name}'")
     def get_config(self, *, plain: bool=False) -> str:
         """Returns string containing text lines suitable for use in configuration file
-        processed with `~configparser.ConfigParser`.
+        processed with [configparser.ConfigParser][].
 
         Arguments:
           plain: When True, it outputs only the option value. When False, it includes also
@@ -692,7 +690,7 @@ class Option(Generic[T], ABC):
         """
     @abstractmethod
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contain this option's value under `proto.options[self.name]`.
@@ -703,7 +701,7 @@ class Option(Generic[T], ABC):
         """
     @abstractmethod
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize the current value into `.ConfigProto` message.
+        """Serialize the current value into `ConfigProto` message.
 
         The value is stored in `proto.options[self.name]` using an appropriate
         protobuf field type (e.g., `as_string`, `as_sint64`). If the current
@@ -719,7 +717,7 @@ class Config:
     Arguments:
         name: Name associated with Config (default section name).
         optional: Whether config is optional (True) or mandatory (False) for
-                  configuration file (see `.load_config()` for details).
+                  configuration file (see `load_config()` for details).
         description: Optional configuration description. Can span multiple lines.
 
     Important:
@@ -776,7 +774,7 @@ class Config:
         return '' if self._description is None else self._description
     def get_config(self, *, plain: bool=False) -> str:
         """Returns string containing text lines suitable for use in configuration file
-        processed with `~configparser.ConfigParser`.
+        processed with [configparser.ConfigParser][].
 
         Important:
             When config is optional and the name is an empty string, it returns empty string.
@@ -820,8 +818,8 @@ class Config:
 
         Raises:
             Error: If `section` does not exist in `config` and `self.optional` is `False`
-                   (unless `section` is `DEFAULTSECT`). Also wraps underlying `ValueError`
-                   or `KeyError` from option parsing.
+                   (unless `section` is `DEFAULTSECT`). Also wraps underlying [ValueError][]
+                   or [KeyError][] from option parsing.
             KeyError: Propagated if an invalid section name is used for a nested config.
             ValueError: Propagated if an option string cannot be parsed correctly.
         """
@@ -842,7 +840,7 @@ class Config:
         except Exception as exc: # pragma: no cover
             raise Error(f"Configuration error: {exc}") from exc
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains option values and sub-configs.
@@ -853,7 +851,7 @@ class Config:
             if subcfg.name in proto.configs:
                 subcfg.load_proto(proto.configs[subcfg.name])
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option values and sub-configs should be stored.
@@ -870,7 +868,7 @@ class Config:
     @property
     def optional(self) -> bool:
         """Whether config is optional (False) or mandatory (True) for configuration file
-        (see `.load_config()` for details).
+        (see `load_config()` for details).
         """
         return self._optional
     @property
@@ -896,9 +894,6 @@ class Config:
 # Options
 class StrOption(Option[str]):
     """Configuration option with string value.
-
-    .. versionadded:: 1.6.1
-       Support for verticals to preserve leading whitespace.
 
     Arguments:
         name: Option name.
@@ -972,7 +967,7 @@ class StrOption(Option[str]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -988,7 +983,7 @@ class StrOption(Option[str]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1059,7 +1054,7 @@ class IntOption(Option[int]):
             raise ValueError("Negative numbers not allowed")
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -1078,7 +1073,7 @@ class IntOption(Option[int]):
             else:
                 self.set_value(getattr(opt, oneof))
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1146,7 +1141,7 @@ class FloatOption(Option[float]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -1165,7 +1160,7 @@ class FloatOption(Option[float]):
             else:
                 self.set_value(getattr(opt, oneof))
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1175,7 +1170,7 @@ class FloatOption(Option[float]):
     value: float | None = property(get_value, set_value, doc="Current option value")
 
 class DecimalOption(Option[Decimal]):
-    """Configuration option with decimal.Decimal value.
+    """Configuration option with [decimal.Decimal][] value.
 
     Arguments:
         name: Option name.
@@ -1232,7 +1227,7 @@ class DecimalOption(Option[Decimal]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto):
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -1251,7 +1246,7 @@ class DecimalOption(Option[Decimal]):
             else:
                 self.set_value(Decimal(getattr(opt, oneof)))
     def save_proto(self, proto: ConfigProto):
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1318,7 +1313,7 @@ class BoolOption(Option[bool]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -1337,7 +1332,7 @@ class BoolOption(Option[bool]):
             else:
                 self.set_value(opt.as_bool)
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1347,7 +1342,7 @@ class BoolOption(Option[bool]):
     value: bool | None = property(get_value, set_value, doc="Current option value")
 
 class ZMQAddressOption(Option[ZMQAddress]):
-    """Configuration option with `.ZMQAddress` value.
+    """Configuration option with [firebird.base.types.ZMQAddress][] value.
 
     Arguments:
         name: Option name.
@@ -1401,7 +1396,7 @@ class ZMQAddressOption(Option[ZMQAddress]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -1417,7 +1412,7 @@ class ZMQAddressOption(Option[ZMQAddress]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1440,8 +1435,8 @@ class EnumOption(Option[E], Generic[E]):
     def __init__(self, name: str, enum_class: type[E], description: str, *, required: bool=False,
                  default: E | None=None, allowed: list | None=None):
         self._value: E | None = None
-        #: List of allowed enum values.
         self.allowed: Sequence[E] = enum_class if allowed is None else allowed
+        "List of allowed enum values."
         self._members: dict = {i.name.lower(): i for i in self.allowed}
         super().__init__(name, enum_class, description, required=required, default=default)
     def _get_value_description(self) -> str:
@@ -1495,7 +1490,7 @@ class EnumOption(Option[E], Generic[E]):
             raise ValueError(f"Value '{value!r}' not allowed")
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains option value.
@@ -1511,7 +1506,7 @@ class EnumOption(Option[E], Generic[E]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1534,8 +1529,8 @@ class FlagOption(Option[F], Generic[F]):
     def __init__(self, name: str, flag_class: type[F], description: str, *, required: bool=False,
                  default: F | None=None, allowed: list | None=None):
         self._value: F | None = None
-        #: List of allowed flag values.
         self.allowed: Sequence[F] = flag_class if allowed is None else allowed
+        "List of allowed flag values."
         self._members: dict = {i.name.lower(): i for i in self.allowed}
         super().__init__(name, flag_class, description, required=required, default=default)
     def _get_value_description(self) -> str:
@@ -1597,7 +1592,7 @@ class FlagOption(Option[F], Generic[F]):
                 raise ValueError(f"Illegal value '{value!s}' for flag option '{self.name}'")
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains option value.
@@ -1616,7 +1611,7 @@ class FlagOption(Option[F], Generic[F]):
             else:
                 self.set_as_str(opt.as_string)
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1626,7 +1621,7 @@ class FlagOption(Option[F], Generic[F]):
     value: F | None = property(get_value, set_value, doc="Current option value")
 
 class UUIDOption(Option[UUID]):
-    """Configuration option with UUID value.
+    """Configuration option with [uuid.UUID][] value.
 
     Arguments:
         name: Option name.
@@ -1680,7 +1675,7 @@ class UUIDOption(Option[UUID]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -1695,7 +1690,7 @@ class UUIDOption(Option[UUID]):
             else:
                 self.set_value(UUID(opt.as_string))
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1705,7 +1700,7 @@ class UUIDOption(Option[UUID]):
     value: UUID | None = property(get_value, set_value, doc="Current option value")
 
 class MIMEOption(Option[MIME]):
-    """Configuration option with MIME type specification value.
+    """Configuration option with [Firebird.base.types.MIME][] type specification value.
 
     Arguments:
         name: Option name.
@@ -1758,7 +1753,7 @@ class MIMEOption(Option[MIME]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -1770,7 +1765,7 @@ class MIMEOption(Option[MIME]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1802,14 +1797,14 @@ class ListOption(Option[list]):
     def __init__(self, name: str, item_type: type | Sequence[type], description: str,
                  *, required: bool=False, default: list | None=None, separator: str | None=None):
         self._value: list | None = None
-        #: Datatypes of list items. If there is more than one type, each value in
-        #: config file must have format: `type_name:value_as_str`.
         self.item_types: Sequence[type] = item_type if isinstance(item_type, Sequence) else (item_type, )
-        #: String that separates list item values when options value is read from
-        #: `ConfigParser`. Default separator is None. It's possible to use a line break as
-        #: separator. If separator is `None` and the value contains line breaks, it uses
-        #: the line break as separator, otherwise it uses comma as separator.
+        """Datatypes of list items. If there is more than one type, each value in
+        config file must have format: `type_name:value_as_str`."""
         self.separator: str | None = separator
+        """String that separates list item values when options value is read from
+        `ConfigParser`. Default separator is None. It's possible to use a line break as
+        separator. If separator is `None` and the value contains line breaks, it uses
+        the line break as separator, otherwise it uses comma as separator."""
         self._convertor: Convertor = get_convertor(item_type) if not isinstance(item_type, Sequence) else None
         super().__init__(name, list, description, required=required, default=default)
         # Value fixup, store copy of default list instead direct assignment
@@ -1903,7 +1898,7 @@ class ListOption(Option[list]):
         self._check_value(value)
         self._value = None if value is None else list(value)
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -1919,7 +1914,7 @@ class ListOption(Option[list]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -1998,7 +1993,7 @@ class PyExprOption(Option[PyExpr]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -2014,7 +2009,7 @@ class PyExprOption(Option[PyExpr]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -2097,7 +2092,7 @@ class PyCodeOption(Option[PyCode]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -2113,7 +2108,7 @@ class PyCodeOption(Option[PyCode]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -2142,7 +2137,7 @@ class PyCallableOption(Option[PyCallable]):
     def __init__(self, name: str, description: str, signature: Signature | Callable | str,
                  * , required: bool=False, default: PyCallable | None=None):
         self._value: PyCallable | None = None
-        #: Callable signature.
+        "Callable signature."
         if isinstance(signature, str):
             if not signature.startswith('def'):
                 signature = 'def ' + signature
@@ -2220,7 +2215,7 @@ class PyCallableOption(Option[PyCallable]):
                     raise ValueError(f"Wrong parameter kind, parameter '{val_par.name}'")
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -2236,7 +2231,7 @@ class PyCallableOption(Option[PyCallable]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.
@@ -2252,7 +2247,7 @@ class ConfigOption(Option[str]):
     itself is configurable. The actual `Config` object must be passed during
     initialization. The `value` property returns this `Config` object, while
     methods like `set_as_str`, `get_as_str`, `get_formatted`, `load_proto`,
-    `save_proto` operate on the `Config` object's *name* (the section name).
+    `save_proto` operate on the `Config` object's **name** (the section name).
 
     Loading/saving the *contents* of the referenced `Config` object is handled
     by the parent `Config`'s `load_config`/`save_proto` methods.
@@ -2295,7 +2290,7 @@ class ConfigOption(Option[str]):
         """Clears the option value.
 
         Note:
-           This method calls `~Config.clear(to_default)`.
+           This method calls `Config.clear(to_default)`.
 
         Arguments:
             to_default: If True, sets the `Config.name` to default value, else to empty string.
@@ -2356,7 +2351,7 @@ class ConfigOption(Option[str]):
 class ConfigListOption(Option[list]):
     """Option holding a list of Config instances, parsing/storing their section names.
 
-    This option manages a list of `Config` objects, all of the *same* specified
+    This option manages a list of `Config` objects, all of the **same** specified
     `item_type`. However, in configuration files (`ConfigParser`) and Protobuf
     messages, it stores and parses a *list of strings*, where each string is the
     section name corresponding to one of the `Config` instances in the list.
@@ -2374,7 +2369,7 @@ class ConfigListOption(Option[list]):
         When read from `ConfigParser`, empty values in the list of names are ignored.
 
     Arguments:
-        name: Option name identifying where the *list of section names* is stored.
+        name: Option name identifying where the **list of section names** is stored.
         item_type: The specific `Config` subclass for items in the list. All items
                    will be instances of this type.
         description: Option description. Can span multiple lines.
@@ -2382,8 +2377,8 @@ class ConfigListOption(Option[list]):
         separator: String separating section names in the config file value.
                    Handles line breaks automatically if `None`. See class docs.
 
-    Example::
-
+    Example:
+        ```python
         from firebird.base.config import Config, StrOption, ConfigListOption
         from configparser import ConfigParser
         import io
@@ -2400,7 +2395,8 @@ class ConfigListOption(Option[list]):
                 super().__init__('main_app')
                 self.workers = ConfigListOption('workers', WorkerConfig,
                                                 'List of worker configurations (section names)')
-
+        ```
+        ```ini
         # --- Configuration File Content ---
         config_data = '''
         [main_app]
@@ -2412,7 +2408,8 @@ class ConfigListOption(Option[list]):
         [worker_beta]
         task_type = reporting
         '''
-
+        ```
+        ```python
         # --- Loading ---
         app_config = MainAppConfig()
         parser = ConfigParser()
@@ -2431,18 +2428,19 @@ class ConfigListOption(Option[list]):
 
         # --- Getting Config String ---
         # print(app_config.get_config()) would regenerate the structure
+        ```
     """
     def __init__(self, name: str, item_type: type[Config], description: str, *,
                  required: bool=False, separator: str | None=None):
         assert issubclass(item_type, Config) # noqa: S101
         self._value: list = []
-        #: Datatype of list items.
         self.item_type: type[Config] = item_type
-        #: String that separates values when options value is read from `ConfigParser`.
-        #: Default separator is None. It's possible to use a line break as separator.
-        #: If separator is `None` and the value contains line breaks, it uses the line
-        #: break as separator, otherwise it uses comma as separator.
+        "Datatype of list items."
         self.separator: str | None = separator
+        """String that separates values when options value is read from `ConfigParser`.
+        Default separator is None. It's possible to use a line break as separator.
+        If separator is `None` and the value contains line breaks, it uses the line
+        break as separator, otherwise it uses comma as separator."""
         super().__init__(name, list, description, required=required, default=[])
     def _get_value_description(self) -> str:
         return f"list of configuration section names (for sections of type '{self.item_type.__name__}')\n"
@@ -2562,7 +2560,7 @@ class DataclassOption(Option[Any]):
     dataclass is defined on its own line or separated by a defined `separator`.
     The format for each field within the string is `field_name: value_as_str`.
 
-    Relies on the `firebird.base.strconv` module to convert the `value_as_str`
+    Relies on the [firebird.base.strconv][] module to convert the `value_as_str`
     part for each field into the appropriate Python type based on the dataclass's
     type hints or the explicitly provided `fields` mapping.
 
@@ -2584,8 +2582,8 @@ class DataclassOption(Option[Any]):
         fields: Optional override mapping field names to types. Useful if type hints
                 are complex or need overriding. If None, uses `get_type_hints`.
 
-    Example::
-
+    Example:
+        ```python
         from dataclasses import dataclass, field
         from firebird.base.config import Config, DataclassOption
         from firebird.base.strconv import register_convertor # If custom types needed
@@ -2604,7 +2602,8 @@ class DataclassOption(Option[Any]):
                 super().__init__('app')
                 self.database = DataclassOption('database', DBInfo,
                                                'Database connection details')
-
+        ```
+        ```ini
         # --- Configuration File Content ---
         config_data = '''
         [app]
@@ -2614,7 +2613,8 @@ class DataclassOption(Option[Any]):
             port: 15432
         '''
         # Note: ssl_mode uses its default (False) as it's not specified.
-
+        ```
+        ```python
         # --- Loading ---
         app_config = AppSettings()
         parser = ConfigParser()
@@ -2631,6 +2631,7 @@ class DataclassOption(Option[Any]):
 
         # --- Getting Config String ---
         # print(app_config.get_config()) would regenerate the structure
+        ```
     """
     def __init__(self, name: str, dataclass: type, description: str, *, required: bool=False,
                  default: Any | None=None, separator: str | None=None, fields: dict[str, type] | None=None):
@@ -2640,13 +2641,13 @@ class DataclassOption(Option[Any]):
             for ftype in self._fields.values():
                 assert get_convertor(ftype) is not None # noqa: S101
         self._value: Any = None
-        #: Dataclass type.
         self.dataclass: type = dataclass
-        #: String that separates dataclass field values when options value is read from
-        #: `ConfigParser`. Default separator is None. It's possible to use a line break
-        #: as separator. If separator is `None` and the value contains line breaks, it
-        #: uses the line break as separator, otherwise it uses comma as separator.
+        "Dataclass type."
         self.separator: str | None = separator
+        """String that separates dataclass field values when options value is read from
+        `ConfigParser`. Default separator is None. It's possible to use a line break
+        as separator. If separator is `None` and the value contains line breaks, it
+        uses the line break as separator, otherwise it uses comma as separator."""
         super().__init__(name, dataclass, description, required=required, default=default)
     def _get_value_description(self) -> str:
         return """list of values, where each list item defines value for a dataclass field.
@@ -2756,7 +2757,7 @@ Item format: field_name:value_as_str
     value: Any = property(get_value, set_value, doc="Current option value")
 
 class PathOption(Option[str]):
-    """Configuration option with `pathlib.Path` value.
+    """Configuration option with [pathlib.Path][] value.
 
         Arguments:
             name: Option name.
@@ -2810,7 +2811,7 @@ class PathOption(Option[str]):
         self._check_value(value)
         self._value = value
     def load_proto(self, proto: ConfigProto) -> None:
-        """Deserialize value from `.ConfigProto` message.
+        """Deserialize value from `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message that may contains options value.
@@ -2826,7 +2827,7 @@ class PathOption(Option[str]):
             else:
                 raise TypeError(f"Wrong value type: {opt.WhichOneof('kind')[3:]}")
     def save_proto(self, proto: ConfigProto) -> None:
-        """Serialize value into `.ConfigProto` message.
+        """Serialize value into `ConfigProto` message.
 
         Arguments:
             proto: Protobuf message where option value should be stored.

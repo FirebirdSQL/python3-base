@@ -38,21 +38,30 @@
 #                               Python 3.8, added Delphi events
 #                 ______________________________________
 
-"""firebird-base - Callback system based on Signals and Slots, and "Delphi events"
-
-TThis module provides two callback mechanisms:
+"""This module provides two callback mechanisms:
 
 1.  **Signals and Slots (`Signal`, `signal` decorator):** Inspired by Qt, a signal
     can be connected to multiple slots (callbacks). When the signal is emitted,
     all connected slots are called. Return values from slots are ignored.
 2.  **Eventsockets (`eventsocket` decorator):** Similar to Delphi events, an
-    eventsocket holds a reference to a *single* slot (callback). Assigning a new
+    eventsocket holds a reference to a **single** slot (callback). Assigning a new
     slot replaces the previous one. Calling the eventsocket delegates the call
     directly to the connected slot. Return values are passed back from the slot.
 
 In both cases, slots can be functions, instance/class methods, `functools.partial`
 objects, or lambda functions. The `inspect` module is used to enforce signature
 matching between the signal/eventsocket definition and the connected slots.
+
+Important:
+    All type annotations in signatures are significant, so callbacks must have exactly the
+    same annotations as signatures used by signals or events. The sole exception are excess
+    keyword  arguments with default values defined on connected callable.
+
+Tip:
+    You may use [functools.partial][] to adapt callable with different signatures. However,
+    you can "mask" only keyword arguments (without default) and leading positional arguments
+    (as any positional argument binded by name will not mask-out parameter from signature
+    introspection).
 """
 
 from __future__ import annotations
@@ -93,8 +102,8 @@ class Signal:
         self._sig: Signature = signature.replace(parameters=[p for p in signature.parameters.values()
                                                              if p.name != 'self'],
                                                  return_annotation=Signature.empty)
-        #: Toggle to block / unblock signal transmission
         self.block: bool = False
+        "Toggle to block / unblock signal transmission"
         self._slots: list[Callable | ReferenceType[Callable]] = []
         self._islots: WeakKeyDictionary = WeakKeyDictionary()
     def __call__(self, *args, **kwargs):
@@ -151,13 +160,12 @@ class Signal:
                     excluding return type and allowing extra keyword args with defaults).
 
         Storage Note:
-
-        - Regular functions are stored using `weakref.ref` to avoid preventing
-          garbage collection if the signal outlives the function's scope.
-        - Instance methods are stored using a `WeakKeyDictionary` mapping the
-          instance (weakly) to the unbound function.
-        - Lambdas and `functools.partial` objects are stored directly, as weak
-          references to them are often problematic.
+            - Regular functions are stored using `weakref.ref` to avoid preventing
+              garbage collection if the signal outlives the function's scope.
+            - Instance methods are stored using a `WeakKeyDictionary` mapping the
+              instance (weakly) to the unbound function.
+            - Lambdas and `functools.partial` objects are stored directly, as weak
+              references to them are often problematic.
         """
         if not callable(slot):
             raise ValueError(f"Connection to non-callable '{slot.__class__.__name__}' object failed")
@@ -223,8 +231,8 @@ class signal: # noqa: N801
     A unique `Signal` instance is lazily created for each object instance the
     first time the signal property is accessed.
 
-    Example::
-
+    Example:
+        ```python
         class MyClass:
             @signal
             def value_changed(self, new_value: int):
@@ -234,6 +242,7 @@ class signal: # noqa: N801
         instance = MyClass()
         instance.value_changed.connect(my_slot_function)
         instance.value_changed.emit(10)
+        ```
     """
     def __init__(self, fget, doc=None):
         self._sig_ = Signature.from_callable(fget)
@@ -297,28 +306,28 @@ class eventsocket: # noqa: N801
     The decorated function's signature (excluding 'self' but including the return
     type annotation) defines the required signature for the assigned slot.
 
-    Use the `.is_set()` method on the property access to check if a handler is assigned.
+    Use the `is_set()` method on the property access to check if a handler is assigned.
 
-    Example::
-
+    Example:
+        ```python
         class MyComponent:
             @eventsocket
             def on_update(self, data: dict) -> None:
                 # Slots must match (data: dict) -> None
                 pass
 
-            def do_update(self):
+            def do_update(self)->:
                 data = {'value': 1}
-                if self.on_update.is_set():
-                    self.on_update(data) # Call the assigned handler
+                self.on_update(data) # Call the assigned handler (or pass if not set)
 
-        def my_handler(data: dict):
+        def my_handler(data: dict) -> None:
             print(f"Handler received: {data}")
 
         comp = MyComponent()
         comp.on_update = my_handler # Connect handler
         comp.do_update()            # Calls my_handler
         comp.on_update = None       # Disconnect handler
+        ```
 
     Important:
         Signature matching includes parameter names, types, kinds, order, *and* the
