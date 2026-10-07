@@ -54,17 +54,6 @@ packages = ["src/firebird"]
 dependencies = [
 ]
 
-[tool.hatch.envs.gdocs]
-dependencies = [
-  "great-docs @ git+https://github.com/posit-dev/great-docs",
-]
-
-[tool.hatch.envs.gdocs.scripts]
-init = "great-docs init"
-scan = "great-docs scan"
-build = "great-docs build"
-preview = "great-docs preview"
-
 [tool.hatch.envs.hatch-test]
 extra-args = ["-vv"]
 dependencies = [
@@ -75,7 +64,7 @@ dependencies = [
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.11", "3.12", "3.13", "3.14"]
 
-[tool.hatch.envs.doc]
+[tool.hatch.envs.spdoc]
 detached = false
 platforms = ["linux"]
 dependencies = [
@@ -84,22 +73,27 @@ dependencies = [
   "sphinx-autodoc-typehints>=1.24.0",
   "doc2dash>=3.0.0"
 ]
-[tool.hatch.envs.doc.scripts]
-build = "cd docs ; make html"
+[tool.hatch.envs.spdoc.scripts]
+build = "cd spdocs ; make html"
 docset = [
-  "cd docs ; doc2dash -u https://firebird-base.readthedocs.io/en/latest/ -f -i ./_static/fb-favicon.png -n firebird-base ./_build/html/",
-  "cd docs; VERSION=`hatch version` ; tar --exclude='.DS_Store' -cvzf ../dist/firebird-base-$VERSION-docset.tgz firebird-base.docset",
+  "cd spdocs ; doc2dash -u https://firebird-base.readthedocs.io/en/latest/ -f -i ./_static/fb-favicon.png -n firebird-base ./_build/html/",
+  "cd spdocs; VERSION=$(python -c 'from firebird.base.__about__ import __version__; print(__version__)') && tar --exclude='.DS_Store' -cvzf ../dist/firebird-base-$VERSION-docset.tgz firebird-base.docset",
 ]
 
-[tool.hatch.envs.zensical]
+[tool.hatch.envs.doc]
 detached = false
 dependencies = [
   "zensical",
   "mkdocstrings-python",
+  "doc2dash>=3.0.0"
 ]
-[tool.hatch.envs.zensical.scripts]
-build = "cd zendocs && zensical build {args}"
-serve = "cd zendocs && zensical serve {args}"
+[tool.hatch.envs.doc.scripts]
+build = "cd docs && zensical build {args}"
+serve = "cd docs && zensical serve {args}"
+docset = [
+  "cd docs ; doc2dash -u https://firebird-base.readthedocs.io/en/latest/ -f -i ./site/assets/fb-favicon.png -n firebird-base ./site/",
+  "cd docs; VERSION=$(python -c 'from firebird.base.__about__ import __version__; print(__version__)') && tar --exclude='.DS_Store' -cvzf ../dist/firebird-base-$VERSION-docset.tgz firebird-base.docset",
+]
 
 [tool.ruff]
 target-version = "py311"

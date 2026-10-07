@@ -1,0 +1,414 @@
+# trace - Trace/audit for class instances
+
+## Overview
+
+::: firebird.base.trace
+    options:
+        members: false
+
+Trace behavior can be configured dynamically at runtime using the `TraceManager`.
+This includes:
+
+* Enabling/disabling tracing globally or for specific aspects (before/after/fail).
+* Registering classes whose methods should be traced.
+* Adding specific trace configurations (like custom messages or levels) for
+  individual methods using `TraceManager.add_trace()`.
+* Loading comprehensive trace configurations from `ConfigParser` files using
+  `TraceManager.load_config()`, which allows specifying traced classes, methods,
+  and decorator parameters via INI-style sections (see `TraceConfig`).
+
+## Example
+
+The following program is an example of small but complex enough code that you can use to
+experiment with code tracing options. The parts relevant to tracing are highlighted in
+the code by embedded comments.
+
+```python
+# test-trace.py
+from __future__ import annotations
+import logging
+from time import monotonic
+from decimal import Decimal
+from enum import IntEnum, auto
+from firebird.base.types import *
+from firebird.base.logging import LogLevel, LoggingIdMixin, get_logger
+from firebird.base.trace import TracedMixin, add_trace, trace_manager, TraceFlag, traced
+
+class Mood(IntEnum):
+    "Agent moods"
+    ANGRY = auto()
+    SAD = auto()
+    NEUTRAL = auto()
+    PLEASED = auto()
+    HAPPY = auto()
+
+class Person(TracedMixin): # TRACE
+    "Sample virtual human agent"
+    def __init__(self, name: str, mood: Mood=Mood.NEUTRAL):
+        self.name: str = name
+        self.mood: Mood = mood
+        self.partners: List[Person] = []
+    # >>> LOGGING & TRACE
+    @property
+    def _agent_name_(self) -> str:
+        return f"{self.mood.name} {self.name}"
+    # <<< LOGGING & TRACE
+    def change_mood(self, offset: int) -> None:
+        result = self.mood + offset
+        if result < Mood.ANGRY:
+            self.mood = Mood.ANGRY
+        elif result > Mood.HAPPY:
+            self.mood = Mood.HAPPY
+        else:
+            self.mood = Mood(result)
+    def process(self, message: str) -> None:
+        msg = message.lower()
+        if msg == "what you are doing here":
+            self.change_mood(-1)
+        if 'awful' in msg:
+            self.change_mood(-1)
+        if ('nice' in msg) or ('wonderful' in msg) or ('pleased' in msg):
+            if self.mood != Mood.ANGRY:
+                self.change_mood(1)
+        if 'happy' in msg:
+            if self.mood != Mood.ANGRY:
+                self.change_mood(2)
+        if 'very nice' in msg:
+            if self.mood != Mood.ANGRY:
+                self.change_mood(1)
+        if 'get lost' in msg:
+            self.change_mood(-2)
+        if self.name.lower() in msg:
+            if self.mood == Mood.SAD:
+                self.change_mood(1)
+        if self.name.lower() not in msg:
+            if self.mood == Mood.NEUTRAL:
+                self.change_mood(-1)
+    def process_response(self, to: str, mood: Mood) -> None:
+        if to == 'greeting':
+            if self.mood == Mood.NEUTRAL:
+                if mood > Mood.NEUTRAL:
+                    self.mood = Mood.PLEASED
+                elif mood == Mood.ANGRY:
+                    self.mood = Mood.SAD
+            elif self.mood == Mood.SAD:
+                if mood == Mood.SAD:
+                    self.mood = Mood.NEUTRAL
+                elif mood == Mood.HAPPY:
+                    self.mood = Mood.ANGRY
+            elif self.mood == Mood.ANGRY and mood == Mood.SAD:
+                self.mood = Mood.NEUTRAL
+        elif to == 'chat':
+            if self.mood == Mood.SAD and mood > Mood.NEUTRAL:
+                self.mood = Mood.NEUTRAL
+            elif self.mood == Mood.ANGRY and mood == Mood.SAD:
+                self.mood = Mood.NEUTRAL
+            elif self.mood == Mood.PLEASED and mood == Mood.ANGRY:
+                self.mood = Mood.NEUTRAL
+            elif self.mood == Mood.HAPPY and mood == Mood.ANGRY:
+                self.mood = Mood.SAD
+        elif to == 'bye':
+            if self.mood == Mood.NEUTRAL:
+                if mood == Mood.ANGRY:
+                    self.mood = Mood.ANGRY
+                elif mood > Mood.NEUTRAL:
+                    self.mood = Mood.PLEASED
+            elif self.mood == Mood.HAPPY and mood == Mood.ANGRY:
+                self.mood = Mood.NEUTRAL
+    def meet(self, other: Person) -> None:
+        self.partners.append(other)
+        self.greeting(other)
+    def interact(self, other: Person, message: str) -> Mood:
+        print(f"[{other.name}] {message}")
+        self.process(message)
+        return self.mood
+    def greeting(self, other: Person) -> None:
+        if self.mood == Mood.NEUTRAL:
+            msg = f"Hi {other.name}, I'm {self.name}"
+        elif self.mood == Mood.ANGRY:
+            msg = "Hi"
+        elif self.mood == Mood.SAD:
+            msg = f"Hi {other.name}"
+        else:
+            msg = f"Hi {other.name}, I'm {self.name}. I'm {self.mood.name} to meet you."
+        self.process_response('greeting', other.interact(self, msg))
+    def chat(self) -> None:
+        for other in self.partners:
+            if self.mood == Mood.ANGRY:
+                msg = "What you are doing here?"
+            elif self.mood == Mood.SAD:
+                msg = "The weather is awful today, don't you think?"
+            elif self.mood == Mood.NEUTRAL:
+                msg = "It's a fine day, don't you think?"
+            elif self.mood == Mood.PLEASED:
+                msg = "It's a very nice day, don't you think?"
+            else:
+                msg = "Today is a wonderful day!"
+            self.process_response('chat', other.interact(self, msg))
+    def bye(self) -> str:
+        while self.partners:
+            other = self.partners.pop()
+            if self.mood == Mood.ANGRY:
+                msg = "Get lost!"
+            elif self.mood == Mood.SAD:
+                msg = "Bye"
+            elif self.mood == Mood.NEUTRAL:
+                msg = f"Bye, {other.name}."
+            elif self.mood == Mood.PLEASED:
+                msg = f"See you, {other.name}!"
+            else:
+                msg = f"Bye, {other.name}. Have a nice day!"
+            self.process_response('bye', other.interact(self, msg))
+        if self.mood == Mood.ANGRY:
+            result = "I hate this meeting!"
+        elif self.mood == Mood.SAD:
+            result = "It was a waste of time!"
+        elif self.mood == Mood.NEUTRAL:
+            result = "It was OK."
+        elif self.mood == Mood.PLEASED:
+            result = "Nice meeting, I think."
+        else:
+            result = "What a wonderful meeting!"
+        return result
+    def __repr__(self) -> str:
+        # Replace "..Person object at .." with something more suitable for trace
+        return f"Person('{self.name}', {self.mood.name})"
+
+def meeting(name: str, persons: List[Person]):
+    "Simulation of virtual agents meeting"
+
+    for person in persons:
+        person.log_context = name
+
+    start = monotonic()
+    print("Meeting started...")
+    print(f"Attendees: {', '.join(f'{x.name} [{x.mood.name}]' for x in persons)}")
+
+    for person in persons:
+        for other in persons:
+            if other is not person:
+                person.meet(other)
+
+    for person in persons:
+        person.chat()
+
+    for person in persons:
+        person.bye()
+
+    e = str(Decimal(monotonic() - start))
+    print(f"Meeting closed in {e[:e.find('.')+6]} sec.")
+    print(f"Outcome: {', '.join(f'{x.name} [{x.mood.name}]' for x in persons)}")
+
+
+def test_trace(name: str, first: Mood, second: Mood) -> None:
+    print("- without trace ----------")
+    meeting(name, [Person('Alex', first), Person('David', second)])
+
+    print("- trace ------------------")
+    # >>> TRACE
+    add_trace(Person, 'greeting')
+    add_trace(Person, 'bye')
+    add_trace(Person, 'chat')
+    add_trace(Person, 'change_mood')
+    add_trace(Person, 'process', with_args=False)
+    add_trace(Person, 'process_response')
+    # <<< TRACE
+    meeting(name, [Person('Alex', first), Person('David', second)])
+
+if __name__ == '__main__':
+    # >>> LOGGING
+    logger = logging.getLogger()
+    logger.setLevel(LogLevel.NOTSET)
+    sh = logging.StreamHandler()
+    sh.setFormatter(logging.Formatter('%(levelname)-10s: [%(topic)s][%(agent)s][%(context)s] %(message)s'))
+    logger.addHandler(sh)
+    # <<< LOGGING
+    # >>> TRACE
+    trace_manager.flags |= TraceFlag.ACTIVE
+    trace_manager.flags |= (TraceFlag.FAIL | TraceFlag.BEFORE | TraceFlag.AFTER)
+    # <<< TRACE
+    test_trace('TEST-1', Mood.SAD, Mood.PLEASED)
+
+```
+
+
+**Output from sample code**:
+
+```text
+   > python test-trace.py
+   - without trace ----------
+   Meeting started...
+   Attendees: Alex [SAD], David [PLEASED]
+   [Alex] Hi David
+   [David] Hi Alex, I'm David. I'm PLEASED to meet you.
+   [Alex] It's a fine day, don't you think?
+   [David] It's a very nice day, don't you think?
+   [Alex] Bye, David. Have a nice day!
+   [David] Bye, Alex. Have a nice day!
+   Meeting closed in 0.00014 sec.
+   Outcome: Alex [HAPPY], David [HAPPY]
+   - trace ------------------
+   Meeting started...
+   Attendees: Alex [SAD], David [PLEASED]
+   DEBUG     : [trace][SAD Alex][TEST-1] >>> greeting(other=Person('David', PLEASED))
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> interact(other=Person('Alex', SAD), message='Hi David')
+   [Alex] Hi David
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> process
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< process[0.00002]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< interact[0.00020] Result: <Mood.PLEASED: 4>
+   DEBUG     : [trace][SAD Alex][TEST-1] >>> process_response(to='greeting', mood=<Mood.PLEASED: 4>)
+   DEBUG     : [trace][SAD Alex][TEST-1] <<< process_response[0.00000]
+   DEBUG     : [trace][SAD Alex][TEST-1] <<< greeting[0.00060]
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> greeting(other=Person('Alex', SAD))
+   DEBUG     : [trace][SAD Alex][TEST-1] >>> interact(other=Person('David', PLEASED), message="Hi Alex, I'm David. I'm PLEASED to meet you.")
+   [David] Hi Alex, I'm David. I'm PLEASED to meet you.
+   DEBUG     : [trace][SAD Alex][TEST-1] >>> process
+   DEBUG     : [trace][SAD Alex][TEST-1] >>> change_mood(offset=1)
+   DEBUG     : [trace][SAD Alex][TEST-1] <<< change_mood[0.00000]
+   DEBUG     : [trace][SAD Alex][TEST-1] <<< process[0.00016]
+   DEBUG     : [trace][SAD Alex][TEST-1] <<< interact[0.00030] Result: <Mood.NEUTRAL: 3>
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> process_response(to='greeting', mood=<Mood.NEUTRAL: 3>)
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< process_response[0.00000]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< greeting[0.00061]
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> chat()
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> interact(other=Person('Alex', NEUTRAL), message="It's a fine day, don't you think?")
+   [Alex] It's a fine day, don't you think?
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> process
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< process[0.00000]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< interact[0.00013] Result: <Mood.PLEASED: 4>
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> process_response(to='chat', mood=<Mood.PLEASED: 4>)
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< process_response[0.00000]
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< chat[0.00042]
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> chat()
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> interact(other=Person('David', PLEASED), message="It's a very nice day, don't you think?")
+   [David] It's a very nice day, don't you think?
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> process
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] >>> change_mood(offset=1)
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< change_mood[0.00000]
+   DEBUG     : [trace][PLEASED Alex][TEST-1] >>> change_mood(offset=1)
+   DEBUG     : [trace][PLEASED Alex][TEST-1] <<< change_mood[0.00000]
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< process[0.00027]
+   DEBUG     : [trace][NEUTRAL Alex][TEST-1] <<< interact[0.00039] Result: <Mood.HAPPY: 5>
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> process_response(to='chat', mood=<Mood.HAPPY: 5>)
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< process_response[0.00000]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< chat[0.00068]
+   DEBUG     : [trace][HAPPY Alex][TEST-1] >>> bye()
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> interact(other=Person('Alex', HAPPY), message='Bye, David. Have a nice day!')
+   [Alex] Bye, David. Have a nice day!
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> process
+   DEBUG     : [trace][PLEASED David][TEST-1] >>> change_mood(offset=1)
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< change_mood[0.00000]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< process[0.00013]
+   DEBUG     : [trace][PLEASED David][TEST-1] <<< interact[0.00024] Result: <Mood.HAPPY: 5>
+   DEBUG     : [trace][HAPPY Alex][TEST-1] >>> process_response(to='bye', mood=<Mood.HAPPY: 5>)
+   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< process_response[0.00000]
+   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< bye[0.00052] Result: 'What a wonderful meeting!'
+   DEBUG     : [trace][HAPPY David][TEST-1] >>> bye()
+   DEBUG     : [trace][HAPPY Alex][TEST-1] >>> interact(other=Person('David', HAPPY), message='Bye, Alex. Have a nice day!')
+   [David] Bye, Alex. Have a nice day!
+   DEBUG     : [trace][HAPPY Alex][TEST-1] >>> process
+   DEBUG     : [trace][HAPPY Alex][TEST-1] >>> change_mood(offset=1)
+   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< change_mood[0.00000]
+   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< process[0.00013]
+   DEBUG     : [trace][HAPPY Alex][TEST-1] <<< interact[0.00024] Result: <Mood.HAPPY: 5>
+   DEBUG     : [trace][HAPPY David][TEST-1] >>> process_response(to='bye', mood=<Mood.HAPPY: 5>)
+   DEBUG     : [trace][HAPPY David][TEST-1] <<< process_response[0.00000]
+   DEBUG     : [trace][HAPPY David][TEST-1] <<< bye[0.00052] Result: 'What a wonderful meeting!'
+   Meeting closed in 0.00432 sec.
+   Outcome: Alex [HAPPY], David [HAPPY]
+```
+
+## Trace configuration
+
+Trace supports configuration based on [firebird.base.config][].
+
+**Sample configuration file**:
+
+```ini
+[trace]
+flags = ACTIVE | FAIL
+;flags = ACTIVE | BEFORE | AFTER | FAIL
+classes = trace_ChannelManager, trace_Channel, trace_TextIOServiceImpl, trace_PipeServerHandler
+
+[trace_PipeServerHandler]
+source = saturnin.core.protocol.fbdp.PipeServerHandler
+methods = close, send_ready, send_close
+
+[trace_ChannelManager]
+source = saturnin.core.base.ChannelManager
+special = trace_defer
+
+[trace_Channel]
+source = saturnin.core.base.Channel
+methods = send, receive, close, bind, unbind, connect, disconnect
+
+[trace_DealerChannel]
+source = saturnin.core.base.DealerChannel
+methods = send, receive, close, bind, unbind, connect, disconnect
+
+[trace_SimpleService]
+source = saturnin.core.classic.SimpleService
+methods = validate, run, initialize, start
+with_args = no
+
+[trace_TextIOServiceImpl]
+source = saturnin.sdk.micro.textio.service.TextIOServiceImpl
+methods = initialize, configure, validate, finalize
+with_args = no
+
+[trace_defer]
+method = defer
+max_param_length = 50
+```
+
+## Enums & Flags
+
+::: firebird.base.trace.TraceFlag
+
+## Functions
+
+::: firebird.base.trace.add_trace
+
+::: firebird.base.trace.remove_trace
+
+::: firebird.base.trace.trace_object
+
+## Trace manager
+
+::: firebird.base.trace.TraceManager
+
+## Trace/audit decorator
+
+::: firebird.base.trace.traced
+
+## Mixins
+
+::: firebird.base.trace.TracedMixin
+
+## Globals
+
+::: firebird.base.trace.trace_manager
+
+## Trace configuration classes
+
+::: firebird.base.trace.BaseTraceConfig
+    options:
+      inherited_members: false
+
+::: firebird.base.trace.TracedMethodConfig
+    options:
+      inherited_members: false
+
+::: firebird.base.trace.TracedClassConfig
+    options:
+      inherited_members: false
+
+::: firebird.base.trace.TraceConfig
+    options:
+      inherited_members: false
+
+## Dataclasses
+
+::: firebird.base.trace.TracedItem
+
+::: firebird.base.trace.TracedClass

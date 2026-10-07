@@ -1,26 +1,20 @@
-#########
-Changelog
-#########
+# Changelog
 
-Version 2.0.3
-=============
+## Version 2.0.3
 
 * Fix: Problem with `entry_points` in `protobuf` module under Python 3.14
 
-Version 2.0.2
-=============
+## Version 2.0.2
 
 * Fix: "quick fingers" issue with `_decompose` fix.
 
-Version 2.0.1
-=============
+## Version 2.0.1
 
 * Fix: for trace configuration.
 * Fix: issues with `_decompose`.
 * Fix: Signature match in `.eventsocket`.
 
-Version 2.0.0
-=============
+## Version 2.0.0
 
 * Change tests from `unittest` to `pytest`, 96% code coverage.
 * Minimal Python version raised to 3.11.
@@ -82,8 +76,7 @@ Version 2.0.0
 
 
 
-Version 1.8.0
-=============
+## Version 1.8.0
 
 * `~firebird.base.config` module:
 
@@ -92,27 +85,23 @@ Version 1.8.0
     variable, or empty string if such variable is not defined.
 
 
-Version 1.7.2
-=============
+## Version 1.7.2
 
-- `.Error.getattr()` should not mask the absence of `__notes__` attribute.
+- `.Error.getattr() should not mask the absence of _notes__` attribute.
 
-Version 1.7.1
-=============
+## Version 1.7.1
 
 - Log record values `module` and `filename` were not assigned properly under Python 3.11,
 - Failed tests due to subtle changes in Python 3.11
 - Downgrade dependency to `protobuf>=4.23.4`
 
-Version 1.7.0
-=============
+## Version 1.7.0
 
 * Update dependency to protobuf >=4.24.3
 * Build system changed from setuptools to hatch
 * Package version is now defined in firebird.base.__about__.py (__version__)
 
-Version 1.6.1
-=============
+## Version 1.6.1
 
 * `~firebird.base.config` module:
 
@@ -120,8 +109,7 @@ Version 1.6.1
   - `.StrOption` now supports preservation of significant leading whitespace for multiline
     values (like `.PyCodeOption`).
 
-Version 1.6.0
-=============
+## Version 1.6.0
 
 * `~firebird.base.protobuf` module:
 
@@ -138,27 +126,24 @@ Version 1.6.0
 
   - Fixed bug in `.TraceManager.load_config()`.
 
-Version 1.5.0
-=============
+## Version 1.5.0
 
 * Move away from setup.cfg to pyproject.toml, new source tree layout.
 
-Version 1.4.3
-=============
+## Version 1.4.3
 
 * `~firebird.base.types` module:
 
-  - Added internal functions `_decompose` and `_power_of_two` from stdlib `.enum` module,
+  - Added internal functions `_decompose and power_of_two` from stdlib `.enum` module,
     because they were removed in Python 3.11.
 
 * `~firebird.base.protobuf` module:
 
-  - Use :ref:`importlib.metadata.entry_points <entry-points>` instead `pkg_resources.iter_entry_points`.
+  - Use `importlib.metadata.entry_points <entry-points>` instead `pkg_resources.iter_entry_points`.
 
 * Improved documentation.
 
-Version 1.4.2
-=============
+## Version 1.4.2
 
 * Optimizations.
 * Cleanup of pylint warnings.
@@ -172,20 +157,17 @@ Version 1.4.2
     `~firebird.base.trace.TraceManager` that could be used to change trace decorator used
     for intrumentation.
 
-Version 1.4.1
-=============
+## Version 1.4.1
 
 * Fix: uregistered bug in trace.TraceConfig - redundant `flags` definition.
 * New: Documentation is now also provided as Dash_ / Zeal_ docset, downloadable from releases_ at github.
 
-Version 1.4.0
-=============
+## Version 1.4.0
 
 * Upgrade to protobuf 4.21.1. As this upgrade has consequences, please read
   https://developers.google.com/protocol-buffers/docs/news/2022-05-06#python-updates
 
-Version 1.3.1
-=============
+## Version 1.3.1
 
 * `~firebird.base.buffer` module:
 
@@ -197,8 +179,7 @@ Version 1.3.1
   - Direct assignment to `.Config` option raises a `ValueError` exception with message
     "Cannot assign values to option itself, use `option.value` instead".
 
-Version 1.3.0
-=============
+## Version 1.3.0
 
 * `~firebird.base.config` module:
 
@@ -206,8 +187,7 @@ Version 1.3.0
   - `.Config` has new constructor keyword-only argument `description`.
   - Fix: uregistered bug in config.ListOption - value and default was the same instance
 
-Version 1.2.0
-=============
+## Version 1.2.0
 
 * Build scheme changed to `PEP 517`.
 * Various changes to documentation and type hint adjustments.
@@ -234,8 +214,7 @@ Version 1.2.0
   - Added: `apply_to_descendants` boolean configuration option to apply configuration also
     to all registered descendant classes. The default value is `True`.
 
-Version 1.1.0
-=============
+## Version 1.1.0
 
 * New module: `signal` - Callback system based on Signals and Slots, and "Delphi events"
 * `~firebird.base.types` module:
@@ -253,7 +232,7 @@ Version 1.1.0
   - Optional argument `to_default` in `~firebird.base.config.Option.clear()` is now keyword-only.
 * `~firebird.base.logging` module:
 
-  - `.get_logging_id()` uses `__qualname__` instead `__name__`
+  - `.get_logging_id() uses _qualname__ instead _name__`
 * `~firebird.base.protobuf` module:
 
   - Added direct support for key well-known data types `Empty`, `Any`, `Duration`,
@@ -279,22 +258,19 @@ Version 1.1.0
   - New function `~firebird.base.types.load()`.
 * Changes in documentation.
 
-Version 1.0.0
-=============
+## Version 1.0.0
 
-* Documentation: new examples for :doc:`trace`, :doc:`logging` and :doc:`hooks`
+* Documentation: new examples for `trace`, `logging` and `hooks`
 * Documentation: adjustments to css
 * DataList is now generic class
 * `.DataList.extract()` has new 'copy' argument.
 
-Version 0.6.1
-=============
+## Version 0.6.1
 
 * Promoted to stable
 * More documentation
 
-Version 0.6.0
-=============
+## Version 0.6.0
 
 * New module: `~firebird.base.strconv` - Data conversion from/to string
 * New module: `~firebird.base.trace` - Trace/audit for class instances
@@ -314,11 +290,10 @@ Version 0.6.0
 
   - Trace/audit functionality removed (into new module `~firebird.base.trace`)
 
-Version 0.5.0
-=============
+## Version 0.5.0
 
 Initial release.
 
-.. _releases: https://github.com/FirebirdSQL/python3-base/releases
-.. _Dash: https://kapeli.com/dash
-.. _Zeal: https://zealdocs.org/
+[releases]: https://github.com/FirebirdSQL/python3-base/releases
+[Dash]: https://kapeli.com/dash
+[Zeal]: https://zealdocs.org/

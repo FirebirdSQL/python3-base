@@ -133,10 +133,9 @@ dmypy.json
 *.wpr
 *.wpu
 
-# Sphinx build
-docs/_build
+# Doc build
+docs/site
 docs/firebird-base.docset/
 
 # Other local files and directories
 local/
-zendocs/
