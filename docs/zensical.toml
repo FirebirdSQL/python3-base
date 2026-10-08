@@ -51,6 +51,7 @@ find_stubs_package = true
 
 [project.plugins.llmstxt]
 enabled = true
+markdown_description = "For version 2.0.3"
 sections = {
 "Home" = ["index.md"],
 "Introduction" = [
