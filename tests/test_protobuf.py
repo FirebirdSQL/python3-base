@@ -49,7 +49,7 @@ from firebird.base.protobuf import (
     get_enum_value_name,
     is_enum_registered,
     is_msg_registered,
-    register_decriptor,
+    register_descriptor,
 )
 
 from .base_test_pb2 import DESCRIPTOR
@@ -78,7 +78,7 @@ def test_aaa_register():
     assert not is_msg_registered(STATE_MSG_TYPE_NAME)
     assert not is_msg_registered(COLLECTION_MSG_TYPE_NAME)
     #
-    register_decriptor(DESCRIPTOR)
+    register_descriptor(DESCRIPTOR)
     #
     assert is_enum_registered(ENUM_TYPE_NAME)
     assert is_msg_registered(STATE_MSG_TYPE_NAME)
@@ -117,7 +117,7 @@ def test_enums():
                  ("TEST_STOPPED", 4),
                  ("TEST_TERMINATED", 6),
                  ]
-    register_decriptor(DESCRIPTOR)
+    register_descriptor(DESCRIPTOR)
     # Value name
     assert get_enum_value_name(ENUM_TYPE_NAME, TestEnum.SUSPENDED) == f"TEST_{TestEnum.SUSPENDED.name}"
     # Errors
@@ -142,7 +142,7 @@ def test_enums():
     assert cm.value.args == (f"Enum {ENUM_TYPE_NAME} has no value with name 'TEST_BAD_VALUE'",)
 
 def test_messages():
-    register_decriptor(DESCRIPTOR)
+    register_descriptor(DESCRIPTOR)
     #
     msg = create_message(STATE_MSG_TYPE_NAME)
     assert msg is not None
