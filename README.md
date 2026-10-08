@@ -143,7 +143,7 @@ Trace supports configuration based on `firebird.base.config`.
 ### Registry for Google Protocol Buffer messages and enums
 
 Module `protobuf` provides central registry for Google Protocol Buffer messages and enums.
-The generated `*_pb2.py protobuf` files could be registered using `register_decriptor` or
+The generated `*_pb2.py protobuf` files could be registered using `register_descriptor` or
 `load_registered` function. The registry could be then used to obtain information about
 protobuf messages or enum types, or to create message instances or enum values.
 
