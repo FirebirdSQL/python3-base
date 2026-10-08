@@ -47,15 +47,15 @@ First, you need to define your own configuration.
 from enum import IntEnum
 from firebird.base.config import Config, StrOption, IntOption, ListOption
 
- class SampleEnum(IntEnum):
-     "Enum for testing"
-     UNKNOWN    = 0
-     READY      = 1
-     RUNNING    = 2
-     WAITING    = 3
-     SUSPENDED  = 4
-     FINISHED   = 5
-     ABORTED    = 6
+class SampleEnum(IntEnum):
+    "Enum for testing"
+    UNKNOWN    = 0
+    READY      = 1
+    RUNNING    = 2
+    WAITING    = 3
+    SUSPENDED  = 4
+    FINISHED   = 5
+    ABORTED    = 6
 
 class DbConfig(Config):
     "Simple database config"
@@ -77,14 +77,13 @@ Has three options and two sub-configs.
         super().__init__('sample-config')
         # options
         self.opt_str: StrOption = StrOption('opt_str', "Sample string option")
-        self.opt_int: IntOption = StrOption('opt_int', "Sample int option")
-        self.enum_list: ListOption = ListOption('enum_list', "List of enum values",
-                                                item_type=SampleEnum)
+        self.opt_int: IntOption = IntOption('opt_int', "Sample int option")
+        self.enum_list: ListOption = ListOption('enum_list', SampleEnum, "List of enum values")
         # sub configs
         self.master_db: DbConfig = DbConfig('master-db')
         self.backup_db: DbConfig = DbConfig('backup-db')
-
 ```
+
 !!! important
     Option must be assigned to `Config` attributes with the same name as option name.
 
@@ -110,99 +109,54 @@ create initial one using `Config.get_config()` method.
 ; Sample Config.
 ;
 ; Has three options and two sub-configs.
-;
 
-; opt_str
-; -------
-;
-; data type: str
-;
-; [optional] Sample string option
-;
+; Sample string option
+; Type: str
 ;opt_str = <UNDEFINED>
 
-; opt_int
-; -------
-;
-; data type: str
-;
-; [optional] Sample int option
-;
+; Sample int option
+; Type: int
 ;opt_int = <UNDEFINED>
 
-; enum_list
-; ---------
-;
-; data type: list
-;
-; [optional] List of enum values
-;
+; List of enum values
+; Type: list [SampleEnum]
 ;enum_list = <UNDEFINED>
 
 [master-db]
 ;
-; Simple DB config
-;
+; Simple database config
 
-; database
-; --------
-;
-; data type: str
-;
-; [REQUIRED] Database connection string
-;
+; REQUIRED option.
+; Database connection string
+; Type: str
 ;database = <UNDEFINED>
 
-; user
-; ----
-;
-; data type: str
-;
-; [REQUIRED] User name
-;
+; REQUIRED option.
+; User name
+; Type: str
 ;user = SYSDBA
 
-; password
-; --------
-;
-; data type: str
-;
-; [optional] User password
-;
+; User password
+; Type: str
 ;password = <UNDEFINED>
 
 [backup-db]
 ;
-; Simple DB config
-;
+; Simple database config
 
-; database
-; --------
-;
-; data type: str
-;
-; [REQUIRED] Database connection string
-;
+; REQUIRED option.
+; Database connection string
+; Type: str
 ;database = <UNDEFINED>
 
-; user
-; ----
-;
-; data type: str
-;
-; [REQUIRED] User name
-;
+; REQUIRED option.
+; User name
+; Type: str
 ;user = SYSDBA
 
-; password
-; --------
-;
-; data type: str
-;
-; [optional] User password
-;
+; User password
+; Type: str
 ;password = <UNDEFINED>
-
 ```
 To read the configuration from file, use the [configparser.ConfigParser][] and pass it
 to [Config.load_config()][firebird.base.config.Config.load_config] method.
