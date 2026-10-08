@@ -54,6 +54,10 @@ packages = ["src/firebird"]
 dependencies = [
 ]
 
+[tool.hatch.envs.default.scripts]
+build-config-proto = "protoc -I../protobuf --python_out=src --pyi_out=src firebird/base/config.proto"
+build-test-proto = "protoc -Itests --python_out=./tests --pyi_out=./tests base_test.proto"
+
 [tool.hatch.envs.hatch-test]
 extra-args = ["-vv"]
 dependencies = [
@@ -63,22 +67,6 @@ dependencies = [
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.11", "3.12", "3.13", "3.14"]
-
-[tool.hatch.envs.spdoc]
-detached = false
-platforms = ["linux"]
-dependencies = [
-  "Sphinx==7.2.6",
-  "sphinx-bootstrap-theme>=0.8.1",
-  "sphinx-autodoc-typehints>=1.24.0",
-  "doc2dash>=3.0.0"
-]
-[tool.hatch.envs.spdoc.scripts]
-build = "cd spdocs ; make html"
-docset = [
-  "cd spdocs ; doc2dash -u https://firebird-base.readthedocs.io/en/latest/ -f -i ./_static/fb-favicon.png -n firebird-base ./_build/html/",
-  "cd spdocs; VERSION=$(python -c 'from firebird.base.__about__ import __version__; print(__version__)') && tar --exclude='.DS_Store' -cvzf ../dist/firebird-base-$VERSION-docset.tgz firebird-base.docset",
-]
 
 [tool.hatch.envs.doc]
 detached = false
