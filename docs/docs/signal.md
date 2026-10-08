@@ -25,6 +25,9 @@ This mechanism is provided in two forms:
 **Example:**
 
 ```python
+from __future__ import annotations
+from firebird.base.signal import signal
+
 class Emitor:
     def __init__(self, name: str):
         self.name = name
