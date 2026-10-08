@@ -373,8 +373,6 @@ def test_bad_hook_registrations(output: Output, manager: HookManager):
     bad_hook: MyHook = MyHook(output, "BAD-Hook")
 
     # Invalid source type for add_hook
-    with pytest.raises(TypeError, match="The type is not registered as hookable"):
-        manager.add_hook(MyEvents.CREATE, ANY, bad_hook.callback) # Cannot use ANY as source
     with pytest.raises(TypeError, match="Subject must be hookable class or instance, or name"):
         manager.add_hook(MyEvents.CREATE, 123, bad_hook.callback) # Invalid type
 
@@ -458,3 +456,106 @@ def test_any_event_hooks(output: Output, manager: HookManager):
     # Check flags after removal (this part is speculative without internal flag recalc logic)
     # assert HookFlag.ANY_EVENT not in manager.flags # Might be false if other ANY hooks remain
 
+
+@pytest.mark.parametrize('event', [MyEvents.ACTION, ANY])
+def test_any_source_hooks_match_all_sources_and_expected_events(output: Output,
+                                                               manager: HookManager,
+                                                               event: MyEvents | type):
+    """A global hook reaches class, instance, and named notifications."""
+    calls: list[tuple[object, object]] = []
+
+    def callback(source: object, actual_event: object) -> None:
+        calls.append((source, actual_event))
+
+    source = MyHookable(output, 'Source-A', register_name=True, trigger_event=None)
+    manager.add_hook(event, ANY, callback)
+    assert (event, ANY, ANY) in manager.hooks
+    assert HookFlag.ANY_SOURCE in manager.flags
+    assert (HookFlag.ANY_EVENT in manager.flags) is (event is ANY)
+
+    for actual_event in (MyEvents.ACTION, MyEvents.DELETE):
+        for notified_source in (MyHookable, source, 'Source-A', object(), 'Other-Name'):
+            callbacks = manager.get_callbacks(actual_event, notified_source)
+            for hook in callbacks:
+                hook(notified_source, actual_event)
+            expected = event is ANY or actual_event == event
+            assert (callback in callbacks) is expected
+            assert calls == ([(notified_source, actual_event)] if expected else [])
+            calls.clear()
+
+    manager.remove_hook(event, ANY, callback)
+    assert manager.get_callbacks(MyEvents.ACTION, source) == []
+    assert manager.get_callbacks(MyEvents.DELETE, source) == []
+    assert manager.flags == HookFlag.NONE
+
+
+@pytest.mark.parametrize('source_kind', ['class', 'instance', 'name'])
+def test_any_event_on_specified_source_excludes_other_sources(output: Output,
+                                                             manager: HookManager,
+                                                             source_kind: str):
+    """An ANY-event hook fires on multiple events only for its chosen source."""
+    source = MyHookable(output, 'Source-A', register_name=True, trigger_event=None)
+    other = MyHookable(output, 'Source-B', register_name=True, trigger_event=None)
+    target = {'class': MyHookable, 'instance': source, 'name': 'Source-A'}[source_kind]
+    calls: list[tuple[object, object]] = []
+
+    def callback(actual_source: object, actual_event: object) -> None:
+        calls.append((actual_source, actual_event))
+
+    manager.add_hook(ANY, target, callback)
+
+    for event in (MyEvents.ACTION, MyEvents.DELETE):
+        callbacks = manager.get_callbacks(event, source)
+        assert callback in callbacks
+        for hook in callbacks:
+            hook(source, event)
+        assert calls == [(source, event)]
+        calls.clear()
+        assert (callback in manager.get_callbacks(event, 'Source-A')) is (source_kind == 'name')
+        if source_kind != 'class':
+            assert callback not in manager.get_callbacks(event, other)
+            assert callback not in manager.get_callbacks(event, 'Source-B')
+        else:
+            assert callback in manager.get_callbacks(event, other)
+
+
+def test_any_source_hook_combines_with_scoped_hooks(output: Output, manager: HookManager):
+    """Global hooks coexist with source-specific callbacks without duplication."""
+    source = MyHookable(output, 'Source-A', register_name=True, trigger_event=None)
+
+    def global_callback(*_):
+        pass
+
+    def specific_global_callback(*_):
+        pass
+
+    def class_callback(*_):
+        pass
+
+    def name_callback(*_):
+        pass
+
+    def instance_callback(*_):
+        pass
+
+    manager.add_hook(ANY, ANY, global_callback)
+    manager.add_hook(MyEvents.ACTION, ANY, specific_global_callback)
+    manager.add_hook(MyEvents.ACTION, MyHookable, class_callback)
+    manager.add_hook(MyEvents.ACTION, 'Source-A', name_callback)
+    manager.add_hook(MyEvents.ACTION, source, instance_callback)
+
+    callbacks = manager.get_callbacks(MyEvents.ACTION, source)
+    assert callbacks.count(global_callback) == 1
+    assert callbacks.count(specific_global_callback) == 1
+    assert callbacks.count(class_callback) == 1
+    assert callbacks.count(name_callback) == 1
+    assert callbacks.count(instance_callback) == 1
+    assert manager.get_callbacks(MyEvents.DELETE, source) == [global_callback]
+    assert set(manager.get_callbacks(MyEvents.ACTION, object())) == {global_callback, specific_global_callback}
+    assert set(manager.get_callbacks(MyEvents.ACTION, [])) == {global_callback, specific_global_callback}
+
+    manager.remove_hook(ANY, ANY, global_callback)
+    assert HookFlag.ANY_SOURCE in manager.flags
+    assert HookFlag.ANY_EVENT not in manager.flags
+    assert specific_global_callback in manager.get_callbacks(MyEvents.ACTION, source)
+    assert manager.get_callbacks(MyEvents.DELETE, source) == []

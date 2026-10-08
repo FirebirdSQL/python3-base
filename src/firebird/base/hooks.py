@@ -96,6 +96,8 @@ class HookFlag(Flag):
     "A hook targets a registered instance name"
     ANY_EVENT = auto()
     "A hook targets ANY event"
+    ANY_SOURCE = auto()
+    "A hook targets ANY source"
 
 class HookManager(Singleton):
     """Manages the registration and retrieval of hooks (callbacks).
@@ -112,6 +114,8 @@ class HookManager(Singleton):
     def _update_flags(self, event: Any, cls: type, obj: Any) -> None:
         if event is ANY:
             self.flags |= HookFlag.ANY_EVENT
+        if cls is ANY and obj is ANY:
+            self.flags |= HookFlag.ANY_SOURCE
         if cls is not ANY:
             self.flags |= HookFlag.CLASS
         if obj is not ANY:
@@ -189,7 +193,9 @@ class HookManager(Singleton):
         """
         cls: type = ANY
         obj: Any = ANY
-        if isinstance(source, type):
+        if source is ANY:
+            pass
+        elif isinstance(source, type):
             if source in self.hookables:
                 cls = source
                 if event is not ANY:
@@ -296,6 +302,7 @@ class HookManager(Singleton):
             5. ANY Event on Name: Hooks for (`ANY`, `ANY`, `source` name`) if applicable.
             6. ANY Event on Class: Hooks for (`ANY`, `cls`, `ANY`) for applicable classes `cls`
                in the MRO.
+            7. ANY Source: Hooks for (`event`, `ANY`, `ANY`) and (`ANY`, `ANY`, `ANY`).
 
         Note:
            If `source` is a class or name directly, only relevant parts of the
@@ -317,21 +324,37 @@ class HookManager(Singleton):
                     result.extend(cast(Hook, hook).callbacks)
         else:
             if HookFlag.INSTANCE in self.flags:
-                if (hook := self.hooks.get((event, ANY, source))) is not None:
-                    result.extend(cast(Hook, hook).callbacks)
-                if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, source))) is not None:
-                    result.extend(cast(Hook, hook).callbacks)
-            if HookFlag.NAME in self.flags and (name := self.obj_map.get(source)) is not None:
-                if (hook := self.hooks.get((event, ANY, name))) is not None:
-                    result.extend(cast(Hook, hook).callbacks)
-                if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, name))) is not None:
-                    result.extend(cast(Hook, hook).callbacks)
+                try:
+                    hash(source)
+                except TypeError:
+                    pass # An unhashable source cannot have an instance-specific hook.
+                else:
+                    if (hook := self.hooks.get((event, ANY, source))) is not None:
+                        result.extend(cast(Hook, hook).callbacks)
+                    if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, source))) is not None:
+                        result.extend(cast(Hook, hook).callbacks)
+            if HookFlag.NAME in self.flags:
+                try:
+                    name = self.obj_map.get(source)
+                except TypeError:
+                    name = None # The source cannot be a weak key and has no registered name.
+                if name is not None:
+                    if (hook := self.hooks.get((event, ANY, name))) is not None:
+                        result.extend(cast(Hook, hook).callbacks)
+                    if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, ANY, name))) is not None:
+                        result.extend(cast(Hook, hook).callbacks)
             if HookFlag.CLASS in self.flags:
                 for cls in (c for c in self.hookables if isinstance(source, c)):
                     if (hook := self.hooks.get((event, cls, ANY))) is not None:
                         result.extend(cast(Hook, hook).callbacks)
                     if HookFlag.ANY_EVENT in self.flags and (hook := self.hooks.get((ANY, cls, ANY))) is not None:
                         result.extend(cast(Hook, hook).callbacks)
+        if HookFlag.ANY_SOURCE in self.flags:
+            if (hook := self.hooks.get((event, ANY, ANY))) is not None:
+                result.extend(cast(Hook, hook).callbacks)
+            if event is not ANY and HookFlag.ANY_EVENT in self.flags \
+                    and (hook := self.hooks.get((ANY, ANY, ANY))) is not None:
+                result.extend(cast(Hook, hook).callbacks)
         return result
 
 hook_manager: HookManager = HookManager()
