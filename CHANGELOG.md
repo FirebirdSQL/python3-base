@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Development
+
+### Added
+
+- Support for hooks registered with `ANY` as the source, including a specific event or `ANY`
+  event, with regression tests for callback delivery and removal.
+- Generated `llms.txt` for the published documentation.
+- Hatch scripts for regenerating the configuration and test protobuf bindings.
+- `AGENTS.md` and per-module development guides.
+
+### Changed
+
+- Migrated the documentation from Sphinx and reStructuredText to Zensical and Markdown,
+  including the Read the Docs and docset build workflows.
+- Linked the published changelog to this file and expanded the configuration, collections,
+  buffer, logging, trace, and protobuf documentation.
+- Updated the protobuf tests and regenerated the test protobuf binding.
+
+### Fixed
+
+- Corrected the public protobuf descriptor registration name to `register_descriptor()`;
+  the previous `register_decriptor()` spelling remains as a deprecated alias until 3.0.
+- Corrected configuration, trace, and signal documentation examples and their generated
+  API references.
 
 ## [2.0.3] - 2026-04-17
 
