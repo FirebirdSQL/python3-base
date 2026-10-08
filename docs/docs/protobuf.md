@@ -26,7 +26,7 @@
 
 ## Functions
 
-::: firebird.base.protobuf.register_decriptor
+::: firebird.base.protobuf.register_descriptor
 
 ::: firebird.base.protobuf.load_registered
 
