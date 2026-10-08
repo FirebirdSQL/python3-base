@@ -48,7 +48,7 @@ the `agent` and its context to particular [logging.Logger][], and returns a
 responsible to add context information into [logging.LogRecord][].
 
 ### Context information
-The conext information added by [ContextLoggerAdapter][firebird.base.logging.ContextLoggerAdapter]
+The context information added by [ContextLoggerAdapter][firebird.base.logging.ContextLoggerAdapter]
 into [logging.LogRecord][] consists from next items:
 
 - **agent**: String representation of the agent identification described above.
@@ -58,8 +58,27 @@ into [logging.LogRecord][] consists from next items:
 - **domain**: A name assigned to a group of agents (more about that later).
 - **topic**: Name of a logging stream.
 
-They could be used in [logging.Formatter][] templates. If you want to use logging that combines
-normal and context logging, it's necessary to assign [ContextFilter][firebird.base.logging.ContextFilter]
+The adapter keeps `context` in its `extra` dictionary. When processing a log message, it
+copies `agent.log_context` into `extra['context']` only if that key is absent (using `None`
+when the agent has no `log_context` attribute). Once set, the value remains in the adapter;
+later changes to `agent.log_context` do not overwrite it. You can set or change
+`log.extra['context']` yourself at any time, including before the first log message.
+
+To have the adapter read `agent.log_context` again on its next log message, delete the
+cached key:
+
+```python
+log = get_logger(agent)  # An existing agent object
+log.extra['context'] = 'manual context'
+log.info('Uses the manual context')
+
+agent.log_context = 'current request'
+del log.extra['context']
+log.info('Uses the current request context')
+```
+
+These record fields can be used in [logging.Formatter][] templates. If you want to combine
+normal and context logging, assign [ContextFilter][firebird.base.logging.ContextFilter]
 to your [logging.Handler][] to add (empty) context information into `LogRecords` that are
 produced by normal loggers.
 

@@ -16,12 +16,17 @@ The framework is based around two classes:
 * [Option][firebird.base.config.Option] - Abstract base class for configuration options,
   where descendants implement handling of particular data type. This module provides
   implementation for next data types: [str][], [int][], [float][], [bool][], [decimal.Decimal][],
-  [enum.Enum][], [enum.Flag][], [uuid.UUID][], [MIME][firebird.base.types.MIME],
+  [enum.Enum][], [enum.Flag][], [uuid.UUID][], [pathlib.Path][], [MIME][firebird.base.types.MIME],
   [ZMQAddress][firebird.base.types.ZMQAddress], [list][], [dataclasses.dataclass][],
   [PyExpr][firebird.base.types.PyExpr], [PyCode][firebird.base.types.PyCode] and
   [PyCallable][firebird.base.types.PyCallable].
   It also provides special options [ConfigOption][firebird.base.config.ConfigOption] and
   [ConfigListOption][firebird.base.config.ConfigListOption].
+
+Use `ConfigOption` for one nested `Config` object whose section name is stored in an
+option. Use `ConfigListOption` for a list of nested `Config` objects: its option value
+contains their section names, separated by commas or by lines. When loading an INI
+file, `Config` loads the options from those referenced sections as well.
 
 Additionally, the [DirectoryScheme][firebird.base.config.DirectoryScheme] abstract base class
 defines set of mostly used application directories. The function

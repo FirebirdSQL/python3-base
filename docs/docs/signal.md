@@ -89,6 +89,9 @@ To disconnect the callable from event, simply assign None to the event.
 **Example:**
 
 ```python
+from __future__ import annotations
+from firebird.base.signal import eventsocket
+
 class Component:
     def __init__(self, name: str):
         self.name = name

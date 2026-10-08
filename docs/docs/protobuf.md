@@ -28,6 +28,8 @@
 
 ::: firebird.base.protobuf.register_descriptor
 
+The former name `register_decriptor()` remains available as a deprecated alias until version 3.0.
+
 ::: firebird.base.protobuf.load_registered
 
 ::: firebird.base.protobuf.is_msg_registered
@@ -39,6 +41,8 @@
 ::: firebird.base.protobuf.get_enum_value_name
 
 ::: firebird.base.protobuf.create_message
+
+::: firebird.base.protobuf.get_message_factory
 
 ::: firebird.base.protobuf.get_enum_field_type
 

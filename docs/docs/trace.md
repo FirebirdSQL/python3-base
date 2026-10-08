@@ -316,7 +316,13 @@ Trace supports configuration based on [firebird.base.config][].
 [trace]
 flags = ACTIVE | FAIL
 ;flags = ACTIVE | BEFORE | AFTER | FAIL
-classes = trace_ChannelManager, trace_Channel, trace_TextIOServiceImpl, trace_PipeServerHandler
+classes =
+  trace_ChannelManager
+  trace_Channel
+  trace_DealerChannel
+  trace_SimpleService
+  trace_TextIOServiceImpl
+  trace_PipeServerHandler
 
 [trace_PipeServerHandler]
 source = saturnin.core.protocol.fbdp.PipeServerHandler
@@ -348,6 +354,12 @@ with_args = no
 method = defer
 max_param_length = 50
 ```
+
+`[trace] classes` names the class sections that are loaded. Each class section's `source`
+identifies the Python class to trace; `methods` names methods to trace with that section's
+settings. A `special` entry names another section with a `method` and its own settings,
+as `[trace_ChannelManager]` does for `[trace_defer]`. Sections that are not referenced
+by `classes` or `special` are ignored.
 
 ## Enums & Flags
 

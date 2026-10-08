@@ -101,9 +101,8 @@ options by registering convertors for required data types.
 
 ## Configuration definitions
 
-Complex applications (and some library modules like `logging`) could be often parametrized
-via configuration. Module [firebird.base.config][] provides a framework for unified structured
-configuration that supports:
+Complex applications could be often parametrized via configuration. Module [firebird.base.config][]
+provides a framework for unified structured configuration that supports:
 
 * configuration options of various data type, including lists and other complex types
 * validation

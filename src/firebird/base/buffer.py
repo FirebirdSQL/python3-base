@@ -100,7 +100,7 @@ class BufferFactory(Protocol): # pragma: no cover
                   is bytes to specify a potentially different final size.
 
         Returns:
-            The created mutable buffer object (e.g., [bytearray][], [ctypes.c_char_Array][]).
+            The created mutable buffer object (e.g., [bytearray][] or a ctypes array of characters).
         """
     def clear(self, buffer: Any) -> None:
         """Fill the buffer entirely with null bytes (zeros).

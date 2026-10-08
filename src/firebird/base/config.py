@@ -1700,7 +1700,7 @@ class UUIDOption(Option[UUID]):
     value: UUID | None = property(get_value, set_value, doc="Current option value")
 
 class MIMEOption(Option[MIME]):
-    """Configuration option with [Firebird.base.types.MIME][] type specification value.
+    """Configuration option with [firebird.base.types.MIME][] type specification value.
 
     Arguments:
         name: Option name.
