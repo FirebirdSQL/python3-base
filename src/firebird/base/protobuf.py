@@ -391,7 +391,7 @@ def get_enum_value_name(enum_type_name: str, value: int) -> str:
     """
     return get_enum_type(enum_type_name).get_value_name(value)
 
-def register_decriptor(file_descriptor: 'google.protobuf.descriptor.FileDescriptor') -> None:
+def register_descriptor(file_descriptor: 'google.protobuf.descriptor.FileDescriptor') -> None:
     """Register all message and enum types defined within a protobuf file descriptor.
 
     This is the primary mechanism for adding types to the registry. The descriptor
@@ -407,6 +407,8 @@ def register_decriptor(file_descriptor: 'google.protobuf.descriptor.FileDescript
     for enum_desc in file_descriptor.enum_types_by_name.values():
         if enum_desc.full_name not in _enumreg:
             _enumreg.store(ProtoEnumType(enum_desc))
+
+register_decriptor =  register_descriptor # Deprecated alias, to be removed in 3.0
 
 def load_registered(group: str) -> None: # pragma: no cover
     """Load and register protobuf types defined via package entry points.
@@ -447,8 +449,8 @@ def load_registered(group: str) -> None: # pragma: no cover
         ```
     """
     for desc in (entry.load() for entry in entry_points().select(group=group)):
-        register_decriptor(desc)
+        register_descriptor(desc)
 
 for well_known in [any_pb2, struct_pb2, duration_pb2, empty_pb2, timestamp_pb2, field_mask_pb2]:
-    register_decriptor(well_known.DESCRIPTOR)
+    register_descriptor(well_known.DESCRIPTOR)
 del any_pb2, struct_pb2, duration_pb2, empty_pb2, timestamp_pb2, field_mask_pb2
